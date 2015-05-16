@@ -1,0 +1,44 @@
+SET(RO_CORE_LIBRARY "RoCore")
+
+# Sources
+SET(RO_CORE_SOURCES
+    CMakeLists.txt
+    RoConfig.cpp
+    RoConfig.h
+    RoCpuInfo.cpp
+    RoCpuInfo.h
+    RoDefines.h
+    RoErrorInfo.h
+    RoException.cpp
+    RoException.h
+    RoFileSystem.cpp
+    RoFileSystem.h
+    RoHashString.cpp
+    RoHashString.h
+    RoLog.cpp
+    RoLog.h
+    RoLogOptions.cpp
+    RoLogOptions.h
+    RoPlatform.cpp
+    RoPlatform.h
+    RoPrerequisites.h
+    RoProperty.h
+    RoPropertyMap.cpp
+    RoPropertyMap.h
+    RoScopedPtr.h
+    RoSerialization.h
+    RoSharedPtr.h
+    RoString.cpp
+    RoString.h
+    RoStringBuilder.cpp
+    RoStringBuilder.h
+    RoStringUtil.cpp
+    RoStringUtil.h
+    RoTimer.cpp
+    RoTimer.h
+    RoTypes.h
+    RoVariant.cpp
+    RoVariant.h
+)
+
+ADD_LIBRARY(${RO_CORE_LIBRARY} STATIC ${RO_CORE_SOURCES})
