@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // This source code is part of RokLegend project.
-//         (Ragnarök Online Client)
+//         (Ragnarok Online Client)
 //     Copyright (c) RokLegend Team, 2013
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -22,15 +22,20 @@ public:
     /** Resets timer */
     void reset();
 
-    /** Returns milliseconds since initialisation or last reset */
+    /** Returns milliseconds since initialization or last reset */
     uint64 getMilliseconds();
 
-    /** Returns microseconds since initialisation or last reset */
+    /** Returns microseconds since initialization or last reset */
     uint64 getMicroseconds();
 
 private:
-    DWORD mStartTick;
-    LONGLONG mLastTime;
+#if roARCHITECTURE_IS_64
+    using RoClockTick = ULONGLONG;
+#else
+    using RoClockTick = DWORD;
+#endif
+    RoClockTick mStartTick;
+    ULONGLONG mLastTime;
     LARGE_INTEGER mStartTime;
     LARGE_INTEGER mFrequency;
 };
