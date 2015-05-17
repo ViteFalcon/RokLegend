@@ -1,3 +1,13 @@
+SET(RO_CORE_LIBRARY "RoCore")
+
 ADD_SUBDIRECTORY(core)
+SET(RO_CORE_DIR ${ROKLEGEND_SOURCE_DIR}/core)
+
+# Make sure to include RoCore only after creating RoCore project
+INCLUDE_DIRECTORIES(${RO_CORE_DIR})
+
 #ADD_SUBDIRECTORY(audio)
-#ADD_SUBDIRECTORY(application)
+ADD_SUBDIRECTORY(application)
+ADD_DEPENDENCIES(${ROKLEGEND_PROJECT_NAME}
+    ${RO_CORE_LIBRARY}
+)

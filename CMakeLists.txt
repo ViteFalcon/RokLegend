@@ -31,7 +31,7 @@ PROJECT(${ROKLEGEND_PROJECT_NAME})
 #-------------------------------------------------------------------------------
 IF (WIN32)
     # This seems to break Xcode projects so definitely don't enable on Apple builds
-    SET(CMAKE_USE_RELATIVE_PATHS true)
+    SET(CMAKE_USE_RELATIVE_PATHS false)
     SET(CMAKE_SUPPRESS_REGENERATION false)
     SET(ROKLEGEND_SHAREDEXT ".dll")
 ELSE ()
@@ -40,6 +40,7 @@ ENDIF ()
 
 # Constants
 SET(ROKLEGEND_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+SET(ROKLEGEND_SOURCE_DIR "${ROKLEGEND_ROOT_DIR}/source")
 SET(ROKLEGEND_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 SET(ROKLEGEND_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 SET(ROKLEGEND_BINARY_DIR_REL "${ROKLEGEND_BUILD_DIR}/bin/Release")

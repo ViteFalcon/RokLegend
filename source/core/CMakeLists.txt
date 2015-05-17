@@ -1,5 +1,3 @@
-SET(RO_CORE_LIBRARY "RoCore")
-
 # Sources
 SET(RO_CORE_SOURCES
     CMakeLists.txt

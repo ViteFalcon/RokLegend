@@ -14,20 +14,27 @@
 #   include <boost/log/common.hpp>
 #   include <boost/log/trivial.hpp>
 #   include <boost/log/utility/setup/file.hpp>
-
+#   include <boost/log/utility/setup/common_attributes.hpp>
 //------------------------------------------------------------------------------
 void roInitBoostLog(const RoLogOptions& options);
 boost::log::trivial::severity_level roGetBoostLogLevel(const RoLogOptions& options);
 //------------------------------------------------------------------------------
 void roInitBoostLog(const RoLogOptions& options)
 {
+    namespace log = boost::log;
     namespace keywords = boost::log::keywords;
-    boost::log::add_file_log(
-        keywords::file_name = options.logFile + "2",
-        keywords::format = "[%TimeStamp%]: %Message%"
+    namespace sinks = boost::log::sinks;
+    boost::log::register_simple_formatter_factory< boost::log::trivial::severity_level, char >("Severity");
+    log::add_common_attributes();
+    boost::shared_ptr<log::core> core = log::core::get();
+    core->set_filter(
+        log::trivial::severity >= roGetBoostLogLevel(options)
         );
-    boost::log::core::get()->set_filter(
-        boost::log::trivial::severity >= roGetBoostLogLevel(options)
+    log::add_file_log(
+        keywords::file_name = options.logFile,
+        keywords::rotation_size = 10 * 1024 * 1024,
+        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0,0,0),
+        keywords::format = "%TimeStamp%: [%Severity%] %Message%"
         );
 }
 //------------------------------------------------------------------------------
@@ -35,27 +42,27 @@ boost::log::trivial::severity_level roGetBoostLogLevel(const RoLogOptions& optio
 {
     switch (options.logLevel)
     {
-    case eLogLevel_None:
+    case RoLogLevel::None:
         return boost::log::trivial::fatal;
         break;
-    case eLogLevel_All:
+    case RoLogLevel::All:
         return boost::log::trivial::trace;
         break;
-    case eLogLevel_Debug:
+    case RoLogLevel::Debug:
         return boost::log::trivial::debug;
         break;
-    case eLogLevel_Info:
+    case RoLogLevel::Info:
         return boost::log::trivial::info;
         break;
-    case eLogLevel_Warning:
+    case RoLogLevel::Warning:
         return boost::log::trivial::warning;
-    case eLogLevel_Error:
+    case RoLogLevel::Error:
         return boost::log::trivial::error;
         break;
-    case eLogLevel_Critical:
+    case RoLogLevel::Critical:
         return boost::log::trivial::fatal;
         break;
-    case eLogLevel_Default:
+    case RoLogLevel::Default:
     default:
         break;
     };

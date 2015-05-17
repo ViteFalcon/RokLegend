@@ -23,11 +23,11 @@
 
 #   include <boost/log/trivial.hpp>
 
-#   define roLOG_DBG BOOST_LOG_TRIVIAL(debug)       << "[  DEBUG  ]" _roLOG_WHERE
-#   define roLOG_WARN BOOST_LOG_TRIVIAL(warning)    << "[ WARNING ]" _roLOG_WHERE
-#   define roLOG_ERR BOOST_LOG_TRIVIAL(error)       << "[  ERROR  ] " _roLOG_WHERE
-#   define roLOG_CRIT BOOST_LOG_TRIVIAL(fatal)      << "[ CRITICAL] " _roLOG_WHERE
-#   define roLOG_INFO BOOST_LOG_TRIVIAL(info)       << "[  INFO   ] "
+#   define roLOG_DBG BOOST_LOG_TRIVIAL(debug)       _roLOG_WHERE
+#   define roLOG_WARN BOOST_LOG_TRIVIAL(warning)    _roLOG_WHERE
+#   define roLOG_ERR BOOST_LOG_TRIVIAL(error)       _roLOG_WHERE
+#   define roLOG_CRIT BOOST_LOG_TRIVIAL(fatal)      _roLOG_WHERE
+#   define roLOG_INFO BOOST_LOG_TRIVIAL(info)       _roLOG_WHERE
 
 #else
 

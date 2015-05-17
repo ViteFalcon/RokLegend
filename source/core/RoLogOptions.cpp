@@ -12,7 +12,7 @@ const RoLogOptions RoLogOptions::Default;
 RoLogOptions::RoLogOptions()
     :logFile(RoFileSystem::GetPathToGameDirForFile("RokLegend.log"))
     ,logFileAppendExisting(false)
-    ,logLevel(eLogLevel_Default)
+    ,logLevel(RoLogLevel::Default)
     ,printIndex(false)
     ,printTimestamp(true)
     ,timestampFormat("[$hh:$mm.$ss] ")

@@ -10,16 +10,16 @@
 
 #include "RoPrerequisites.h"
 
-enum RoLogLevel
+enum class RoLogLevel
 {
-    eLogLevel_None = -2,
-    eLogLevel_Default = -1,
-    eLogLevel_All,
-    eLogLevel_Debug,
-    eLogLevel_Info,
-    eLogLevel_Warning,
-    eLogLevel_Error,
-    eLogLevel_Critical
+    None = -2,
+    Default = -1,
+    All,
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Critical
 };
 
 struct RoLogOptions
