@@ -22,7 +22,9 @@ using int64 = boost::int64_t;
 using uint64 = boost::uint64_t;
 
 using float32 = float;
-using real = float32;
+// DO NOT uncomment this. Eigen will have compilation issues if we define a 'real' type.
+// https://forum.kde.org/viewtopic.php?f=74&t=117258
+// using real = float32;
 using float64 = double;
 
 using RoBuffer = std::string;

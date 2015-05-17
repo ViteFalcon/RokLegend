@@ -1,15 +1,17 @@
-#include <RoPrerequisites.h>
-#include <RoLog.h>
-#include <RoLogOptions.h>
-#include <RoFileSystem.h>
-#include <RoCpuInfo.h>
+#include <core/RoPrerequisites.h>
+#include <core/RoLog.h>
+#include <core/RoLogOptions.h>
+#include <core/RoFileSystem.h>
+#include <core/RoCpuInfo.h>
 
 void roInitializeLogging();
+void playMusic();
 
 int main() {
     try
     {
         roInitializeLogging();
+        playMusic();
 
         roLOG_INFO << "Starting RokLegend...";
         {
@@ -41,4 +43,18 @@ void roInitializeLogging() {
     logOptions.logFile = RoFileSystem::GetPathToGameDirForFile("roklegend2.log");
     logOptions.logLevel = RoLogLevel::All;
     roInitLogs(logOptions);
+}
+
+#include <audio/RoAudioManager.h>
+#include <audio/RoAudio.h>
+#include <conio.h>
+
+#define roTEST_BGM_FILE L"C:/tmp/01.mp3"
+
+void playMusic()
+{
+    RoConfig config;
+    RoAudioManagerPtr audioManager = RoAudioManager::Get(config);
+    RoAudioPtr audio = audioManager->getBackgroundMusic(roTEST_BGM_FILE);
+    _getch();
 }

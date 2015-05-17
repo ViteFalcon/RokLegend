@@ -1,0 +1,8 @@
+////////////////////////////////////////////////////////////////////////////////
+// This source code is part of RokLegend project.
+//         (Ragnarok Online Client)
+//     Copyright (c) RokLegend Team, 2015
+////////////////////////////////////////////////////////////////////////////////
+#include "RoNullIrrKlangSound.h"
+
+irrklang::RoNullIrrKlangSound irrklang::RoNullIrrKlangSound::INSTANCE;
