@@ -390,21 +390,24 @@ public:
 
     //////////////////////////////////////////////////////////////////////////
 
-    operator const std::wstring&() const;
+    operator std::wstring() const;
 
-    operator const std::string&() const;
+    operator std::string() const;
 
     //! returns the current string in UTF-8 form within a std::string
-    std::string&& asUTF8() const;
-
-    //! returns the current string in UTF-8 form as a nul-terminated char array
-    const char* asUTF8_c_str() const;
+    std::string asUTF8() const;
 
     //! returns the current string in the native form of std::wstring
-    const std::wstring& asWStr() const;
+    std::wstring asWStr() const
+    {
+        return mString;
+    }
 
-    //! returns the current string in the native form of a nul-terminated wchar_t array
-    const wchar_t* asWStr_c_str() const;
+    //! returns the current string in the native form of a null-terminated wchar_t array
+    const wchar_t* asWStr_c_str() const
+    {
+        return mString.c_str();
+    }
 
 private:
     roS11N_ALLOW_PRIVATE_ACCESS;

@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "RoCpuInfo.h"
-
+#include <sstream>
 #include <boost/algorithm/string.hpp>
 //-----------------------------------------------------------------------------
 #define roCPUINFO_VENDOR_ID     "vendor_id"
@@ -16,38 +16,68 @@
 //-----------------------------------------------------------------------------
 #define roCPUINFO_UNKNOWN       "[Not Known]"
 //-----------------------------------------------------------------------------
-RoCpuInfo::RoCpuInfo()
+const RoCpuInfo& RoCpuInfo::Get()
 {
-    loadInfo();
+    static unique_ptr<RoCpuInfo> cpuInfo;
+    static bool notInitialized = true;
+    if (notInitialized)
+    {
+        std::string vendorId = roCPUINFO_UNKNOWN;
+        std::string modelName = roCPUINFO_UNKNOWN;
+        std::string cpuMhz = roCPUINFO_UNKNOWN;
+        std::string cacheSize = roCPUINFO_UNKNOWN;
+        std::string cpuCores = roCPUINFO_UNKNOWN;
+/*#if roPLATFORM_IS_LINUX
+        try
+        {
+            std::ifstream cpuinfo("/proc/cpuinfo", std::ios::binary | std::ios::in);
+            while (!cpuinfo.eof())
+            {
+                std::string infoline;
+                std::getline(cpuinfo, infoline);
+                std::string::size_type colon_index = infoline.find(':');
+                if (std::string::npos != colon_index)
+                {
+                    std::string keyStr = infoline.substr(0, colon_index);
+                    boost::trim(keyStr);
+                    if 
+                    RoHashString key(keyStr.c_str());
+                    if (mInfos.count(key))
+                    {
+                        RoString value = infoline.substr(colon_index + 1);
+                        RoStringUtil::Trim(value);
+                        mInfos[key] = value;
+                    }
+                }
+            }
+        }
+        catch (...)
+        {
+            // Do nothing
+        }
+#endif // roPLATFORM_IS_LINUX*/
+        cpuInfo.reset(new RoCpuInfo(vendorId, modelName, cpuMhz, cacheSize, cpuCores));
+        notInitialized = false;
+    }
+    return *cpuInfo;
+}
+//-----------------------------------------------------------------------------
+RoCpuInfo::RoCpuInfo(
+    std::string vendorId,
+    std::string modelName,
+    std::string cpuMhz,
+    std::string cacheSize,
+    std::string cpuCores)
+    : mVendorId(vendorId)
+    , mModelName(modelName)
+    , mCpuMhz(cpuMhz)
+    , mCacheSize(cacheSize)
+    , mCpuCores(cpuCores)
+{
 }
 //-----------------------------------------------------------------------------
 RoCpuInfo::~RoCpuInfo()
 {
-}
-//-----------------------------------------------------------------------------
-RoString RoCpuInfo::getVendorId() const
-{
-    return mInfos.at(roCPUINFO_VENDOR_ID);
-}
-//-----------------------------------------------------------------------------
-RoString RoCpuInfo::getModelName() const
-{
-    return mInfos.at(roCPUINFO_MODEL_NAME);
-}
-//-----------------------------------------------------------------------------
-RoString RoCpuInfo::getFrequency() const
-{
-    return mInfos.at(roCPUINFO_FREQUENCY);
-}
-//-----------------------------------------------------------------------------
-RoString RoCpuInfo::getCacheSize() const
-{
-    return mInfos.at(roCPUINFO_CACHE_SIZE);
-}
-//-----------------------------------------------------------------------------
-RoString RoCpuInfo::getCoreCount() const
-{
-    return mInfos.at(roCPUINFO_CORES);
 }
 //-----------------------------------------------------------------------------
 bool RoCpuInfo::isLittleEndian() const
@@ -60,42 +90,11 @@ bool RoCpuInfo::isLittleEndian() const
     return true;
 }
 //-----------------------------------------------------------------------------
-void RoCpuInfo::loadInfo()
+
+RoString RoCpuInfo::printString() const
 {
-    mInfos[roCPUINFO_VENDOR_ID] = roCPUINFO_UNKNOWN;
-    mInfos[roCPUINFO_MODEL_NAME] = roCPUINFO_UNKNOWN;
-    mInfos[roCPUINFO_FREQUENCY] = roCPUINFO_UNKNOWN;
-    mInfos[roCPUINFO_CACHE_SIZE] = roCPUINFO_UNKNOWN;
-    mInfos[roCPUINFO_CORES] = roCPUINFO_UNKNOWN;
-
-#if roPLATFORM_IS_LINUX
-    try
-    {
-        std::ifstream cpuinfo("/proc/cpuinfo", std::ios::binary|std::ios::in);
-        while (!cpuinfo.eof())
-        {
-            std::string infoline;
-            std::getline(cpuinfo, infoline);
-            std::string::size_type colon_index = infoline.find(':');
-            if (std::string::npos != colon_index)
-            {
-                std::string keyStr = infoline.substr(0, colon_index);
-                boost::trim(keyStr);
-                RoHashString key(keyStr.c_str());
-                if (mInfos.count(key))
-                {
-                    RoString value = infoline.substr(colon_index+1);
-                    RoStringUtil::Trim(value);
-                    mInfos[key] = value;
-                }
-            }
-        }
-    }
-    catch (...)
-    {
-        // Do nothing
-    }
-
-#endif // roPLATFORM_IS_LINUX
+    std::stringstream ss;
+    ss << *this;
+    return RoString(ss.str());
 }
 //-----------------------------------------------------------------------------

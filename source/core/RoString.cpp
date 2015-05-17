@@ -574,35 +574,20 @@ const wchar_t& RoString::operator[](size_type index) const
     return mString.operator [](index);
 }
 
-RoString::operator const std::wstring&() const
+RoString::operator std::wstring() const
 {
     return mString;
 }
 
-RoString::operator const std::string&() const
+RoString::operator std::string() const
 {
     return asUTF8();
 }
 
-std::string&& RoString::asUTF8() const
+std::string RoString::asUTF8() const
 {
     std::string utf8 = boost::locale::conv::utf_to_utf<char>(mString);
-    return std::move(utf8);
-}
-
-const char* RoString::asUTF8_c_str() const
-{
-    return asUTF8().c_str();
-}
-
-const std::wstring& RoString::asWStr() const
-{
-    return mString;
-}
-
-const wchar_t* RoString::asWStr_c_str() const
-{
-    return c_str();
+    return utf8;
 }
 
 const RoString::size_type RoString::npos = RoString::wstring_type::npos;

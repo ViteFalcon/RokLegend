@@ -41,6 +41,12 @@ struct RoFnvHash<N, 0>
 class RoHashString
 {
 public:
+    inline static RoHashString FromString(const RoString& string)
+    {
+        auto stdString = string.asUTF8();
+        return RoHashString{ stdString.c_str() };
+    }
+
     struct ConstCharWrapper
     {
         roINLINE ConstCharWrapper(const char* str)

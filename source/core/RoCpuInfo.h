@@ -17,29 +17,54 @@
  **/
 class RoCpuInfo
 {
+public: // static
+    static const RoCpuInfo& Get();
 public:
-    RoCpuInfo();
     virtual ~RoCpuInfo();
 
-    RoString getVendorId() const;
+    std::string getVendorId() const
+    {
+        return mVendorId;
+    }
 
-    RoString getModelName() const;
+    std::string getModelName() const
+    {
+        return mModelName;
+    }
 
-    RoString getFrequency() const;
+    std::string getFrequency() const
+    {
+        return mCpuMhz;
+    }
 
-    RoString getCacheSize() const;
+    std::string getCacheSize() const
+    {
+        return mCacheSize;
+    }
 
-    RoString getCoreCount() const;
+    std::string getCoreCount() const
+    {
+        return mCpuCores;
+    }
 
     bool isLittleEndian() const;
 
+    RoString printString() const;
+
 private: // functions
-    void loadInfo();
+    RoCpuInfo(
+        std::string vendorId,
+        std::string modelName,
+        std::string cpuMhz,
+        std::string cacheSize,
+        std::string cpuCores);
 
 private: // members
-    typedef boost::unordered_map<RoHashString, RoString> CpuInfoMap;
-
-    CpuInfoMap mInfos;
+    const std::string mVendorId;
+    const std::string mModelName;
+    const std::string mCpuMhz;
+    const std::string mCacheSize;
+    const std::string mCpuCores;
 };
 
 roINLINE std::ostream& operator << (std::ostream& stream, const RoCpuInfo& cpuInfo)

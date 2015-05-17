@@ -16,7 +16,7 @@ public:
 
     roINLINE bool has(const RoString& key)
     {
-        RoHashString keyHash(key.asUTF8_c_str());
+        auto keyHash = RoHashString::FromString(key);
         return mConfiguration.has(keyHash);
     }
 

@@ -55,7 +55,7 @@ public:
 
     roINLINE bool has(const RoString& name) const
     {
-        return has(RoHashString(name.asUTF8_c_str()));
+        return has(RoHashString::FromString(name));
     }
 
     template <typename T>

@@ -62,10 +62,11 @@ void RoConfig::open(const RoString& filename)
                 settingEnd = sectionItr->second.end();
             while (settingItr != settingEnd)
             {
-                const RoHashString settingName((sectionName + L"." + settingItr->first).asUTF8_c_str());
+                auto settingName = sectionName + L"." + settingItr->first;
+                auto settingKey = RoHashString::FromString(settingName);
                 const RoString settingValue = settingItr->second.get_value<std::wstring>();
 
-                configuration.set(settingName, settingValue);
+                configuration.set(settingKey, settingValue);
 
                 ++settingItr;
             }
@@ -94,6 +95,6 @@ void RoConfig::open(const RoString& filename)
 
 RoVariant RoConfig::get(const RoString& key) const
 {
-    RoHashString keyHash(key.asUTF8_c_str());
+    auto keyHash = RoHashString::FromString(key);
     return mConfiguration.get(keyHash);
 }
