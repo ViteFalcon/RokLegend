@@ -1,0 +1,27 @@
+# Macro to link target libraries given a RokLegend module.
+MACRO(RO_TARGET_LINK_LIBRARIES TARGET)
+    SET(MODULE_LIBS "")
+    FOREACH(LIB_NAME ${ARGN})
+        TARGET_LINK_LIBRARIES(
+            ${TARGET}
+            debug ${ROKLEGEND_LIB_DIR_DBG}/${LIB_NAME}_d.lib
+            optimized ${ROKLEGEND_LIB_DIR_REL}/${LIB_NAME}.lib
+        )
+    ENDFOREACH()
+ENDMACRO()
+
+# Macro to set source-group for a list of files
+MACRO(RO_SOURCE_GROUP GROUP_NAME)
+    SET(HEADER_FILES "")
+    SET(SOURCE_FILES "")
+    FOREACH(CXX_FILE ${ARGN})
+        GET_FILENAME_COMPONENT(CXX_EXT ${CXX_FILE} EXT)
+        IF (".h" STREQUAL "${CXX_EXT}")
+            LIST(APPEND HEADER_FILES ${CXX_FILE})
+        ELSE ()
+            LIST(APPEND SOURCE_FILES ${CXX_FILE})
+        ENDIF ()
+    ENDFOREACH()
+    SOURCE_GROUP(${ROKLEGEND_HXX_SOURCE_GROUP}\\${GROUP_NAME} FILES ${HEADER_FILES})
+    SOURCE_GROUP(${ROKLEGEND_CXX_SOURCE_GROUP}\\${GROUP_NAME} FILES ${SOURCE_FILES})
+ENDMACRO()

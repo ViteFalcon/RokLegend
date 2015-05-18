@@ -5,8 +5,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#ifndef ROGRF_STRING_UTIL_H
-#define ROGRF_STRING_UTIL_H
 
 #include "RoPrerequisites.h"
 
@@ -138,5 +136,3 @@ private:
     RoStringUtil();
     virtual ~RoStringUtil();
 };
-
-#endif // ROGRF_STRING_UTIL_H

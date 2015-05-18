@@ -5,8 +5,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#ifndef ROKLEGEND_VARIANT_H
-#define ROKLEGEND_VARIANT_H
 
 #include "RoPrerequisites.h"
 
@@ -270,6 +268,22 @@ public:
     }
 
     /**
+    Constructor that converts std::string to RoString
+    **/
+    inline explicit RoVariant(const std::string& val)
+        :mHolder(new ValueHeld < RoString > { val })
+    {
+    }
+
+    /**
+    Constructor that converts std::wstring to RoString
+    **/
+    inline explicit RoVariant(const std::wstring& val)
+        :mHolder(new ValueHeld < RoString > { val })
+    {
+    }
+
+    /**
       Constructor that accepts any type of value to be stored
      **/
     template <typename T>
@@ -486,5 +500,3 @@ namespace Detail {
         return false;
     }
 }
-
-#endif // ROKLEGEND_VARIANT_H
