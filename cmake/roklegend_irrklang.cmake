@@ -12,23 +12,10 @@ IF (MSVC)
 ENDIF ()
 SET(irrKlang_BINARY_DIR "${irrKlang_DIR}/bin/${irrKlang_PLATFORM_DIR}")
 IF (WIN32)
-    LIST(APPEND ROKLEGEND_BINARY_REL "${irrKlang_BINARY_DIR}/irrKlang.dll")
-    LIST(APPEND ROKLEGEND_BINARY_DBG "${ROKLEGEND_BINARY_REL}")
+    SET(irrKlang_BINARIES "${irrKlang_BINARY_DIR}/irrKlang.dll" "${irrKlang_BINARY_DIR}/ikpMP3.dll")
+    LIST(APPEND ROKLEGEND_BINARY_REL "${irrKlang_BINARIES}")
+    LIST(APPEND ROKLEGEND_BINARY_DBG "${irrKlang_BINARIES}")
 ENDIF ()
 
 SET(irrKlang_LIBRARY_DIRS "${irrKlang_DIR}/lib/${irrKlang_PLATFORM_DIR}")
 SET(irrKlang_LIBRARIES "irrKlang.lib")
-
-# FIXME: This needs to be changed. We shouldn't have absolute paths in our code.
-GET_FILENAME_COMPONENT(irrKlang_PLUGINS_DIR_REL "${ROKLEGEND_BUILD_DIR}/External/irrKlang" REALPATH)
-SET(irrKlang_PLUGINS_DIR_DBG "${irrKlang_PLUGINS_DIR_REL}/Debug")
-SET(irrKlang_PLUGINS_BINARY_REL "${irrKlang_BINARY_DIR}/ikpMP3.dll")
-SET(irrKlang_PLUGINS_BINARY_DBG "${irrKlang_PLUGINS_BINARY_REL}")
-
-IF (NOT "" STREQUAL "${irrKlang_PLUGINS_BINARY_REL}")
-    FILE(COPY ${irrKlang_PLUGINS_BINARY_REL} DESTINATION ${irrKlang_PLUGINS_DIR_REL})
-ENDIF ()
-
-IF (NOT "" STREQUAL "${irrKlang_PLUGINS_BINARY_DBG}")
-    FILE(COPY ${irrKlang_PLUGINS_BINARY_DBG} DESTINATION ${irrKlang_PLUGINS_DIR_DBG})
-ENDIF ()

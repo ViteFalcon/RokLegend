@@ -9,12 +9,6 @@
 #include "RoIrrKlangAudioManager.h"
 #include "RoIrrKlangAudio.h"
 
-#if roDEBUG_MODE
-#   define roIRRKLANG_PLUGIN_DIR roIRRKLANG_PLUGIN_DIR_DBG
-#else
-#   define roIRRKLANG_PLUGIN_DIR roIRRKLANG_PLUGIN_DIR_REL
-#endif // roDEBUG_MODE
-
 /*namespace irrklang
 {
     class OgreDataStreamReader : public IFileReader
@@ -92,7 +86,7 @@ RoIrrKlangAudioManager::RoIrrKlangAudioManager(const RoConfig& config)
     : RoAudioManager(config)
     , mEngine(irrklang::createIrrKlangDevice())
 {
-    mEngine->loadPlugins(roIRRKLANG_PLUGIN_DIR);
+    mEngine->loadPlugins(".");
     //irrklang::OgreFileFactory* irrklangFileFactory = new irrklang::OgreFileFactory();
     //mEngine->addFileFactory(irrklangFileFactory);
     //irrklangFileFactory->drop();

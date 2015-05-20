@@ -5,7 +5,12 @@
 #include <core/RoLogOptions.h>
 #include <core/RoVariant.h>
 
+#include <fstream>
+
+#define roROOT_FOLDER_FILE "ROOT"
+
 void roInitializeLogging();
+void roChangeRootFolder();
 void playMusic();
 void testVariants();
 
@@ -13,6 +18,7 @@ int main() {
     try
     {
         roInitializeLogging();
+        roChangeRootFolder();
         testVariants();
         playMusic();
 
@@ -46,6 +52,30 @@ void roInitializeLogging() {
     logOptions.logFile = RoFileSystem::GetPathToGameDirForFile("roklegend2.log");
     logOptions.logLevel = RoLogLevel::All;
     roInitLogs(logOptions);
+}
+
+void roChangeRootFolder()
+{
+    RoPath rootPathFilePath = RoFileSystem::GetWorkingDirectory() / RoPath{ roROOT_FOLDER_FILE };
+    if (!RoFileSystem::FileExists(rootPathFilePath))
+    {
+        roLOG_DBG << "No root folder defining file was found.";
+        return;
+    }
+    std::string rootPathString;
+
+    std::ifstream rootPathFile(rootPathFilePath.string().c_str(), std::ios::in | std::ios::binary);
+    rootPathFile >> rootPathString;
+    rootPathFile.close();
+    if (RoFileSystem::FileExists(rootPathString))
+    {
+        roLOG_DBG << "Changing directory to " << rootPathString;
+        RoFileSystem::ChangeWorkingDirectory(rootPathString);
+    }
+    else
+    {
+        roLOG_ERR << "Failed to change directory to '" << rootPathString << "', since it doesn't exist.";
+    }
 }
 
 #include <audio/RoAudioManager.h>
@@ -105,7 +135,7 @@ void variantTestForType(const char* testName, const TestType testValue)
 {
     VariantTestLogger log{ testName };
     RoVariant variant{ testValue };
-    roLOG_INFO << "Test Value: " << testValue;
+    roLOG_INFO << "Test Value: " << testValue << " (stored as " << variant.getType().name() << ")";
     variantTestCaseForTypes<TestType, char>(log, "To Char", testValue);
     variantTestCaseForTypes<TestType, uint8>(log, "To uint8", testValue);
     variantTestCaseForTypes<TestType, int16>(log, "To int16", testValue);
