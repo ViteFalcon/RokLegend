@@ -47,6 +47,8 @@ LIST(APPEND CMAKE_MODULE_PATH
 INCLUDE(roklegend_macros)
 INCLUDE(roklegend_platform)
 INCLUDE(roklegend_irrklang)
+INCLUDE(roklegend_zlib)
+INCLUDE(roklegend_grf)
 
 FIND_PACKAGE(Boost)
 

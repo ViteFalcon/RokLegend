@@ -309,3 +309,6 @@ CMakeFiles
 Makefile
 cmake_install.cmake
 install_manifest.txt
+
+### RokLegend ###
+dependencies/zlib/include/zconf.h

@@ -28,7 +28,7 @@ using float32 = float;
 using float64 = double;
 
 using RoBuffer = std::string;
-using RoStreamSize = boost::uintmax_t;
+using RoStreamSize = size_t;
 
 using RoCharArray = std::vector<char>;
 using RoByteArray = std::vector<uint8>;

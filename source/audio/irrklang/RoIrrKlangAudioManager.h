@@ -19,6 +19,7 @@ public:
     virtual ~RoIrrKlangAudioManager();
 
     virtual RoAudioPtr getSound2D(const RoString& filename) override;
+    virtual RoAudioPtr getSound2D(const RoString& filename, const RoDataStreamPtr& data, bool loop) override;
     virtual RoAudioPtr getSound3D(const RoString& filename) override;
 
     virtual void playSound2D(const RoString& filename, bool loop) override;

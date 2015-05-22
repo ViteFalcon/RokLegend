@@ -5,18 +5,23 @@ SET(RO_CORE_SOURCES
     RoConfig.h
     RoCpuInfo.cpp
     RoCpuInfo.h
+    RoDataStream.h
     RoDefines.h
     RoErrorInfo.h
     RoException.cpp
     RoException.h
     RoFileSystem.cpp
     RoFileSystem.h
+    RoGlobPattern.cpp
+    RoGlobPattern.h
     RoHashString.cpp
     RoHashString.h
     RoLog.cpp
     RoLog.h
     RoLogOptions.cpp
     RoLogOptions.h
+    RoMemoryDataStream.cpp
+    RoMemoryDataStream.h
     RoPlatform.cpp
     RoPlatform.h
     RoPrerequisites.h
@@ -35,6 +40,8 @@ SET(RO_CORE_SOURCES
     RoTimer.cpp
     RoTimer.h
     RoTypes.h
+    RoUtilities.cpp
+    RoUtilities.h
     RoVariant.cpp
     RoVariant.h
 )

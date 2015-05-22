@@ -5,13 +5,27 @@
 #include <core/RoLogOptions.h>
 #include <core/RoVariant.h>
 
+#include <archive/RoDataFolder.h>
+#include <archive/RoGrfStorageBackend.h>
+#include <archive/RoGrfFactory.h>
+#include <archive/RoGrf.h>
+
+#include <audio/RoAudioManager.h>
+#include <audio/RoAudio.h>
+
+#include <conio.h>
 #include <fstream>
 
 #define roROOT_FOLDER_FILE "ROOT"
 
+//#define roGRF_TEST_FILE "C:\\Users\\ullatil\\Games\\Ragnarok Online\\data.grf"
+#define roTEST_BGM_FILE L"C:/tmp/01.mp3"
+#define roGRF_TEST_FILE "C:\\Users\\ullatil\\Games\\InertiaRO\\data.grf"
+#define roKEY_ESC 27
+#define roKEY_RETURN 13
+
 void roInitializeLogging();
 void roChangeRootFolder();
-void playMusic();
 void testVariants();
 
 int main() {
@@ -19,8 +33,6 @@ int main() {
     {
         roInitializeLogging();
         roChangeRootFolder();
-        testVariants();
-        playMusic();
 
         roLOG_INFO << "Starting RokLegend...";
         {
@@ -31,6 +43,29 @@ int main() {
         roLOG_WARN << "Testing";
         roLOG_ERR << "Testing";
         roLOG_CRIT << "Testing";
+
+        testVariants();
+
+        RoConfig config;
+        RoAudioManagerPtr audioManager = RoAudioManager::Get(config);
+
+        RoAudioPtr audio = audioManager->getBackgroundMusic(roTEST_BGM_FILE);
+        audio->setIsPaused(false);
+
+        auto grf = RoGrf2{ roGRF_TEST_FILE };
+        RoString testSound = RoDataFolder::EffectSounds + L"ef_teleportation.wav";
+        auto soundDataStream = grf.getFileContentsOf(testSound);
+        auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
+        char ch = 0;
+        do 
+        {
+            ch = _getch();
+            if (roKEY_RETURN == ch)
+            {
+                audioManager->playSound2D(testSound, false);
+            }
+            Sleep(2);
+        } while (ch != roKEY_ESC);
     }
     catch (boost::exception& e)
     {
@@ -77,12 +112,6 @@ void roChangeRootFolder()
         roLOG_ERR << "Failed to change directory to '" << rootPathString << "', since it doesn't exist.";
     }
 }
-
-#include <audio/RoAudioManager.h>
-#include <audio/RoAudio.h>
-#include <conio.h>
-
-#define roTEST_BGM_FILE L"C:/tmp/01.mp3"
 
 class VariantTestLogger
 {
@@ -164,12 +193,4 @@ void testVariants()
     variantTestForType<double>("double", 65.5432871098);
     variantTestForType<std::string>("std::string", "66");
     variantTestForType<std::wstring>("std::wstring", L"66");
-}
-
-void playMusic()
-{
-    RoConfig config;
-    RoAudioManagerPtr audioManager = RoAudioManager::Get(config);
-    RoAudioPtr audio = audioManager->getBackgroundMusic(roTEST_BGM_FILE);
-    _getch();
 }

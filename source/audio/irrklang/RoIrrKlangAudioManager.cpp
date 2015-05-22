@@ -109,6 +109,22 @@ RoAudioPtr RoIrrKlangAudioManager::getSound2D(const RoString& filename)
         RoVec3f::ZERO);
 }
 //------------------------------------------------------------------------------
+RoAudioPtr RoIrrKlangAudioManager::getSound2D(const RoString& filename, const RoDataStreamPtr& data, bool loop)
+{
+    static const bool IS_2D = false;
+    const std::string utf8FileName = filename.asUTF8();
+    RoBuffer buffer = data->readAll();
+    return std::make_shared<RoIrrKlangAudio>(
+        IS_2D,
+        filename,
+        *mEngine,
+        mEngine->addSoundSourceFromMemory(
+            &buffer[0],
+            static_cast<irrklang::ik_u32>(buffer.size()),
+            utf8FileName.c_str()),
+        RoVec3f::ZERO);
+}
+//------------------------------------------------------------------------------
 RoAudioPtr RoIrrKlangAudioManager::getSound3D(const RoString& filename)
 {
     static const bool IS_3D = true;

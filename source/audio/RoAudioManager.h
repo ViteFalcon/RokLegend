@@ -8,6 +8,7 @@
 
 #include <core/RoPrerequisites.h>
 #include <core/RoConfig.h>
+#include <core/RoDataStream.h>
 #include <math/RoVector3f.h>
 
 roFORWARD_DECL_PTR(RoAudio);
@@ -27,7 +28,10 @@ public:
     virtual ~RoAudioManager() = default;
  
     virtual RoAudioPtr getSound2D(const RoString& filename) = 0;
+    virtual RoAudioPtr getSound2D(const RoString& filename, const RoDataStreamPtr& data, bool loop) = 0;
+
     virtual RoAudioPtr getSound3D(const RoString& filename) = 0;
+
     RoAudioPtr getBackgroundMusic(const RoString& filename);
  
     virtual void playSound2D(const RoString& filename, bool loop) = 0;
