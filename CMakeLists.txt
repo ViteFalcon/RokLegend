@@ -49,6 +49,7 @@ INCLUDE(roklegend_platform)
 INCLUDE(roklegend_irrklang)
 INCLUDE(roklegend_zlib)
 INCLUDE(roklegend_grf)
+INCLUDE(roklegend_tbb)
 
 FIND_PACKAGE(Boost)
 
@@ -56,10 +57,12 @@ FIND_PACKAGE(Boost)
 INCLUDE_DIRECTORIES(
     ${ROKLEGEND_SOURCE_DIR}
     ${Boost_INCLUDE_DIRS}
+    ${TBB_INCLUDE_DIRS}
 )
 LINK_DIRECTORIES(
     ${Boost_LIBRARY_DIRS}
     ${irrKlang_LIBRARY_DIRS}
+    ${TBB_LIBRARY_DIRS}
 )
 
 ADD_SUBDIRECTORY(source)
