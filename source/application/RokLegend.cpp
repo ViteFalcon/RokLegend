@@ -64,7 +64,7 @@ int main() {
             {
                 audioManager->playSound2D(testSound, false);
             }
-            Sleep(2);
+            Sleep(0);
         } while (ch != roKEY_ESC);
     }
     catch (boost::exception& e)

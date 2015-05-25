@@ -44,6 +44,7 @@ LIST(APPEND CMAKE_MODULE_PATH
     ${ROKLEGEND_CMAKE_DIR}
 )
 
+INCLUDE(cotire)
 INCLUDE(roklegend_macros)
 INCLUDE(roklegend_platform)
 INCLUDE(roklegend_irrklang)

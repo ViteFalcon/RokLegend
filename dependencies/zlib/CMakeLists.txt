@@ -188,4 +188,5 @@ if(UNIX)
     # On unix-like platforms the library is almost always called libz
    set_target_properties(zlib PROPERTIES OUTPUT_NAME z)
 endif(UNIX)
-   
+
+COTIRE(zlib)
