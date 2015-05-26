@@ -749,7 +749,7 @@ static bool prv_grf_load(struct grf_handler *handler) {
 				memcpy(entry->filename, pos, fn_len); // fn_len + 1 is already 0x00
 				decode_filename((unsigned char *)entry->filename, fn_len);
 				pos += fn_len;
-				fn_len = strlen(entry->filename);
+				fn_len = (uint32_t) strlen(entry->filename);
 				memcpy((void *)&tmpentry, pos, sizeof(struct grf_table_entry_data));
 				pos += sizeof(struct grf_table_entry_data);
 				if ( ((tmpentry.flags & GRF_FLAG_FILE) == 0) || (tmpentry.size == 0)) {
@@ -950,7 +950,7 @@ static bool prv_grf_load(struct grf_handler *handler) {
 			wasted_space = grfstat.st_size - GRF_HEADER_SIZE - 8 - posinfo[0]; // in theory, all this space should be used for files
 			while(pos < pos_max) {
 				size_t av_len = pos_max - pos;
-				int fn_len = prv_grf_strnlen((char *)pos, av_len);
+				int fn_len = (int) prv_grf_strnlen((char *)pos, av_len);
 				struct grf_table_entry_data tmpentry;
 				result--;
 				if (fn_len + sizeof(struct grf_table_entry_data) > av_len) { free(table); return false; }
@@ -1244,7 +1244,7 @@ GRFEXPORT bool grf_put_contents_to_file(grf_node_handle file, const char *fn) {
 		return false;
 	}
 	while(1) {
-		int i=fwrite(ptr+p, 1, size-p, f);
+		int i= (int) fwrite(ptr+p, 1, size-p, f);
 		if (i<=0) {
 			free(ptr);
 			free(name);
@@ -1271,7 +1271,7 @@ GRFEXPORT grf_node_handle grf_file_add(grf_handle handler, const char *filename,
 	// 1. Compress file, to have its size
 	ptr_comp = malloc(size+100);
 	if (ptr_comp == NULL) return NULL; /* out of memory? */
-	comp_size = zlib_buffer_deflate(ptr_comp, size + 100, ptr, size, handler->compression_level);
+	comp_size = zlib_buffer_deflate(ptr_comp, (int)(size + 100), ptr, (int)size, handler->compression_level);
 	comp_size_aligned = comp_size + (4-((comp_size-1) % 4)) - 1;
 	ptr_comp = realloc(ptr_comp, comp_size_aligned);
 	if (ptr_comp == NULL) return NULL; /* out of memory? */
@@ -1310,7 +1310,7 @@ GRFEXPORT grf_node_handle grf_file_add(grf_handle handler, const char *filename,
 		if (ptr_file->next != NULL) ptr_file->next->prev = ptr_file;
 		prev->next = ptr_file;
 	}
-	ptr_file->size = size;
+	ptr_file->size = (uint32_t) size;
 	ptr_file->len = comp_size;
 	ptr_file->len_aligned = comp_size_aligned;
 	ptr_file->flags = GRF_FLAG_FILE;
@@ -1411,7 +1411,7 @@ static bool prv_grf_write_table(struct grf_handler *handler) {
 	grf_node_handle prev;
 
 	while(node != NULL) {
-		table_size += strlen(node->filename)+1+sizeof(struct grf_table_entry_data);
+		table_size += (uint32_t) strlen(node->filename)+1+sizeof(struct grf_table_entry_data);
 		node = node->next;
 	}
 
@@ -1423,7 +1423,7 @@ static bool prv_grf_write_table(struct grf_handler *handler) {
 		node = handler->first_node;
 		while(node != NULL) {
 			struct grf_table_entry_data te;
-			int j=strlen(node->filename);
+			int j = (int) strlen(node->filename);
 			memcpy(pos, node->filename, j);
 			pos+=j;
 			*(char *)(pos) = 0;

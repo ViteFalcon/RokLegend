@@ -6,8 +6,23 @@
 #include <boost/cstdint.hpp>
 #include <boost/optional.hpp>
 #include <string>
-#include <vector>
 #include <memory>
+
+// TODO: Move this to CMake
+#define roUSE_TBB_ALLOCATORS 1
+#if roUSE_TBB_ALLOCATORS
+#   include <tbb/scalable_allocator.h>
+
+template <typename T>
+using RoAllocator = tbb::scalable_allocator < T > ;
+
+#else
+
+template <typename T>
+using RoAllocator = std::allocator < T > ;
+#endif
+
+#include "RoVector.h"
 
 using int8 = boost::int8_t;
 using uint8 = boost::uint8_t;
@@ -30,8 +45,8 @@ using float64 = double;
 using RoBuffer = std::string;
 using RoStreamSize = size_t;
 
-using RoCharArray = std::vector<char>;
-using RoByteArray = std::vector<uint8>;
+using RoCharArray = RoVector<char>;
+using RoByteArray = RoVector<uint8>;
 
 template <typename T>
 using optional = boost::optional<T>;

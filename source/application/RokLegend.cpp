@@ -4,6 +4,8 @@
 #include <core/RoLog.h>
 #include <core/RoLogOptions.h>
 #include <core/RoVariant.h>
+#include <core/task/RoTaskCollection.h>
+#include <core/task/RoTaskManager.h>
 
 #include <archive/RoDataFolder.h>
 #include <archive/RoGrfStorageBackend.h>
@@ -26,7 +28,8 @@
 
 void roInitializeLogging();
 void roChangeRootFolder();
-void testVariants();
+void testVariants(const RoTaskArgs& args);
+void mainLoop(const RoTaskArgs& args);
 
 int main() {
     try
@@ -44,28 +47,12 @@ int main() {
         roLOG_ERR << "Testing";
         roLOG_CRIT << "Testing";
 
-        testVariants();
+        RoTaskCollection tasks;
+        tasks.add("RunVariantTests", testVariants);
+        tasks.add("MainLoop", mainLoop);
 
-        RoConfig config;
-        RoAudioManagerPtr audioManager = RoAudioManager::Get(config);
-
-        RoAudioPtr audio = audioManager->getBackgroundMusic(roTEST_BGM_FILE);
-        audio->setIsPaused(false);
-
-        auto grf = RoGrf2{ roGRF_TEST_FILE };
-        RoString testSound = RoDataFolder::EffectSounds + L"ef_teleportation.wav";
-        auto soundDataStream = grf.getFileContentsOf(testSound);
-        auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
-        char ch = 0;
-        do 
-        {
-            ch = _getch();
-            if (roKEY_RETURN == ch)
-            {
-                audioManager->playSound2D(testSound, false);
-            }
-            Sleep(0);
-        } while (ch != roKEY_ESC);
+        roSCHEDULE_TASK(RunVariantTests, RoEmptyArgs::INSTANCE);
+        roRUN_TASK(MainLoop, RoEmptyArgs::INSTANCE);
     }
     catch (boost::exception& e)
     {
@@ -80,6 +67,30 @@ int main() {
         roLOG_CRIT << "An unknown exception was caught!";
     }
     return 0;
+}
+
+void mainLoop(const RoTaskArgs& args)
+{
+    RoConfig config;
+    RoAudioManagerPtr audioManager = RoAudioManager::Get(config);
+
+    RoAudioPtr audio = audioManager->getBackgroundMusic(roTEST_BGM_FILE);
+    audio->setIsPaused(false);
+
+    auto grf = RoGrf2{ roGRF_TEST_FILE };
+    RoString testSound = RoDataFolder::EffectSounds + L"ef_teleportation.wav";
+    auto soundDataStream = grf.getFileContentsOf(testSound);
+    auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
+    char ch = 0;
+    do
+    {
+        ch = _getch();
+        if (roKEY_RETURN == ch)
+        {
+            audioManager->playSound2D(testSound, false);
+        }
+        Sleep(0);
+    } while (ch != roKEY_ESC);
 }
 
 void roInitializeLogging() {
@@ -178,8 +189,9 @@ void variantTestForType(const char* testName, const TestType testValue)
     variantTestCaseForTypes<TestType, std::string>(log, "To string", testValue);
     variantTestCaseForTypes<TestType, std::wstring>(log, "To wstring", testValue);
 }
-void testVariants()
+void testVariants(const RoTaskArgs& args)
 {
+    roLOG_INFO << "Task ID: " << args.taskId;
     // -- int
     variantTestForType<int8>("int8", 65);
     variantTestForType<uint8>("uint8", 65);

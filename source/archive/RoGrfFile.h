@@ -98,6 +98,6 @@ private:
 
 roDEFINE_PTR(RoGrfFile);
 
-typedef std::vector<RoGrfFilePtr> RoGrfFilePtrArray;
+typedef RoVector<RoGrfFilePtr> RoGrfFilePtrArray;
 
 #endif // ROKLEGEND_GRF_FILE_H

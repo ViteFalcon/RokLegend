@@ -1,4 +1,14 @@
 # Sources
+SET(RO_TASK_SOURCES
+    task/RoTask.h
+    task/RoTaskArgs.h
+    task/RoTaskCollection.cpp
+    task/RoTaskCollection.h
+    task/RoTaskManager.cpp
+    task/RoTaskManager.h
+)
+RO_SOURCE_GROUP(task FILES ${RO_TASK_SOURCES})
+
 SET(RO_CORE_SOURCES
     CMakeLists.txt
     RoConfig.cpp
@@ -44,6 +54,7 @@ SET(RO_CORE_SOURCES
     RoUtilities.h
     RoVariant.cpp
     RoVariant.h
+    ${RO_TASK_SOURCES}
 )
 
 ADD_LIBRARY(${RO_CORE_LIBRARY} STATIC ${RO_CORE_SOURCES})

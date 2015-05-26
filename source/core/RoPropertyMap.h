@@ -141,6 +141,6 @@ private:
     StrToPropertyMap mProperties;
 };
 
-typedef std::vector<RoPropertyMap> RoPropertyMapArray;
+typedef RoVector<RoPropertyMap> RoPropertyMapArray;
 
 #endif // ROKLEGEND_PROPERTY_MAP_H

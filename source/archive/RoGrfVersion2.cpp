@@ -85,7 +85,7 @@ struct RoGrf2CacheHeader
 //------------------------------------------------------------------------------
 struct RoGrf2FileList
 {
-    typedef std::vector<RoGrfFilePtr> GrfFileList;
+    typedef RoVector<RoGrfFilePtr> GrfFileList;
     typedef GrfFileList::iterator Iterator;
 
     GrfFileList files;

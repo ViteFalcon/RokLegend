@@ -64,7 +64,7 @@ private:
     virtual void findFileNames(size_t grfId, RoStringArray& fileNames, const FileInfoFilter& filter);
 
     typedef boost::unordered_map<RoString, RoGrfFilePtr> GrfHashMap;
-    typedef std::vector<GrfHashMap> GrfArray;
+    typedef RoVector<GrfHashMap> GrfArray;
     typedef boost::unordered_map<RoString, size_t> GrfNameIndexMap;
 
     GrfArray mGrfs;
