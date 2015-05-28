@@ -25,6 +25,7 @@
 
 #include <memory>
 
+#if BOOST_VERSION <= 105500
 namespace boost {
     namespace serialization {
 
@@ -60,5 +61,6 @@ namespace boost {
 
     }
 }
+#endif // BOOST_VERSION <= 105500
 
 #endif // ROKLEGEND_SERIALIZATION_H

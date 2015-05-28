@@ -671,3 +671,28 @@ RoDataStreamPtr RoGrf2::getFileContentsOf(const RoString& fileName)
     roLOG_INFO << "Expected " << fileSize << " bytes. Read " << bytesRead << " bytes.";
     return std::make_shared<RoMemoryDataStream>(buffer, fileSize, true, RoMemoryDataStream::AccessMode::READ);
 }
+
+#include <core/RoGlobPattern.h>
+
+void RoGrf2::findFiles(RoStringArray& result, const RoString& pattern) const
+{
+    auto matcher = RoGlobPattern::New(pattern.asUTF8());
+    return filterFiles(result, [&](const RoString& fileName) {
+        return matcher->matches(fileName);
+    });
+}
+
+void RoGrf2::filterFiles(RoStringArray& result, const RoFileNameFilter& filter) const
+{
+    grf_handle grfHandle = static_cast<grf_handle>(mHandle);
+    grf_node_handle* fileHandles = grf_get_file_id_list(grfHandle);
+    while (fileHandles && *fileHandles)
+    {
+        grf_node_handle currentHandle = *fileHandles++;
+        RoString fileName = RoString::FromEucKr(grf_file_get_filename(currentHandle));
+        if (filter(fileName))
+        {
+            result.push_back(fileName);
+        }
+    }
+}

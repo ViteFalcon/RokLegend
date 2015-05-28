@@ -3,6 +3,7 @@
 #include <core/RoFileSystem.h>
 #include <core/RoLog.h>
 #include <core/RoLogOptions.h>
+#include <core/RoTimer.h>
 #include <core/RoVariant.h>
 #include <core/task/RoTaskCollection.h>
 #include <core/task/RoTaskManager.h>
@@ -82,6 +83,16 @@ void mainLoop(const RoTaskArgs& args)
     auto soundDataStream = grf.getFileContentsOf(testSound);
     auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
     char ch = 0;
+
+    {
+        RoTimer fileFilterTimer{};
+        RoStringArray files = grf.findFiles("*\\ef_teleportation.wav");
+        roLOG_DBG << "Found " << files.size() << " file(s) in " << fileFilterTimer.getMilliseconds() / 1000.0f << " seconds";
+        for (RoString fileName : files)
+        {
+            roLOG_DBG << "\t" << fileName;
+        }
+    }
     do
     {
         ch = _getch();

@@ -53,6 +53,14 @@ INCLUDE(roklegend_grf)
 INCLUDE(roklegend_tbb)
 
 FIND_PACKAGE(Boost)
+IF ("${Boost_LIBRARY_DIRS}" STREQUAL "")
+    IF (MSVC12 AND CMAKE_CL_64)
+        SET(Boost_LIBRARY_DIRS "${Boost_INCLUDE_DIRS}/lib64-msvc-12.0")
+    ENDIF ()
+ENDIF ()
+IF (MSVC12)
+	ADD_DEFINITIONS(-DBOOST_EXCLUDE_MSVC12_BUG)
+ENDIF ()
 
 # Set common stuff here
 INCLUDE_DIRECTORIES(

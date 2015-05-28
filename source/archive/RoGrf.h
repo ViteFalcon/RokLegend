@@ -12,8 +12,6 @@
 
 #include <fstream>
 
-#include <boost/unordered_map.hpp>
-
 class RoGrfFileCacheInfo;
 
 class RoGrf
@@ -87,13 +85,33 @@ protected:
     RoGrfStorageBackendPtr  mStore;
 };
 
+using RoFileNameFilter = std::function < bool(const RoString&) > ;
+
 class RoGrf2 {
 public:
     RoGrf2(const RoString& name);
     ~RoGrf2();
 
     RoDataStreamPtr getFileContentsOf(const RoString& fileName);
-private:
+
+    inline RoStringArray findFiles(const RoString& pattern) const
+    {
+        RoStringArray result;
+        findFiles(result, pattern);
+        return result;
+    }
+
+    inline RoStringArray filterFiles(const RoFileNameFilter& filter) const
+    {
+        RoStringArray result;
+        filterFiles(result, filter);
+        return result;
+    }
+private: // methods
+    void findFiles(RoStringArray& result, const RoString& pattern) const;
+    void filterFiles(RoStringArray& result, const RoFileNameFilter& filter) const;
+
+private: // fields
     void* mHandle;
 };
 
