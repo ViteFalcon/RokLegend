@@ -466,4 +466,19 @@ namespace boost
     size_t hash_value(const RoString& str);
 }
 
+namespace std
+{
+    template <>
+    struct hash < RoString >
+    {
+        using argument_type = RoString;
+        using result_type = hash<std::string>::result_type;
+
+        result_type operator() (argument_type const& value) const
+        {
+            return std::hash<std::string>()(value.asUTF8());
+        }
+    };
+}
+
 #endif // ROKLEGEND_STRING_H

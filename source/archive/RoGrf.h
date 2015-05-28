@@ -85,14 +85,24 @@ protected:
     RoGrfStorageBackendPtr  mStore;
 };
 
+roFORWARD_DECL_PTR(RoGrf2);
+
 using RoFileNameFilter = std::function < bool(const RoString&) > ;
 
-class RoGrf2 {
-public:
-    RoGrf2(const RoString& name);
-    ~RoGrf2();
+class RoGrf2
+{
+public: // static
+    static RoGrf2Ptr FromFile(const RoString& fileName);
 
-    RoDataStreamPtr getFileContentsOf(const RoString& fileName);
+public:
+    virtual ~RoGrf2() = default;
+
+    inline RoString getName() const
+    {
+        return mName;
+    }
+
+    virtual RoDataStreamPtr getFileContentsOf(const RoString& fileName) const = 0;
 
     inline RoStringArray findFiles(const RoString& pattern) const
     {
@@ -107,12 +117,16 @@ public:
         filterFiles(result, filter);
         return result;
     }
-private: // methods
-    void findFiles(RoStringArray& result, const RoString& pattern) const;
-    void filterFiles(RoStringArray& result, const RoFileNameFilter& filter) const;
+protected:
+    RoGrf2(const RoString& name)
+        : mName(name)
+    {
+    }
+    virtual void findFiles(RoStringArray& result, const RoString& pattern) const = 0;
+    virtual void filterFiles(RoStringArray& result, const RoFileNameFilter& filter) const = 0;
 
-private: // fields
-    void* mHandle;
+private:
+    const RoString mName;
 };
 
 #endif // ROKLEGEND_GRF_H

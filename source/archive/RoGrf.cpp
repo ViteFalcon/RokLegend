@@ -645,26 +645,66 @@ bool RoGrf::hasSpecialExtension(const RoString& file)
 extern "C" {
 #   include <grf.h>
 }
+#include <core/RoHashMap.h>
 #include <core/RoScopedPtr.h>
 
-RoGrf2::RoGrf2(const RoString& name) : mHandle(nullptr)
+using RoGrfHandle = grf_handle;
+using RoGrfFileHandle = grf_node_handle;
+using RoGrfFileCache = RoHashMap < RoString, RoGrfFileHandle > ;
+
+class RoGrf2Impl :  public RoGrf2
+{
+public:
+    RoGrf2Impl(const RoString& name, const RoGrfHandle handle, RoGrfFileCache cache)
+        : RoGrf2(name)
+        , mHandle(handle)
+        , mCache(cache)
+    {
+    }
+    ~RoGrf2Impl()
+    {
+        grf_free(static_cast<grf_handle>(mHandle));
+    }
+
+    RoDataStreamPtr getFileContentsOf(const RoString& fileName) const override;
+
+protected: // methods
+    void findFiles(RoStringArray& result, const RoString& pattern) const override;
+    void filterFiles(RoStringArray& result, const RoFileNameFilter& filter) const override;
+
+private: // fields
+
+    RoGrfHandle mHandle;
+    RoGrfFileCache mCache;
+};
+
+RoGrfFileCache cacheFileList(RoGrfHandle grfHandle)
+{
+    grf_node_handle* fileHandles = grf_get_file_id_list(grfHandle);
+    RoGrfFileCache cache{};
+    while (fileHandles && *fileHandles)
+    {
+        grf_node_handle currentHandle = *fileHandles++;
+        RoString fileName = RoString::FromEucKr(grf_file_get_filename(currentHandle));
+        cache[fileName] = currentHandle;
+    }
+    return cache;
+}
+
+RoGrf2Ptr RoGrf2::FromFile(const RoString& name)
 {
     const std::string utf8Name = name.asUTF8();
-    mHandle = grf_load(utf8Name.c_str(), false);
-    if (mHandle == nullptr) {
-        roTHROW(RoException() << RoErrorInfoDetail("Failed to load GRF!"));
-    }
+    auto handle = grf_load(utf8Name.c_str(), false);
+    roTHROW_IF(nullptr == handle, RoException() << RoErrorInfoDetail("Failed to load GRF!"));
+    auto cachedFileList = cacheFileList(handle);
+    return std::make_shared<RoGrf2Impl>(name, handle, cachedFileList);
 }
 
-RoGrf2::~RoGrf2()
+RoDataStreamPtr RoGrf2Impl::getFileContentsOf(const RoString& fileName) const
 {
-    grf_free(static_cast<grf_handle>(mHandle));
-}
-
-RoDataStreamPtr RoGrf2::getFileContentsOf(const RoString& fileName)
-{
-    const std::string utf8Name = fileName.asUTF8();
-    grf_node_handle fileHandle = grf_get_file(static_cast<grf_handle>(mHandle), utf8Name.c_str());
+    auto cacheItr = mCache.find(fileName);
+    roTHROW_IF(mCache.end() == cacheItr, RoItemNotFound() << RoErrorInfoItemName(fileName));
+    grf_node_handle fileHandle = static_cast<grf_node_handle>(cacheItr->second);
     uint32_t fileSize = grf_file_get_size(fileHandle);
     char *buffer = new char[fileSize];
     uint32_t bytesRead = grf_file_get_contents(fileHandle, buffer);
@@ -674,7 +714,7 @@ RoDataStreamPtr RoGrf2::getFileContentsOf(const RoString& fileName)
 
 #include <core/RoGlobPattern.h>
 
-void RoGrf2::findFiles(RoStringArray& result, const RoString& pattern) const
+void RoGrf2Impl::findFiles(RoStringArray& result, const RoString& pattern) const
 {
     auto matcher = RoGlobPattern::New(pattern.asUTF8());
     return filterFiles(result, [&](const RoString& fileName) {
@@ -682,17 +722,12 @@ void RoGrf2::findFiles(RoStringArray& result, const RoString& pattern) const
     });
 }
 
-void RoGrf2::filterFiles(RoStringArray& result, const RoFileNameFilter& filter) const
+void RoGrf2Impl::filterFiles(RoStringArray& result, const RoFileNameFilter& filter) const
 {
-    grf_handle grfHandle = static_cast<grf_handle>(mHandle);
-    grf_node_handle* fileHandles = grf_get_file_id_list(grfHandle);
-    while (fileHandles && *fileHandles)
-    {
-        grf_node_handle currentHandle = *fileHandles++;
-        RoString fileName = RoString::FromEucKr(grf_file_get_filename(currentHandle));
-        if (filter(fileName))
+    for_each(mCache.begin(), mCache.end(), [&](RoGrfFileCache::value_type const& entry) {
+        if (filter(entry.first))
         {
-            result.push_back(fileName);
+            result.push_back(entry.first);
         }
-    }
+    });
 }

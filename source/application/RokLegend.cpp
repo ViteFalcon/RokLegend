@@ -78,21 +78,22 @@ void mainLoop(const RoTaskArgs& args)
     RoAudioPtr audio = audioManager->getBackgroundMusic(roTEST_BGM_FILE);
     audio->setIsPaused(false);
 
-    auto grf = RoGrf2{ roGRF_TEST_FILE };
-    RoString testSound = RoDataFolder::EffectSounds + L"ef_teleportation.wav";
-    auto soundDataStream = grf.getFileContentsOf(testSound);
-    auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
-    char ch = 0;
-
+    RoTimer profiler{};
+    auto grf = RoGrf2::FromFile(roGRF_TEST_FILE);
+    roLOG_DBG << "Took " << profiler.getMilliseconds() / 1000.0f << " seconds to load GRF";
+    profiler.reset();
+    RoStringArray files = grf->findFiles("*\\ef_teleportation.wav");
+    roLOG_DBG << "Found " << files.size() << " file(s) in " << profiler.getMilliseconds() / 1000.0f << " seconds";
+    for (RoString fileName : files)
     {
-        RoTimer fileFilterTimer{};
-        RoStringArray files = grf.findFiles("*\\ef_teleportation.wav");
-        roLOG_DBG << "Found " << files.size() << " file(s) in " << fileFilterTimer.getMilliseconds() / 1000.0f << " seconds";
-        for (RoString fileName : files)
-        {
-            roLOG_DBG << "\t" << fileName;
-        }
+        roLOG_DBG << "\t" << fileName;
     }
+    RoString testSound = files[0];
+    auto soundDataStream = grf->getFileContentsOf(testSound);
+    auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
+
+    std::cout << "Ready to accept inputs!" << std::endl;
+    char ch = 0;
     do
     {
         ch = _getch();
