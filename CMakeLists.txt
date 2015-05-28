@@ -51,6 +51,7 @@ INCLUDE(roklegend_irrklang)
 INCLUDE(roklegend_zlib)
 INCLUDE(roklegend_grf)
 INCLUDE(roklegend_tbb)
+INCLUDE(roklegend_sqlitepp)
 
 FIND_PACKAGE(Boost)
 IF ("${Boost_LIBRARY_DIRS}" STREQUAL "")
