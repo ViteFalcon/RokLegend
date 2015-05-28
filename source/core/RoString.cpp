@@ -788,3 +788,13 @@ namespace boost
         return boost::hash_value(str.asUTF8());
     }
 }
+
+bool tbb::rostring_hasher::equal(const RoString& j, const RoString& k) const
+{
+    return j == k;
+}
+
+size_t tbb::rostring_hasher::hash(const RoString& key) const
+{
+    return hasher(key);
+}

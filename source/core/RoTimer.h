@@ -5,8 +5,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#ifndef ROGRF_TIMER_H
-#define ROGRF_TIMER_H
 
 #include "RoPrerequisites.h"
 
@@ -39,5 +37,3 @@ private:
     LARGE_INTEGER mStartTime;
     LARGE_INTEGER mFrequency;
 };
-
-#endif // ROGRF_TIMER_H

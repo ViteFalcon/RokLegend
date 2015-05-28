@@ -481,4 +481,20 @@ namespace std
     };
 }
 
+namespace tbb
+{
+    struct rostring_hasher
+    {
+        rostring_hasher() = default;
+        rostring_hasher(const rostring_hasher& other) = default;
+        ~rostring_hasher() = default;
+
+        bool equal(const RoString& j, const RoString& k) const;
+        size_t hash(const RoString& key) const;
+
+    private:
+        std::hash<RoString> hasher;
+    };
+}
+
 #endif // ROKLEGEND_STRING_H

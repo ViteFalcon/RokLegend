@@ -34,4 +34,8 @@ SET(RO_ARCHIVE_SOURCES
     RoZlib.h
 )
 
+# Setting the following to 1/0 will enable/disable concurrent caching of filenames when loading GRF.
+# Vite Falcon: On a Core i5, I saw consistent timings with the non-concurrent version.
+ADD_DEFINITIONS(-DroGRF_USE_CONCURRENT_LOADING=0)
+
 ADD_LIBRARY(${RO_ARCHIVE_LIBRARY} STATIC ${RO_ARCHIVE_SOURCES})

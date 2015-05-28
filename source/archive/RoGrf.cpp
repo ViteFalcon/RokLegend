@@ -678,18 +678,7 @@ private: // fields
     RoGrfFileCache mCache;
 };
 
-RoGrfFileCache cacheFileList(RoGrfHandle grfHandle)
-{
-    grf_node_handle* fileHandles = grf_get_file_id_list(grfHandle);
-    RoGrfFileCache cache{};
-    while (fileHandles && *fileHandles)
-    {
-        grf_node_handle currentHandle = *fileHandles++;
-        RoString fileName = RoString::FromEucKr(grf_file_get_filename(currentHandle));
-        cache[fileName] = currentHandle;
-    }
-    return cache;
-}
+RoGrfFileCache cacheFileList(RoGrfHandle grfHandle);
 
 RoGrf2Ptr RoGrf2::FromFile(const RoString& name)
 {
@@ -722,12 +711,46 @@ void RoGrf2Impl::findFiles(RoStringArray& result, const RoString& pattern) const
     });
 }
 
+#include <tbb/concurrent_vector.h>
+#include <tbb/concurrent_hash_map.h>
+#include <tbb/parallel_for.h>
+#include <tbb/parallel_for_each.h>
+
+RoGrfFileCache cacheFileList(RoGrfHandle grfHandle)
+{
+#if roGRF_USE_CONCURRENT_LOADING
+    uint32 fileCount = grf_filecount(grfHandle);
+    grf_node_handle* fileHandles = grf_get_file_id_list(grfHandle);
+    using ConcurrentIntermediateCache = tbb::concurrent_hash_map < RoString, RoGrfFileHandle, tbb::rostring_hasher > ;
+    ConcurrentIntermediateCache intermediateCache;
+    tbb::parallel_for(uint32{ 0 }, fileCount, [&](uint32 index) {
+        grf_node_handle fileHandle = fileHandles[index];
+        RoString fileName = RoString::FromEucKr(grf_file_get_filename(fileHandle));
+        intermediateCache.insert(std::make_pair(fileName, fileHandle));
+    });
+    RoGrfFileCache cache{ intermediateCache.begin(), intermediateCache.end() };
+#else
+    grf_node_handle* fileHandles = grf_get_file_id_list(grfHandle);
+    RoGrfFileCache cache{};
+    while (fileHandles && *fileHandles)
+    {
+        grf_node_handle currentHandle = *fileHandles++;
+        RoString fileName = RoString::FromEucKr(grf_file_get_filename(currentHandle));
+        cache[fileName] = currentHandle;
+    }
+#endif // roGRF_USE_CONCURRENT_LOADING
+    roLOG_DBG << "Loaded " << cache.size() << " files!";
+    return cache;
+}
+
 void RoGrf2Impl::filterFiles(RoStringArray& result, const RoFileNameFilter& filter) const
 {
-    for_each(mCache.begin(), mCache.end(), [&](RoGrfFileCache::value_type const& entry) {
+    tbb::concurrent_vector<RoString> intermediateResults{};
+    tbb::parallel_for_each(mCache.begin(), mCache.end(), [&](RoGrfFileCache::value_type const& entry) {
         if (filter(entry.first))
         {
-            result.push_back(entry.first);
+            intermediateResults.push_back(entry.first);
         }
     });
+    result.assign(intermediateResults.begin(), intermediateResults.end());
 }
