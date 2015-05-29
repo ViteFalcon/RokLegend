@@ -87,3 +87,28 @@ ENDIF ()
 
 SET(ROKLEGEND_ROOT_FILE "${ROKLEGEND_BUILD_DIR}/source/application/ROOT")
 FILE(WRITE  ${ROKLEGEND_ROOT_FILE} "${ROKLEGEND_ROOT_DIR}")
+
+SET(RO_CMAKE_INCLUDED_FILES
+	cmake/cotire.cmake
+	cmake/roklegend_grf.cmake
+	cmake/roklegend_irrklang.cmake
+	cmake/roklegend_macros.cmake
+	cmake/roklegend_platform.cmake
+	cmake/roklegend_sqlitepp.cmake
+	cmake/roklegend_tbb.cmake
+	cmake/roklegend_zlib.cmake
+)
+SOURCE_GROUP(cmake FILES ${RO_CMAKE_INCLUDED_FILES})
+
+SET(RO_CMAKE_SOURCE_FILES
+	source/CMakeLists.txt
+)
+SOURCE_GROUP(source FILES ${RO_CMAKE_SOURCE_FILES})
+
+SET(RO_CMAKE_FILES
+	${RO_CMAKE_INCLUDED_FILES}
+	${RO_CMAKE_SOURCE_FILES}
+	CMakeLists.txt
+)
+
+ADD_CUSTOM_TARGET(CMakeFiles SOURCES ${RO_CMAKE_FILES})

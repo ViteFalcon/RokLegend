@@ -125,6 +125,7 @@ set(ZLIB_PRIVATE_HDRS
     ${ZLIB_INCLUDE_DIR}/zutil.h
 )
 set(ZLIB_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
     ${ZLIB_SOURCE_DIR}/adler32.c
     ${ZLIB_SOURCE_DIR}/compress.c
     ${ZLIB_SOURCE_DIR}/crc32.c
