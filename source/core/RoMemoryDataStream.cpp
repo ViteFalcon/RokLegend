@@ -213,6 +213,9 @@ RoStreamSize RoMemoryDataStream::write(const void* buffer, RoStreamSize size)
 //------------------------------------------------------------------------------
 RoBuffer RoMemoryDataStream::readAll()
 {
-    RoBuffer buffer(mBuffer, mEnd-mCursor);
+    size_t size = mEnd - mCursor;
+    RoBuffer buffer{};
+    buffer.resize(size, 0);
+    memcpy_s(&buffer[0], size, mBuffer, size);
     return buffer;
 }

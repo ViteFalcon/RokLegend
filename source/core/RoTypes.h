@@ -42,7 +42,7 @@ using float32 = float;
 // using real = float32;
 using float64 = double;
 
-using RoBuffer = std::string;
+using RoBuffer = RoVector < uint8 > ;
 using RoStreamSize = size_t;
 
 using RoCharArray = RoVector<char>;

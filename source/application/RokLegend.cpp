@@ -16,6 +16,8 @@
 #include <audio/RoAudioManager.h>
 #include <audio/RoAudio.h>
 
+#include <storage/RoDataInfo.h>
+
 #include <conio.h>
 #include <fstream>
 
@@ -88,6 +90,7 @@ void mainLoop(const RoTaskArgs& args)
     {
         roLOG_DBG << "\t" << fileName;
     }
+    roLOG_DBG << "--- " << RoDataInfo::Get().getValue("dir:Sfx", "NOTFOUND");
     RoString testSound = files[0];
     auto soundDataStream = grf->getFileContentsOf(testSound);
     auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
