@@ -91,7 +91,6 @@ private: // Fields
 };
 
 RoTaskManagerImpl::RoAtomicTaskId RoTaskManagerImpl::sNextId;
-const RoEmptyArgs RoEmptyArgs::INSTANCE{};
 
 RoTaskManager& RoTaskManager::GetInstance()
 {

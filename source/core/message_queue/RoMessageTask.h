@@ -1,0 +1,11 @@
+////////////////////////////////////////////////////////////////////////////////
+// This source code is part of RokLegend project.
+//         (Ragnarök Online Client)
+//     Copyright (c) RokLegend Team, 2013
+////////////////////////////////////////////////////////////////////////////////
+
+#pragma once
+#ifndef ROKLEGEND_MESSAGE_TASK_H
+#define ROKLEGEND_MESSAGE_TASK_H
+
+#endif // ROKLEGEND_MESSAGE_TASK_H

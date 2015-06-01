@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../RoSharedPtr.h"
+#include "../RoPropertyMap.h"
 
 struct RoTaskArgs;
 roDEFINE_PTR(RoTaskArgs);
@@ -11,7 +12,31 @@ roDEFINE_PTR(RoTaskArgs);
 struct RoTaskArgs
 {
     RoTaskId taskId{ -1 };
+
+    RoTaskArgsPtr clone() const;
     virtual RoTaskArgsPtr clone(const RoTaskId taskId) const = 0;
+
+    void set(const RoHashString& name, const RoVariant& val);
+
+    template <typename T>
+    roINLINE void set(const RoHashString &name, const T &val)
+    {
+        set(name, RoVariant(val));
+    }
+
+    template <typename T>
+    void get(const RoHashString &name, T& val) const
+    {
+        return mProperties.getProperty(name).as(val);
+    }
+
+    inline RoPropertyMap getProperties() const
+    {
+        return mProperties;
+    }
+
+private:
+    RoPropertyMap mProperties;
 };
 
 /**
@@ -28,9 +53,21 @@ struct RoTaskArgsBase : RoTaskArgs
         clonedArgs->taskId = taskId;
         return clonedArgs;
     }
+
+private:
+    RoPropertyMap mProperties;
 };
 
-struct RoEmptyArgs : public RoTaskArgsBase < RoEmptyArgs >
+#define roDEFINE_TASK_ARGS(ClassName) struct ClassName : public RoTaskArgsBase<ClassName>
+
+template <typename T>
+const T& as_event_args(const RoTaskArgs& args)
+{
+    const T& event_args_ptr = dynamic_cast<const T&>(args);
+    return event_args_ptr;
+}
+
+roDEFINE_TASK_ARGS(RoEmptyArgs)
 {
     static const RoEmptyArgs INSTANCE;
 };

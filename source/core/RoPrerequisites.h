@@ -6,6 +6,7 @@
 #include "RoString.h"
 #include "RoHashString.h"
 
+#include <algorithm>
 #include <functional>
 
 #include <boost/signals2.hpp>
@@ -16,12 +17,16 @@ using RoActionId = RoHashString;
 
 class RoOgreRenderer;
 
-using StringArray = RoVector<std::string> ;
+using RoAtomicString = RoAtomic < RoString > ;
+using StringArray = RoVector<std::string>;
 using RoStringArray = RoVector<RoString>;
-typedef boost::unordered_set<RoString>  RoStringSet;
+using RoStringSet = boost::unordered_set<RoString>;
 
-typedef optional<RoString>   RoOptionalUtf8;
-typedef optional<RoString>   RoOptionalString;
+using RoOptionalUtf8 = optional < RoString > ;
+using RoOptionalString = optional < RoString > ;
+
+#define roMAX(a,b) std::max(a,b)
+#define roMIN(a,b) std::min(a,b)
 
 #include "RoSharedPtr.h"
 
@@ -30,15 +35,17 @@ using RoTaskId = uint64;
 enum class RoEventResult
 {
     ///< Propagates the event to the next in line for event
-    Propogate = 0x001,
+    PROPAGATE = 0x001,
     ///< Indicates the event was not handled
-    Unhandled = 0x010,
+    UNHANDLED = 0x010,
     ///< Indicates the event was handled
-    Handled = 0x020,
+    HANDLED = 0x020,
     ///< Indicates that the event was not handled and should be propagated
-    PropogateUnhandled = Propogate|Unhandled,
+    PROPAGATE_UNHANDLED = PROPAGATE|UNHANDLED,
     ///< Indicates that the event was handled and should be propagated
-    PropogateHandled = Propogate|Handled
+    PROPAGATE_HANDLED = PROPAGATE|HANDLED
 };
+
+#define roPOST_MSG(actionName, args)
 
 #endif // ROKLEGEND_PREREQUISITES_H

@@ -37,7 +37,7 @@ roDEFINE_EXCEPTION(InvalidOperation);
 #define roTHROW_IF(condition, exception) if (condition) { roTHROW(exception); }
 
 #define roTRY try {
-#define roEXIT_GAME roPOST_MSG(ExitGame, RoPropertyMap::Empty)
+#define roEXIT_GAME /* roPOST_MSG(ExitGame, RoPropertyMap::Empty) */
 #define roCATCH_BOOST_EXCEPTION } catch (boost::exception& boostException) \
 {\
     roLOG_CRIT << boost::diagnostic_information_what(boostException);

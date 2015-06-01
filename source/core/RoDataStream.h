@@ -81,6 +81,11 @@ public:
         return 0;
     }
 
+    virtual RoStreamSize bytesRead(void) const
+    {
+        return size() - remainingSize();
+    }
+
     virtual void seek(RoStreamSize pos) = 0;
     virtual RoStreamSize tell() = 0;
     virtual bool eof() const = 0;
@@ -106,5 +111,19 @@ template <typename T>
 RoDataStream& operator << (RoDataStream& stream, const T& value)
 {
     stream.write(&value, sizeof(T));
-    return *this;
+    return stream;
+}
+
+template <typename T>
+auto operator >> (RoDataStream& stream, const T& value) -> decltype(value.readFromStream(RoDataStream&), stream)
+{
+    value.readFromStream(stream);
+    return stream;
+}
+
+template <typename T>
+RoDataStream& operator >> (RoDataStream& stream, const T& value)
+{
+    stream.read(&value, sizeof(T));
+    return stream;
 }

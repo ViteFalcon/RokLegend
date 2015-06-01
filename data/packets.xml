@@ -1,0 +1,400 @@
+<packets>
+    <versions>
+        <version id="0" client="Sakexe_0"/>
+        <version id="1" client="Sakexe_2004_07_05a"/>
+        <version id="2" client="Sakexe_2004_07_13a"/>
+        <version id="3" client="Sakexe_2004_07_26a"/>
+        <version id="4" client="Sakexe_2004_08_09a"/>
+        <version id="5" client="Sakexe_2004_08_16a"/>
+        <version id="6" client="Sakexe_2004_08_17a"/>
+        <version id="7" client="Sakexe_2004_09_06a"/>
+        <version id="8" client="Sakexe_2004_09_20a"/>
+        <version id="9" client="Sakexe_2004_10_05a"/>
+        <version id="10" client="Sakexe_2004_10_25a"/>
+        <version id="11" client="Sakexe_2004_11_01a"/>
+        <version id="12" client="Sakexe_2004_11_09a"/>
+        <version id="13" client="Sakexe_2004_11_15a"/>
+        <version id="14" client="Sakexe_2004_11_29a"/>
+        <version id="15" client="Sakexe_2004_12_13a"/>
+        <version id="16" client="Sakexe_2005_01_10b"/>
+        <version id="17" client="Sakexe_2005_03_28a"/>
+        <version id="18" client="Sakexe_2005_04_04a"/>
+        <version id="19" client="Sakexe_2005_04_11a"/>
+        <version id="20" client="Sakexe_2005_04_25a"/>
+        <version id="21" client="Sakexe_2005_05_09a"/>
+        <version id="22" client="Sakexe_2005_05_23a"/>
+        <version id="23" client="Sakexe_2005_05_30a"/>
+        <version id="24" client="Sakexe_2005_05_31a"/>
+        <version id="25" client="Sakexe_2005_06_08a"/>
+        <version id="26" client="Sakexe_2005_06_22a"/>
+        <version id="27" client="Sakexe_2005_06_28a"/>
+        <version id="28" client="Sakexe_2005_07_18a"/>
+        <version id="29" client="Sakexe_2005_07_19b"/>
+        <version id="30" client="Sakexe_2005_08_01a"/>
+        <version id="31" client="Sakexe_2005_08_08a"/>
+        <version id="32" client="Sakexe_2005_08_17a"/>
+        <version id="33" client="Sakexe_2005_08_29a"/>
+        <version id="34" client="Sakexe_2005_09_12b"/>
+        <version id="35" client="Sakexe_2005_10_10a"/>
+        <version id="36" client="Sakexe_2005_10_13a"/>
+        <version id="37" client="Sakexe_2005_10_17a"/>
+        <version id="38" client="Sakexe_2005_10_24a"/>
+        <version id="39" client="Sakexe_2005_11_07a"/>
+        <version id="40" client="Sakexe_2006_01_09a"/>
+        <version id="41" client="Sakexe_2006_01_26a"/>
+        <version id="42" client="Sakexe_2006_03_06a"/>
+        <version id="43" client="Sakexe_2006_03_13a"/>
+        <version id="44" client="Sakexe_2006_03_27a"/>
+        <version id="45" client="Sakexe_2006_10_23a"/>
+        <version id="46" client="Sakexe_2007_01_02a"/>
+        <version id="47" client="Sakexe_2007_01_08a"/>
+        <version id="48" client="Sakexe_2007_01_22a"/>
+        <version id="49" client="Sakexe_2007_01_29a"/>
+        <version id="50" client="Sakexe_2007_02_05a"/>
+        <version id="51" client="Sakexe_2007_02_12a"/>
+        <version id="52" client="Sakexe_2007_05_07a"/>
+        <version id="53" client="Sakexe_2007_10_02a"/>
+        <version id="54" client="Sakexe_2007_10_23a"/>
+        <version id="55" client="Sakexe_2007_11_06a"/>
+        <version id="56" client="Sakexe_2007_11_13a"/>
+        <version id="57" client="Sakexe_2007_11_20a"/>
+        <version id="58" client="Sakexe_2007_11_27a"/>
+        <version id="59" client="Sakexe_2008_01_02a"/>
+        <version id="60" client="Sakexe_2008_03_18a"/>
+        <version id="61" client="Sakexe_2008_03_25b"/>
+        <version id="62" client="Sakexe_2008_04_01a"/>
+        <version id="63" client="Sakexe_2008_05_27a"/>
+        <version id="64" client="Sakexe_2008_08_20a"/>
+        <version id="65" client="Sakexe_2008_09_10a"/>
+        <version id="66" client="Sakexe_2008_11_13a"/>
+        <version id="67" client="Sakexe_2008_11_26a"/>
+        <version id="68" client="Sakexe_2008_12_10a"/>
+        <version id="69" client="Sakexe_2009_01_14a"/>
+        <version id="70" client="Sakexe_2009_02_18a"/>
+        <version id="71" client="Sakexe_2009_02_25a"/>
+        <version id="72" client="Sakexe_2009_03_30a"/>
+        <version id="73" client="Sakexe_2009_04_08a"/>
+        <version id="74" client="RagexeRE_0"/>
+        <version id="75" client="RagexeRE_2008_08_27a"/>
+        <version id="76" client="RagexeRE_2008_09_10a"/>
+        <version id="77" client="RagexeRE_2008_11_12a"/>
+        <version id="78" client="RagexeRE_2008_12_17a"/>
+        <version id="79" client="RagexeRE_2008_12_17b"/>
+        <version id="80" client="RagexeRE_2009_01_21a"/>
+        <version id="81" client="RagexeRE_2009_02_18a"/>
+        <version id="82" client="RagexeRE_2009_02_26c"/>
+        <version id="83" client="RagexeRE_2009_04_01a"/>
+        <version id="84" client="RagexeRE_2009_05_14a"/>
+        <version id="85" client="RagexeRE_2009_05_20a"/>
+        <version id="86" client="RagexeRE_2009_06_03a"/>
+        <version id="87" client="RagexeRE_2009_06_10a"/>
+        <version id="88" client="RagexeRE_2009_06_17a"/>
+        <version id="89" client="RagexeRE_2009_07_01a"/>
+        <version id="90" client="RagexeRE_2009_07_08a"/>
+        <version id="91" client="RagexeRE_2009_07_15a"/>
+        <version id="92" client="RagexeRE_2009_08_05a"/>
+        <version id="93" client="RagexeRE_2009_08_18a"/>
+        <version id="94" client="RagexeRE_2009_08_25a"/>
+        <version id="95" client="RagexeRE_2009_09_22a"/>
+        <version id="96" client="RagexeRE_2009_09_29a"/>
+        <version id="97" client="RagexeRE_2009_10_06a"/>
+        <version id="98" client="RagexeRE_2009_10_27a"/>
+        <version id="99" client="RagexeRE_2009_11_03a"/>
+        <version id="100" client="RagexeRE_2009_11_04a"/>
+        <version id="101" client="RagexeRE_2009_11_17a"/>
+        <version id="102" client="RagexeRE_2009_11_18c"/>
+        <version id="103" client="RagexeRE_2009_11_24a"/>
+        <version id="104" client="RagexeRE_2009_12_08a"/>
+        <version id="105" client="RagexeRE_2009_12_22a"/>
+        <version id="106" client="RagexeRE_2010_01_05a"/>
+        <version id="107" client="RagexeRE_2010_01_26a"/>
+        <version id="108" client="RagexeRE_2010_02_09a"/>
+        <version id="109" client="RagexeRE_2010_02_23a"/>
+        <version id="110" client="RagexeRE_2010_03_03a"/>
+        <version id="111" client="RagexeRE_2010_03_09a"/>
+        <version id="112" client="RagexeRE_2010_03_23a"/>
+        <version id="113" client="RagexeRE_2010_04_06a"/>
+        <version id="114" client="RagexeRE_2010_04_13a"/>
+        <version id="115" client="RagexeRE_2010_04_14d"/>
+        <version id="116" client="RagexeRE_2010_04_20a"/>
+        <version id="117" client="RagexeRE_2010_06_01a"/>
+        <version id="118" client="RagexeRE_2010_06_08a"/>
+        <version id="119" client="RagexeRE_2010_06_15a"/>
+        <version id="120" client="RagexeRE_2010_06_22a"/>
+        <version id="121" client="RagexeRE_2010_06_29a"/>
+        <version id="122" client="RagexeRE_2010_07_01a"/>
+        <version id="123" client="RagexeRE_2010_07_13a"/>
+        <version id="124" client="RagexeRE_2010_07_14a"/>
+        <version id="125" client="RagexeRE_2010_08_03a"/>
+        <version id="126" client="RagexeRE_2010_11_24a"/>
+        <version id="127" client="RagexeRE_2011_10_05a"/>
+        <version id="128" client="RagexeRE_2011_11_02a"/>
+    </versions>
+
+    <heartbeatpackets>
+        <heartbeatpacket id="0x200" server="LoginServer" version="0">
+            <data name="username" type="string" size="24"/>
+        </heartbeatpacket>
+        <heartbeatpacket id="0x187" server="CharacterServer" version="0">
+            <data name="accountId" type="uint32" value="0"/>
+        </heartbeatpacket>
+        <alivepacket id="0x7E" server="MapServer" version="0">
+            <data name="tick" type="uint32" value="0"/>
+        </alivepacket>
+    </heartbeatpackets>
+
+    <structures>
+        <struct name="ServerInfo" version="73">
+            <data name="ipaddress" type="uint32"/>
+            <data name="port" type="uint16"/>
+            <data name="server_name" type="string" size="20"/>
+            <data name="players" type="uint16"/>
+            <data name="server_type" type="uint16"/>
+            <data name="new_data" type="uint16"/>
+        </struct>
+        <struct name="CharacterInfo" version="73">
+            <data name="character_id" type="uint32"/>
+            <data name="base_xp" type="uint32"/>
+            <data name="zeny" type="uint32"/>
+            <data name="job_xp" type="uint32"/>
+            <data name="job_lvl" type="uint32"/>
+            <data name="body_state" type="uint32"/>
+            <data name="health_state" type="uint32"/>
+            <data name="effect_state" type="uint32"/>
+            <data name="karma" type="uint32"/>
+            <data name="manner" type="uint32"/>
+            <data name="status_point" type="uint16"/>
+            <data name="hp" type="uint16"/>
+            <data name="maxhp" type="uint16"/>
+            <data name="sp" type="uint16"/>
+            <data name="maxsp" type="uint16"/>
+            <data name="walk_speed" type="uint16"/>
+            <data name="job" type="uint16"/>
+            <data name="hair" type="uint16"/>
+            <data name="weapon" type="uint16"/>
+            <data name="base_level" type="uint16"/>
+            <data name="skill_points" type="uint16"/>
+            <data name="head_bottom" type="uint16"/>
+            <data name="shield" type="uint16"/>
+            <data name="head_top" type="uint16"/>
+            <data name="head_mid" type="uint16"/>
+            <data name="hair_colour" type="uint16"/>
+            <data name="cloth_colour" type="uint16"/>
+            <data name="name" type="string" size="24"/>
+            <data name="str" type="byte"/>
+            <data name="agi" type="byte"/>
+            <data name="vit" type="byte"/>
+            <data name="int" type="byte"/>
+            <data name="dex" type="byte"/>
+            <data name="luk" type="byte"/>
+            <data name="slot" type="byte"/>
+            <data name="unknown3" type="byte"/>
+            <data name="can_rename" type="uint16"/>
+        </struct>
+        <struct name="CharacterInfo" version="114">
+            <data name="character_id" type="uint32"/>
+            <data name="base_xp" type="uint32"/>
+            <data name="zeny" type="uint32"/>
+            <data name="job_xp" type="uint32"/>
+            <data name="job_lvl" type="uint32"/>
+            <data name="body_state" type="uint32"/>
+            <data name="health_state" type="uint32"/>
+            <data name="effect_state" type="uint32"/>
+            <data name="karma" type="uint32"/>
+            <data name="manner" type="uint32"/>
+            <data name="status_point" type="uint16"/>
+            <data name="hp" type="uint32"/>
+            <data name="maxhp" type="uint32"/>
+            <data name="sp" type="uint16"/>
+            <data name="maxsp" type="uint16"/>
+            <data name="walk_speed" type="uint16"/>
+            <data name="job" type="uint16"/>
+            <data name="hair" type="uint16"/>
+            <data name="weapon" type="uint16"/>
+            <data name="base_level" type="uint16"/>
+            <data name="skill_points" type="uint16"/>
+            <data name="head_bottom" type="uint16"/>
+            <data name="shield" type="uint16"/>
+            <data name="head_top" type="uint16"/>
+            <data name="head_mid" type="uint16"/>
+            <data name="hair_colour" type="uint16"/>
+            <data name="cloth_colour" type="uint16"/>
+            <data name="name" type="string" size="24"/>
+            <data name="str" type="byte"/>
+            <data name="agi" type="byte"/>
+            <data name="vit" type="byte"/>
+            <data name="int" type="byte"/>
+            <data name="dex" type="byte"/>
+            <data name="luk" type="byte"/>
+            <data name="slot" type="byte"/>
+            <data name="unknown1" type="byte"/>
+            <data name="can_rename" type="bool"/>
+            <data name="unknown2" type="byte"/>
+            <data name="map_name" type="string" size="16"/>
+            <data name="delete_date" type="uint32"/>
+            <data name="robe" type="uint16"/>
+            <data name="unknown3" type="uint16"/>
+        </struct>
+        <struct name="byte2" version="0">
+            <data name="x" type="byte"/>
+            <data name="y" type="byte"/>
+        </struct>
+        <struct name="byte3" version="0">
+            <data name="x" type="byte"/>
+            <data name="y" type="byte"/>
+            <data name="z" type="byte"/>
+        </struct>
+    </structures>
+
+    <packet id="0x64" name="MasterLogin" version="73">
+        <data name="version" type="uint32" value="20"/>
+        <data name="username" type="string" size="24"/>
+        <data name="password" type="string" size="24"/>
+        <data name="master_version" type="byte" value="8"/>
+    </packet>
+    <packet id="0x65" name="GameLogin" version="73">
+        <data name="account_id" type="uint32"/>
+        <data name="login_id" type="uint32"/>
+        <data name="login_id2" type="uint32"/>
+        <data name="user_level" type="uint16" value="0"/>
+        <data name="account_sex" type="byte"/>
+    </packet>
+    <packet id="0x66" name="CharacterSelect" version="73">
+        <data name="slot" type="byte"/>
+    </packet>
+    <packet id="0x67" name="CharacterCreate" version="73">
+        <data name="name" type="string" size="24"/>
+        <data name="str" type="byte"/>
+        <data name="agi" type="byte"/>
+        <data name="vit" type="byte"/>
+        <data name="int" type="byte"/>
+        <data name="dex" type="byte"/>
+        <data name="luk" type="byte"/>
+        <data name="slot" type="byte"/>
+        <data name="hair_colour" type="uint16"/>
+        <data name="hair" type="uint16"/>
+    </packet>
+    <packet id="0x68" name="CharacterDelete" version="73">
+        <data name="character_id" type="uint32"/>
+        <data name="email" type="string" size="40"/>
+    </packet>
+    <packet id="0x69" name="AccountServerInfo" version="73">
+        <data name="packet_size" type="uint16"/>
+        <data name="login_id1" type="uint32"/>
+        <data name="account_id" type="uint32"/>
+        <data name="login_id2" type="uint32"/>
+        <data name="last_login_ip" type="uint32"/>
+        <data name="last_login_time" type="string" size="24"/>
+        <data name="unknown" type="uint16"/>
+        <data name="account_gender" type="byte"/>
+        <data name="servers" type="list" element="ServerInfo" containertype="restOfPacket" dependson="packet_size"/>
+    </packet>
+    <packet id="0x6A" name="MasterLoginError" version="73">
+        <data name="error_code" type="byte"/>
+        <data name="error_detail" type="string" size="20"/>
+    </packet>
+    <packet id="0x6B" name="CharactersReceived" version="73">
+        <data name="packet_size" type="uint16"/>
+        <data name="unknown" type="string" size="20"/>
+        <data name="characters" type="list" element="CharacterInfo" containertype="restOfPacket" dependson="packet_size"/>
+    </packet>
+    <packet id="0x6B" name="CharactersReceived" version="114">
+        <data name="packet_size" type="uint16"/>
+        <data name="max_slots" type="byte"/>
+        <data name="available_slots" type="byte"/>
+        <data name="premium_slots" type="byte"/>
+        <data name="unknown" type="string" size="20"/>
+        <data name="characters" type="list" element="CharacterInfo" containertype="restOfPacket" dependson="packet_size"/>
+    </packet>
+    <packet id="0x6C" name="GameLoginError" version="73">
+        <data name="error_code" type="byte"/>
+    </packet>
+    <packet id="0x6D" name="CharacterCreateSuccess" version="0">
+        <data name="character" type="CharacterInfo"/>
+    </packet>
+    <packet id="0x6E" name="CharacterCreateFailed" version="73">
+        <data name="error_code" type="byte"/>
+    </packet>
+    <packet id="0x6F" name="CharacterDeleteSuccess" version="73"/>
+    <packet id="0x70" name="CharacterSelectFailed" version="73">
+        <!--
+            0x00 = Character name already exists
+            0x01 = You are under-aged (WTF???)
+            0xFF = Character creation denied
+        -->
+        <data name="error_code" type="byte"/>
+    </packet>
+    <packet id="0x71" name="ReceivedCharMap" version="73">
+        <data name="character_id" type="uint32"/>
+        <data name="map_name" type="string" size="16"/>
+        <data name="ipaddress" type="uint32"/>
+        <data name="port" type="uint16"/>
+    </packet>
+    <packet id="0x72" name="MapEnter" version="73">
+        <data name="account_id" type="uint32"/>
+        <data name="character_id" type="uint32"/>
+        <data name="session_id" type="uint32"/>
+        <data name="tick" type="uint32"/>
+        <data name="account_sex" type="byte"/>
+    </packet>
+    <packet id="0x73" name="MapEnterSuccess" version="73">
+        <data name="start_time" type="uint32"/>
+        <data name="direction" type="byte3"/>
+        <data name="position" type="byte2"/>
+    </packet>
+    <packet id="0x74" name="MapEnterFailed" version="73">
+        <data name="error_code" type="byte"/>
+    </packet>
+    <packet id="0x75" name="MapEnterFailed" version="73">
+    </packet>
+    <packet id="0x7D" name="MapLoaded" version="73"/>
+    <packet id="0x7F" name="MapSync" version="73">
+        <data name="tick" type="uint32"/>
+    </packet>
+    <packet id="0x436" name="MapLogin" version="73">
+        <data name="account_id" type="uint32"/>
+        <data name="character_id" type="uint32"/>
+        <data name="session_id" type="uint32"/>
+        <data name="tick" type="uint32"/>
+        <data name="account_sex" type="byte"/>
+    </packet>
+    <packet id="0x81" name="CharacterSelectFailed" version="73">
+        <data name="error_code" type="byte"/>
+    </packet>
+    <packet id="0x82" name="MapServerQuit" version="73"/>
+    <packet id="0x83" name="MapServerQuitSuccess" version="73"/>
+    <packet id="0x84" name="MapServerQuitFailed" version="73"/>
+    <packet id="0x85" name="RequestMove" version="73">
+        <data name="destination" type="byte3"/>
+    </packet>
+    <packet id="0x8E" name="ReceivedPublicMessage" version="73">
+        <data name="packet_size" type="uint16"/>
+        <data name="message" type="string" dependson="packet_size"/>
+    </packet>
+    <packet id="0x14D" name="GuildQueryFirst" version="73">
+        <!-- NO DATA -->
+    </packet>
+    <packet id="0x14F" name="GuildQueryPage" version="73">
+        <data name="page" type="uint32"/>
+    </packet>
+    <packet id="0x28D" name="CharacterRename" version="73">
+        <data name="account_id" type="uint32"/>
+        <data name="character_id" type="uint32"/>
+        <data name="name" type="string" size="24"/>
+    </packet>
+    <packet id="0x2716" name="CharLoginSuccess" version="73">
+        <data name="account_id" type="uint32"/>
+    </packet>
+    <packet id="0x283" name="MapLoginSuccess" version="73">
+        <data name="character_id" type="uint32"/>
+    </packet>
+    <packet id="0x40C" name="PublicAnnouncement" version="73">
+        <data name="packet_size" type="uint16"/>
+        <data name="message" type="string" dependson="packet_size"/>
+    </packet>
+    <packet id="0x08B9" name="PinCodeSystemDisabled" version="114">
+        <data name="unknown" type="uint32"/>
+        <data name="account_id" type="uint32"/>
+        <data name="unknown2" type="uint16"/>
+    </packet>
+</packets>

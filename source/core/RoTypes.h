@@ -3,6 +3,7 @@
 #define RO_TYPES_H
 
 #include "RoDefines.h"
+#include <atomic>
 #include <cstdint>
 #include <boost/optional.hpp>
 #include <string>
@@ -68,5 +69,27 @@ using RoOptionalInt64 = optional<int64>;
 using RoOptionalUInt64 = optional<uint64>;
 using RoOptionalFloat = optional<float>;
 using RoOptionalDouble = optional<double>;
+using RoOptionalStreamSize = optional<RoStreamSize> ;
+
+template <typename T>
+using RoAtomic = std::atomic < T > ;
+
+using RoAtomicBool = RoAtomic < bool > ;
+using RoAtomicInt8 = RoAtomic < int8 > ;
+using RoAtomicUInt8 = RoAtomic < uint8 > ;
+using RoAtomicInt16 = RoAtomic < int16 > ;
+using RoAtomicUInt16 = RoAtomic < uint16 > ;
+using RoAtomicInt32 = RoAtomic < int32 > ;
+using RoAtomicUInt32 = RoAtomic < uint32 > ;
+using RoAtomicInt64 = RoAtomic < int64 > ;
+using RoAtomicUInt64 = RoAtomic < uint64 > ;
+using RoAtomicFloat = RoAtomic < float > ;
+using RoAtomicDouble = RoAtomic < double > ;
+
+template <typename Enumeration>
+auto as_integer(Enumeration const value) -> typename std::underlying_type<Enumeration>::type
+{
+    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+}
 
 #endif // RO_TYPES_H
