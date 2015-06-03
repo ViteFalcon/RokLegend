@@ -1,7 +1,7 @@
 #pragma once
 #include "RoPacket.h"
 
-class RoLoginCredentials : public RoPacketT < RoLoginCredentials >
+roDEFINE_PACKET(RoLoginCredentials)
 {
 public:
     RoLoginCredentials();

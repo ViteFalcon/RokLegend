@@ -12,9 +12,14 @@
 #include "RoNetServer.h"
 #include "RoNetworkManager.h"
 
-#include "events/RoServerConnectedEvent.h"
+#include "events/RoExtendedPacketReceivedEvent.h"
+#include "events/RoPacketReceivedEvent.h"
 #include "events/RoServerConnectRequestFailedEvent.h"
+#include "events/RoServerConnectedEvent.h"
 #include "events/RoServerDisconnectedEvent.h"
+
+#include "packets/RoPacket.h"
+#include "packets/RoPacketTranslator.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -73,11 +78,11 @@ void RoNetTcpConnection::doClose()
         roLOG_INFO << "Closing connection!";
         mConnected = false;
         mSocket.close();
-        RoPropertyMap args;
-        args.set("ServerType", mType);
+        RoServerDisconnectedEvent event;
+        event.serverType = mType;
         if (mPostMessage.load())
         {
-            roPOST_MSG(NetworkServerDisconnected, args);
+            roPOST_MSG(NetworkServerDisconnected, event);
         }
     }
     mService.stop();
@@ -120,9 +125,9 @@ void RoNetTcpConnection::handleConnect(const SystemErrorCode& error)
         mConnected = false;
     });
     mConnected = true;
-    RoPropertyMap args;
-    args.set("ServerType", mType);
-    roPOST_MSG(NetworkServerConnected, args);
+    RoServerConnectedEvent event;
+    event.serverType = mType;
+    roPOST_MSG(NetworkServerConnected, event);
     doKeepAlive();
     asyncReadPacket();
 }
@@ -152,17 +157,21 @@ void RoNetTcpConnection::doReadPacket()
     }
     if (mPacketDb.hasPacket(mPacketId))
     {
-        SocketDataStream* socketStream = new SocketDataStream(mSocket);
+        RoSharedPtr<SocketDataStream> socketStream = std::make_shared<SocketDataStream>(mSocket);
         socketStream->advance(2);
         RoNetPacketPtr packet = mPacketDb.getPacketById(mPacketId);
         packet->tryReadFromStream(*socketStream);
-        delete socketStream;
-        roPOST_MSG_NAMED(packet->getActionName(), packet->getProperties());
+        socketStream.reset();
+        RoPacketReceivedEvent event;
+        RoHashString actionName = RoHashString::FromString(packet->getActionName());
+        event.packet = RoPacketTranslator::Get().translate(actionName, packet->getProperties());
+        event.merge(packet->getProperties());
+        roPOST_MSG_NAMED(packet->getActionName(), event);
     }
     else if (!mUint32PacketIdCallbacks.empty())
     {
         PacketId unknownPacketId = mPacketId;
-        SocketDataStream* socketStream = new SocketDataStream(mSocket);
+        RoSharedPtr<SocketDataStream> socketStream = std::make_shared<SocketDataStream>(mSocket);
         uint32 val = 0;
 #ifdef WIN32
         memcpy_s(&val, sizeof(uint32), &mPacketId, sizeof(PacketId));
@@ -178,7 +187,10 @@ void RoNetTcpConnection::doReadPacket()
         Uint32PacketIdCallbackMap::const_accessor uint32PacketIdIterator;
         if (mUint32PacketIdCallbacks.find(uint32PacketIdIterator, mPacketId))
         {
-            RoMessageQueue::Append(uint32PacketIdIterator->second.first, uint32PacketIdIterator->second.second);
+            RoExtendedPacketReceivedEvent event;
+            event.packetId = mPacketId;
+            event.merge(uint32PacketIdIterator->second.second);
+            RoMessageQueue::Append(uint32PacketIdIterator->second.first, event);
         }
         else
         {

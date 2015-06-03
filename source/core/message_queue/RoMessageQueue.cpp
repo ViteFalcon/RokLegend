@@ -4,11 +4,13 @@
 //     Copyright (c) RokLegend Team, 2013
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <Core/RoPrecompiledHeader.h>
-#include <MessageQueue/RoMessageQueue.h>
-#include <MessageQueue/RoMessage.h>
+#include "RoMessageQueue.h"
+#include "RoMessage.h"
 
-#include <Task/RoTaskFactory.h>
+#include <core/RoErrorInfo.h>
+#include <core/RoException.h>
+#include <core/RoLog.h>
+#include <core/task/RoTaskManager.h>
 
 #define roDEBUG_MESSAGE_QUEUE 0
 
@@ -39,7 +41,7 @@ void RoMessageQueue::dispatch()
     RoMessagePtr message;
     while (mMessages.try_pop(message))
     {
-        RoTaskFactory::Run(message->getFunction(), message->getArgs());
+        roRUN_TASK_NAMED(message->getFunction(), message->getArgs());
     }
 }
 
@@ -62,9 +64,9 @@ void RoMessageQueue::_ClearAll()
     }
 }
 
-bool RoMessageQueue::Append(const RoString& function, const RoPropertyMap& args)
+bool RoMessageQueue::Append(const RoString& function, const RoTaskArgs& args)
 {
-    RoMessagePtr message(new RoMessage(function, args));
+    RoMessagePtr message(new RoMessage{ function, args });
     for (int i = 0; i < eMessageQueue_Count; ++i)
     {
         if (sQueues[i]->enqueueIfAcceptable(message))

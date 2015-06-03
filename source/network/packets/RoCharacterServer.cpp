@@ -1,5 +1,6 @@
 #include "RoCharacterServer.h"
 
+roREGISTER_SUB_PACKET(RoCharacterServer);
 
 RoCharacterServer::RoCharacterServer()
 {

@@ -30,6 +30,11 @@ struct RoTaskArgs
         return mProperties.getProperty(name).as(val);
     }
 
+    inline void merge(const RoPropertyMap& properties)
+    {
+        mProperties.merge(properties, RoPropertyMap::MergeStrategy::ERROR_ON_EXISTING);
+    }
+
     inline RoPropertyMap getProperties() const
     {
         return mProperties;

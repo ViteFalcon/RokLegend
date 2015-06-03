@@ -22,6 +22,13 @@ public: // Static
     static const RoPropertyMap Empty;
 
 public:
+    enum class MergeStrategy
+    {
+        OVERWRITE,
+        SKIP_EXISTING,
+        ERROR_ON_EXISTING
+    };
+
     RoPropertyMap(){}
     ~RoPropertyMap();
 
@@ -135,10 +142,22 @@ public:
         return mProperties != rhs.mProperties;
     }
 
+    void merge(const RoPropertyMap& other, MergeStrategy mergeStrategy);
+
 private:
     using PropertyPtr = std::shared_ptr<RoProperty>;
-    using StrToPropertyMap = boost::unordered_map<RoHashString, PropertyPtr>;
+    using StrToPropertyMap = boost::unordered_map < RoHashString, PropertyPtr > ;
+    using MergeHandler = std::function < void(RoPropertyMap&, const StrToPropertyMap::mapped_type&) >;
+    using MergeHandlers = boost::unordered_map < MergeStrategy, MergeHandler > ;
+
     StrToPropertyMap mProperties;
+
+private: // static
+    static void MergeOverwrite(RoPropertyMap& properties, const StrToPropertyMap::mapped_type& newProperty);
+    static void MergeSkipExisting(RoPropertyMap& properties, const StrToPropertyMap::mapped_type& newProperty);
+    static void MergeThrowIfExisting(RoPropertyMap& properties, const StrToPropertyMap::mapped_type& newProperty);
+
+    static const MergeHandlers sMergeHandlers;
 };
 
 typedef RoVector<RoPropertyMap> RoPropertyMapArray;

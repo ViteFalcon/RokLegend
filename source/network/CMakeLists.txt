@@ -13,10 +13,14 @@ SET(RO_NETWORK_PACKETS
 	packets/RoLoginSuccessful.h
 	packets/RoPacket.h
 	packets/RoPacketField.h
+	packets/RoPacketTranslator.cpp
+	packets/RoPacketTranslator.h
 )
 RO_SOURCE_GROUP(packets ${RO_NETWORK_PACKETS})
 
 SET(RO_NETWORK_EVENTS
+	events/RoExtendedPacketReceivedEvent.h
+	events/RoPacketReceivedEvent.h
 	events/RoSendActionToServerEvent.h
 	events/RoServerConnectedEvent.h
 	events/RoServerConnectionFailedEvent.h

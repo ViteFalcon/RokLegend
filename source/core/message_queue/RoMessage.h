@@ -9,8 +9,8 @@
 #define ROKLEGEND_MESSAGE_H
 
 #include "../RoPrerequisites.h"
-#include "../RoPropertyMap.h"
 #include "../RoSharedPtr.h"
+#include "../task/RoTaskArgs.h"
 
 class RoMessage;
 roDEFINE_PTR(RoMessage);
@@ -21,7 +21,7 @@ roDEFINE_PTR(RoMessage);
 class RoMessage
 {
 public:
-    explicit RoMessage(const RoString& function, const RoPropertyMap& args = RoPropertyMap());
+    explicit RoMessage(const RoString& function, const RoTaskArgs& args);
     virtual ~RoMessage();
 
     inline RoString getFunction() const
@@ -29,14 +29,14 @@ public:
         return mFunction;
     }
 
-    inline RoPropertyMap getArgs() const
+    inline RoTaskArgs& getArgs() const
     {
-        return mArgs;
+        return *mArgs;
     }
 
 private:
-    const RoString        mFunction;
-    const RoPropertyMap mArgs;
+    const RoString      mFunction;
+    const RoTaskArgsPtr mArgs;
 };
 
 #endif // ROKLEGEND_MESSAGE_H

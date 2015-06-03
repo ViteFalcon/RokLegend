@@ -1,7 +1,7 @@
 #pragma once
 #include "RoPacket.h"
 
-enum class RoAccountGender
+/*enum class RoAccountGender
 {
     UNKNOWN = -1,
     FEMALE,
@@ -9,7 +9,7 @@ enum class RoAccountGender
     SERVER
 };
 
-class RoAuthenticatedAccount : public RoPacketT < RoAuthenticatedAccount >
+roDEFINE_PACKET(RoAuthenticatedAccount)
 {
 public:
     RoAuthenticatedAccount();
@@ -47,4 +47,4 @@ private:
     RoString mLastLoginIp;
     RoString mLastLoginTime;
     uint8 mGender;
-};
+};*/

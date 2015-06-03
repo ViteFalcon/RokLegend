@@ -10,8 +10,17 @@ SET(RO_TASK_SOURCES
 )
 RO_SOURCE_GROUP(task FILES ${RO_TASK_SOURCES})
 
+SET(RO_MESSAGE_QUEUE_SOURCES
+	message_queue/RoMessage.cpp
+	message_queue/RoMessage.h
+	message_queue/RoMessageQueue.cpp
+	message_queue/RoMessageQueue.h
+)
+RO_SOURCE_GROUP(message_queue FILES ${RO_MESSAGE_QUEUE_SOURCES})
+
 SET(RO_CORE_SOURCES
     CMakeLists.txt
+	RoAllocator.h
 	RoConfig.cpp
 	RoConfig.h
 	RoCpuInfo.cpp
@@ -63,6 +72,7 @@ SET(RO_CORE_SOURCES
 	RoVector.h
 	RoZipIterator.h
     ${RO_TASK_SOURCES}
+	${RO_MESSAGE_QUEUE_SOURCES}
 )
 
 ADD_LIBRARY(${RO_CORE_LIBRARY} STATIC ${RO_CORE_SOURCES})

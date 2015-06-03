@@ -12,7 +12,7 @@ enum class RoServerType
     PAY_TO_PLAY
 };
 
-class RoCharacterServer : public RoPacketT < RoCharacterServer >
+roDEFINE_PACKET(RoCharacterServer)
 {
 public:
     RoCharacterServer();
@@ -46,3 +46,5 @@ private:
     uint16 mServerType;
     uint16 mNewData;
 };
+
+roDEFINE_PTR(RoCharacterServer);

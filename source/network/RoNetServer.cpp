@@ -7,6 +7,7 @@
 
 #include "RoNetServer.h"
 #include <core/task/RoTaskManager.h>
+#include <core/message_queue/RoMessageQueue.h>
 
 #include <tbb/concurrent_hash_map.h>
 

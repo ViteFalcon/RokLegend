@@ -1,23 +1,29 @@
-#pragma once
-#include "RoPacket.h"
+#include "RoLoginFailed.h"
 
-enum class RoLoginFailureReason
+RoLoginFailed::RoLoginFailed()
+    : mErrorCode(-1)
 {
-    UNKNOWN = -1,
-    ACCOUNT_DOESNT_EXIST,
-    INCORRECT_PASSWORD,
-    REJECTED_FROM_SERVER,
-    BLOCKED_ACCOUNT,
-    NOT_LATEST_CLIENT,
-    SERVER_BLOCKED_CONNECTION
-};
+    add<uint8>("error_code", &RoLoginFailed::mErrorCode);
+}
 
-class RoLoginFailed : public RoPacketT<RoLoginFailed>
+RoLoginFailureReason RoLoginFailed::getReason() const
 {
-public:
-    RoLoginFailed();
-
-    RoLoginFailureReason getReason() const;
-private:
-    uint8 mErrorCode;
-};
+    switch (mErrorCode)
+    {
+    case 0:
+        return RoLoginFailureReason::ACCOUNT_DOESNT_EXIST;
+    case 1:
+        return RoLoginFailureReason::INCORRECT_PASSWORD;
+    case 3:
+        return RoLoginFailureReason::REJECTED_FROM_SERVER;
+    case 4:
+        return RoLoginFailureReason::BLOCKED_ACCOUNT;
+    case 5:
+        return RoLoginFailureReason::NOT_LATEST_CLIENT;
+    case 6:
+        return RoLoginFailureReason::SERVER_BLOCKED_CONNECTION;
+    default:
+        break;
+    }
+    return RoLoginFailureReason::UNKNOWN;
+}

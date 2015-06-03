@@ -9,20 +9,6 @@
 #include <string>
 #include <memory>
 
-// TODO: Move this to CMake
-#define roUSE_TBB_ALLOCATORS 1
-#if roUSE_TBB_ALLOCATORS
-#   include <tbb/scalable_allocator.h>
-
-template <typename T>
-using RoAllocator = tbb::scalable_allocator < T > ;
-
-#else
-
-template <typename T>
-using RoAllocator = std::allocator < T > ;
-#endif
-
 #include "RoVector.h"
 
 using int8 = std::int8_t;

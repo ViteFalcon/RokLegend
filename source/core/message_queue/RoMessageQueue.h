@@ -9,7 +9,7 @@
 #define ROKLEGEND_MESSAGE_QUEUE_H
 
 #include "../RoPrerequisites.h"
-#include "../RoPropertyMap.h"
+#include "../task/RoTaskArgs.h"
 
 #include "RoMessage.h"
 
@@ -50,7 +50,7 @@ public:
 public: // Static
     static RoMessageQueue& Get(RoMessageQueue::Types type);
 
-    static bool Append(const RoString& function, const RoPropertyMap& args);
+    static bool Append(const RoString& function, const RoTaskArgs& args);
 
     static void _ClearAll();
 private: // Functions
@@ -68,13 +68,12 @@ private: // Static Members
 private: // Members
     typedef tbb::concurrent_queue<RoMessagePtr> Queue;
 
-    const RoString        mName;
+    const RoString      mName;
     const boost::regex  mRegex;
     Queue               mMessages;
 };
 
-//#define roPOST_MSG(function, args) RoMessageQueue::Append(roSTRINGIFY(function), args)
-//#define roPOST_MSG_NAMED(functionName, args) RoMessageQueue::Append(functionName, args)
-#define roPOST_MSG_NAMED(functionName, args)
+#define roPOST_MSG(function, args) RoMessageQueue::Append(roSTRINGIFY(function), args)
+#define roPOST_MSG_NAMED(functionName, args) RoMessageQueue::Append(functionName, args)
 
 #endif // ROKLEGEND_MESSAGE_QUEUE_H

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "RoTaskCollection.h"
+#include <core/RoException.h>
+#include <core/RoErrorInfo.h>
 
 template <typename DerivedType>
 class RoTaskHandler
@@ -13,7 +15,9 @@ protected:
 
     void add(const RoString& name, TaskFunction taskFunction)
     {
+        static_assert(std::is_base_of<RoTaskHandler<DerivedType>, DerivedType>::value, "DerivedType should inherit from RoTaskHandler<DerivedType>!");
         DerivedType* self = dynamic_cast<DerivedType*>(this);
+        roTHROW_IF(nullptr == self, RoInvalidOperation() << RoErrorInfoDetail("Failed to convert task-handler type to derived-type."));
         mTasks.add(name, std::bind(taskFunction, self, std::placeholders::_1));
     }
 private:

@@ -30,6 +30,7 @@ struct RoException : virtual std::exception, virtual boost::exception
 
 roDEFINE_EXCEPTION(FileNotFound);
 roDEFINE_EXCEPTION(ItemNotFound);
+roDEFINE_EXCEPTION(DuplicateItemFound);
 roDEFINE_EXCEPTION(InvalidGrfException);
 roDEFINE_EXCEPTION(InvalidOperation);
 

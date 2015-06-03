@@ -16,6 +16,8 @@
 #include <audio/RoAudioManager.h>
 #include <audio/RoAudio.h>
 
+#include <network/RoNetworkManager.h>
+
 #include <storage/RoDataInfo.h>
 
 #include <conio.h>
@@ -95,11 +97,14 @@ void mainLoop(const RoTaskArgs& args)
     auto soundDataStream = grf->getFileContentsOf(testSound);
     auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
 
+    RoSharedPtr<RoNetworkManager> networkManager = std::make_shared<RoNetworkManager>("data/packets.xml");
+
     std::cout << "Ready to accept inputs!" << std::endl;
     char ch = 0;
     do
     {
-        ch = _getch();
+        ch = kbhit() ? _getch() : 0;
+        roSCHEDULE_TASK(_NetworkUpdate, RoEmptyArgs::INSTANCE);
         if (roKEY_RETURN == ch)
         {
             audioManager->playSound2D(testSound, false);

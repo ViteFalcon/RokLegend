@@ -11,7 +11,6 @@
 #include "RoNetTcpConnection.h"
 
 #include <core/RoDict.h>
-#include <core/message_queue/RoMessageTask.h>
 
 #include "events/RoServerConnectRequestEvent.h"
 #include "events/RoServerConnectRequestFailedEvent.h"
@@ -19,6 +18,7 @@
 #include "events/RoServerConnectedEvent.h"
 #include "events/RoServerDisconnectedEvent.h"
 #include "events/RoSendActionToServerEvent.h"
+#include "events/RoPacketReceivedEvent.h"
 
 void RoNetworkManager::Connect(RoNetServerType serverType, const RoString& ipAddress, const RoString& portNumber)
 {

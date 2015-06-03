@@ -6,9 +6,9 @@
 
 #include "RoMessage.h"
 
-RoMessage::RoMessage(const RoString& function, const RoPropertyMap& args)
+RoMessage::RoMessage(const RoString& function, const RoTaskArgs& args)
     : mFunction(function)
-    , mArgs(args)
+    , mArgs(args.clone())
 {
 }
 

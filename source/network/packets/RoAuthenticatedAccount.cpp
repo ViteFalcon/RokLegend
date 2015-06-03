@@ -1,4 +1,7 @@
 #include "RoAuthenticatedAccount.h"
+#include "RoPacketTranslator.h"
+
+/*roREGISTER_PACKET("AccountServerInfo", RoAuthenticatedAccount);
 
 RoAuthenticatedAccount::RoAuthenticatedAccount()
 {
@@ -24,4 +27,4 @@ RoAccountGender RoAuthenticatedAccount::getGender() const
         break;
     }
     return RoAccountGender::UNKNOWN;
-}
+}*/

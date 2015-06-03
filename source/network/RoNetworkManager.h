@@ -26,7 +26,7 @@ class RoNetTcpConnection;
 /**
   * Brief description about RoNetworkManager.
  **/
-class RoNetworkManager : RoTaskHandler<RoNetworkManager>
+class RoNetworkManager : public RoTaskHandler<RoNetworkManager>
 {
 public:
     static void Connect(RoNetServerType serverType, const RoString& ipAddress, const RoString& portNumber);

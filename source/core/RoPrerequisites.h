@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <type_traits>
 
 #include <boost/signals2.hpp>
 #include <boost/unordered_map.hpp>
@@ -45,7 +46,5 @@ enum class RoEventResult
     ///< Indicates that the event was handled and should be propagated
     PROPAGATE_HANDLED = PROPAGATE|HANDLED
 };
-
-#define roPOST_MSG(actionName, args)
 
 #endif // ROKLEGEND_PREREQUISITES_H
