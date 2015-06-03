@@ -35,6 +35,27 @@ void roInitializeLogging();
 void roChangeRootFolder();
 void testVariants(const RoTaskArgs& args);
 void mainLoop(const RoTaskArgs& args);
+void loginPrompt(const RoTaskArgs& args);
+
+roDEFINE_PTR(RoNetworkManager);
+
+
+enum class RoCliGameState
+{
+    NONE,
+    LOGIN_PROMPT,
+    LOGIN_REQUEST_SENT,
+    LOGIN_SUCCEEDED,
+    LOGIN_FAILED
+};
+using RoAtomicCliGameState = RoAtomic < RoCliGameState > ;
+roDEFINE_PTR(RoAtomicCliGameState);
+
+roDEFINE_TASK_ARGS(RoLoginPromptEvent)
+{
+    RoNetworkManagerPtr networkManager;
+    RoAtomicCliGameStatePtr gameState;
+};
 
 int main() {
     try
@@ -55,6 +76,7 @@ int main() {
         RoTaskCollection tasks;
         tasks.add("RunVariantTests", testVariants);
         tasks.add("MainLoop", mainLoop);
+        tasks.add("LoginPrompt", loginPrompt);
 
         roSCHEDULE_TASK(RunVariantTests, RoEmptyArgs::INSTANCE);
         roRUN_TASK(MainLoop, RoEmptyArgs::INSTANCE);
@@ -78,6 +100,7 @@ void mainLoop(const RoTaskArgs& args)
 {
     RoConfig config;
     RoAudioManagerPtr audioManager = RoAudioManager::Get(config);
+    RoAtomicCliGameStatePtr gameState{ new RoAtomicCliGameState{ RoCliGameState::NONE } };
 
     RoAudioPtr audio = audioManager->getBackgroundMusic(roTEST_BGM_FILE);
     audio->setIsPaused(false);
@@ -97,9 +120,10 @@ void mainLoop(const RoTaskArgs& args)
     auto soundDataStream = grf->getFileContentsOf(testSound);
     auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
 
-    RoSharedPtr<RoNetworkManager> networkManager = std::make_shared<RoNetworkManager>("data/packets.xml");
+    RoNetworkManagerPtr networkManager = std::make_shared<RoNetworkManager>("data/packets.xml");
 
     std::cout << "Ready to accept inputs!" << std::endl;
+    audioManager->playSound2D(testSound, false);
     char ch = 0;
     do
     {
@@ -107,10 +131,65 @@ void mainLoop(const RoTaskArgs& args)
         roSCHEDULE_TASK(_NetworkUpdate, RoEmptyArgs::INSTANCE);
         if (roKEY_RETURN == ch)
         {
-            audioManager->playSound2D(testSound, false);
+            RoCliGameState expectedState = RoCliGameState::NONE;
+            if (gameState->compare_exchange_strong(expectedState, RoCliGameState::LOGIN_PROMPT))
+            {
+                audioManager->playSound2D(testSound, false);
+                RoLoginPromptEvent event;
+                event.networkManager = networkManager;
+                event.gameState = gameState;
+                roRUN_TASK(LoginPrompt, event);
+            }
+            else
+            {
+                std::cerr << "Found unexpected state: " << as_integer(expectedState) << std::endl;
+            }
         }
         Sleep(0);
     } while (ch != roKEY_ESC);
+}
+
+#include <core/RoHashSet.h>
+
+std::string readPassword(const std::string& message)
+{
+    RoHashSet<char> allowedChars = { '.', ',', '!', '@', '$', '%', '^', '&', '*', '+', '-', '_', '=' };
+    RoVector<char> password;
+    std::cout << message;
+    char ch = 0;
+    do 
+    {
+        ch = _getch();
+        if (isalnum(ch) || allowedChars.count(ch))
+        {
+            password.push_back(ch);
+            std::cout << "*";
+        }
+    } while (ch != roKEY_RETURN);
+    std::cout << std::endl;
+    password.push_back(0);
+    std::string passwordString(password.begin(), password.end());
+    return passwordString;
+}
+
+void loginPrompt(const RoTaskArgs& args)
+{
+    auto loginPromptState = RoCliGameState::LOGIN_PROMPT;
+    auto loginEvent = as_event_args<RoLoginPromptEvent>(args);
+    if (loginEvent.gameState->load() != loginPromptState)
+    {
+        return;
+    }
+    std::string username;
+    std::cout << "Enter Username: ";
+    std::cin >> username;
+    std::string password = readPassword("Enter Password: ");
+    if (loginEvent.gameState->compare_exchange_strong(loginPromptState, RoCliGameState::NONE))
+    {
+        std::cout << "TODO: Send login event via network manager." << std::endl;
+        return;
+    }
+    std::cerr << "Failed to login due to unexpected game-state '" << as_integer(loginPromptState) << "'" << std::endl;
 }
 
 void roInitializeLogging() {
