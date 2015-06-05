@@ -11,6 +11,7 @@
 #include <core/RoPrerequisites.h>
 
 #include "RoNetServerType.h"
+#include "packets/RoPacket.h"
 
 #include <core/message_queue/RoMessageQueue.h>
 #include <core/task/RoTaskHandler.h>
@@ -30,6 +31,7 @@ class RoNetworkManager : public RoTaskHandler<RoNetworkManager>
 {
 public:
     static void Connect(RoNetServerType serverType, const RoString& ipAddress, const RoString& portNumber);
+    static void SendToServer(RoNetServerType serverType, RoPacketPtr packet);
     static void Disconnect(RoNetServerType serverType);
 
     RoNetworkManager(const RoString& packetDb);
@@ -45,6 +47,7 @@ private: // Tasks
     void sendToLoginServer(const RoTaskArgs& args);
     void sendToCharacterServer(const RoTaskArgs& args);
     void sendToMapServer(const RoTaskArgs& args);
+    void sendToServer(const RoNetServerType serverType, const char* name, const RoTaskArgs& args);
     void serverConnected(const RoTaskArgs& args);
     void serverConnectionFailed(const RoTaskArgs& args);
     void serverDisconnected(const RoTaskArgs& args);

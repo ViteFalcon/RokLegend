@@ -17,7 +17,7 @@
 #include "events/RoServerDisconnectRequestEvent.h"
 #include "events/RoServerConnectedEvent.h"
 #include "events/RoServerDisconnectedEvent.h"
-#include "events/RoSendActionToServerEvent.h"
+#include "events/RoSendPacketToServerEvent.h"
 #include "events/RoPacketReceivedEvent.h"
 
 void RoNetworkManager::Connect(RoNetServerType serverType, const RoString& ipAddress, const RoString& portNumber)
@@ -27,6 +27,27 @@ void RoNetworkManager::Connect(RoNetServerType serverType, const RoString& ipAdd
     event.ipAddress = ipAddress;
     event.portNumber = portNumber;
     roPOST_MSG(NetworkServerConnect, event);
+}
+
+void RoNetworkManager::SendToServer(RoNetServerType serverType, RoPacketPtr packet)
+{
+    RoSendPacketToServerEvent event;
+    event.packet = packet;
+    switch (serverType)
+    {
+    case RoNetServerType::LOGIN:
+        roPOST_MSG(NetworkLoginServerSend, event);
+        break;
+    case RoNetServerType::CHARACTER:
+        roPOST_MSG(NetworkCharacterServerSend, event);
+        break;
+    case RoNetServerType::MAP:
+        roPOST_MSG(NetworkMapServerSend, event);
+        break;
+    default:
+        roLOG_ERR << "Cannot send packet to unrecognized server-type: " << as_integer(serverType);
+        break;
+    }
 }
 
 void RoNetworkManager::Disconnect(RoNetServerType serverType)
@@ -63,44 +84,31 @@ RoNetworkManager::~RoNetworkManager()
 
 void RoNetworkManager::sendToLoginServer(const RoTaskArgs& args)
 {
-    RoNetTcpConnectionPtr& loginServer = mConnections[as_integer(RoNetServerType::LOGIN)];
-    if (!loginServer)
-    {
-        roLOG_ERR << "The login server is not connected for this operation to be completed.";
-        return;
-    }
-    auto event = as_event_args<RoSendActionToServerEvent>(args);
-    RoNetPacketPtr packet = mPacketDb->getPacketByAction(event.action);
-    packet->fromProperties(event.getProperties());
-    loginServer->send(packet);
+    sendToServer(RoNetServerType::LOGIN, "Login", args);
 }
 
 void RoNetworkManager::sendToCharacterServer(const RoTaskArgs& args)
 {
-    RoNetTcpConnectionPtr& characterServer = mConnections[as_integer(RoNetServerType::CHARACTER)];
-    if (!characterServer)
-    {
-        roLOG_ERR << "The character server is not connected for this operation to be completed.";
-        return;
-    }
-    auto event = as_event_args<RoSendActionToServerEvent>(args);
-    RoNetPacketPtr packet = mPacketDb->getPacketByAction(event.action);
-    packet->fromProperties(args.getProperties());
-    characterServer->send(packet);
+    sendToServer(RoNetServerType::CHARACTER, "Character", args);
 }
 
 void RoNetworkManager::sendToMapServer(const RoTaskArgs& args)
 {
-    RoNetTcpConnectionPtr& mapServer = mConnections[as_integer(RoNetServerType::MAP)];
-    if (!mapServer)
+    sendToServer(RoNetServerType::MAP, "Map", args);
+}
+
+void RoNetworkManager::sendToServer(const RoNetServerType serverType, const char* name, const RoTaskArgs& args)
+{
+    RoNetTcpConnectionPtr& serverConnection = mConnections[as_integer(serverType)];
+    if (!serverConnection)
     {
-        roLOG_ERR << "The map server is not connected for this operation to be completed.";
+        roLOG_ERR << name << " server is not connected for this operation to be completed.";
         return;
     }
-    auto event = as_event_args<RoSendActionToServerEvent>(args);
-    RoNetPacketPtr packet = mPacketDb->getPacketByAction(event.action);
-    packet->fromProperties(args.getProperties());
-    mapServer->send(packet);
+    auto event = as_event_args<RoSendPacketToServerEvent>(args);
+    RoNetPacketPtr packet = mPacketDb->getPacketByAction(event.packet->getActionName());
+    packet->fromProperties(event.packet->getProperties());
+    serverConnection->send(packet);
 }
 
 void RoNetworkManager::serverConnected(const RoTaskArgs& args)
@@ -137,8 +145,8 @@ void RoNetworkManager::disconnect(const RoTaskArgs& args)
 
 void RoNetworkManager::update(const RoTaskArgs &)
 {
-    bool expected = false;
-    if (mOkToUpdate.compare_exchange_strong(expected, true))
+    bool expected = true;
+    if (mOkToUpdate.compare_exchange_strong(expected, false))
     {
         mMessages.dispatch();
         mOkToUpdate.store(true);

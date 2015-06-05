@@ -15,6 +15,7 @@ struct RoPacket
     virtual ~RoPacket() = default;
 
     virtual RoString getClassName() const = 0;
+    virtual RoHashString getActionName() const = 0;
     virtual RoPropertyMap getProperties() const = 0;
     virtual void fromProperties(const RoPropertyMap& properties) = 0;
     RoPacketPtr cloneFromProperties(const RoPropertyMap& properties) const
@@ -55,8 +56,9 @@ private:
     template <typename T>
     using ListFieldType = typename RoClassField<DerivedType, RoVector<RoSharedPtr<T>>>::Type;
 
-    static const size_t sRegistrationId;
     static const RoString sClassName;
+    static const RoHashString sActionName;
+    static const size_t sRegistrationId;
 
     Fields mFields;
 
@@ -108,6 +110,11 @@ public:
         return sClassName;
     }
 
+    virtual RoHashString getActionName() const
+    {
+        return sActionName;
+    }
+
     virtual RoPropertyMap getProperties() const override
     {
         RoPropertyMap properties;
@@ -137,5 +144,9 @@ public:
 #define roDEFINE_PACKET(PacketClassname) class PacketClassname : public RoPacketT<PacketClassname>
 #define roREGISTER_PACKET(PacketName, PacketClassname) \
     const RoString RoPacketT<PacketClassname>::sClassName{ roSTRINGIFY(PacketName) };\
+    const RoHashString RoPacketT<PacketClassname>::sActionName{ PacketName };\
     const size_t RoPacketT<PacketClassname>::sRegistrationId = RoPacketTranslator::Get().add<PacketClassname>(_H(PacketName))
-#define roREGISTER_SUB_PACKET(PacketClassname) const size_t RoPacketT<PacketClassname>::sRegistrationId = -1
+#define roREGISTER_SUB_PACKET(PacketClassname) \
+    const RoString RoPacketT<PacketClassname>::sClassName{ roSTRINGIFY(PacketClassname) };\
+    const RoHashString RoPacketT<PacketClassname>::sActionName { roSTRINGIFY(PacketClassname) };\
+    const size_t RoPacketT<PacketClassname>::sRegistrationId = -1

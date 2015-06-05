@@ -1,5 +1,7 @@
 #include "RoLoginCredentials.h"
 
+roREGISTER_PACKET("MasterLogin", RoLoginCredentials);
+
 RoLoginCredentials::RoLoginCredentials()
 {
     add<RoString>("username", &RoLoginCredentials::mUsername);

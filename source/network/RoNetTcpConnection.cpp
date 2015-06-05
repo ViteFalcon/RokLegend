@@ -32,8 +32,12 @@
 #endif
 
 #define roHEARTBEAT_INTERVAL_SECS 50
-#define roCHECK_ASIO_ERROR_AND_DO(error, doLambda) handleError(error, __FUNCTION__, doLambda)
-#define roCHECK_ASIO_ERROR(error) handleError(error, __FUNCTION__)
+#define roCHECK_ASIO_ERROR_AND_DO(error, doLambda) if (handleError(error, __FUNCTION__, doLambda)) {\
+    return;\
+}
+#define roCHECK_ASIO_ERROR(error) if (handleError(error, __FUNCTION__)) {\
+    return;\
+}
 
 RoNetTcpConnection::RoNetTcpConnection(RoNetworkManager& parent, RoNetPacketDb& packetDb, RoNetServerType type, const RoString& server, const RoString& port)
     : mParent(parent)
@@ -247,13 +251,13 @@ void RoNetTcpConnection::handleHeartBeat(const SystemErrorCode& error)
     doKeepAlive();
 }
 
-inline void RoNetTcpConnection::handleError(const SystemErrorCode& error, const char* functionName)
+inline bool RoNetTcpConnection::handleError(const SystemErrorCode& error, const char* functionName)
 {
     AdditionalErrorActions errorActions;
-    handleError(error, functionName, errorActions);
+    return handleError(error, functionName, errorActions);
 }
 
-inline void RoNetTcpConnection::handleError(const SystemErrorCode& error, const char* functionName, AdditionalErrorActions additionalActions)
+inline bool RoNetTcpConnection::handleError(const SystemErrorCode& error, const char* functionName, AdditionalErrorActions additionalActions)
 {
     if (error && mConnected)
     {
@@ -263,5 +267,7 @@ inline void RoNetTcpConnection::handleError(const SystemErrorCode& error, const 
             additionalActions();
         }
         doClose();
+        return true;
     }
+    return false;
 }

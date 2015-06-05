@@ -29,7 +29,7 @@ size_t RoPacketTranslator::add(const RoHashString& packetName, RoPacketPtr trans
 {
     static size_t nextId = 1;
     auto translationItr = mTranslations.find(packetName);
-    if (mTranslations.end() == translationItr)
+    if (mTranslations.end() != translationItr)
     {
         std::stringstream errorMessage;
         errorMessage

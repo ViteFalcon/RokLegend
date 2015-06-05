@@ -67,8 +67,8 @@ private: // Functions
     void handleReadPacket(const SystemErrorCode& error);
     void handleWrite(const SystemErrorCode& error, RoStreamSize bytesTransferred);
     void handleHeartBeat(const SystemErrorCode& error);
-    void handleError(const SystemErrorCode& error, const char* functionName);
-    void handleError(const SystemErrorCode& error, const char* functionName, AdditionalErrorActions additionalActions);
+    bool handleError(const SystemErrorCode& error, const char* functionName);
+    bool handleError(const SystemErrorCode& error, const char* functionName, AdditionalErrorActions additionalActions);
 
     void asyncReadPacket();
     void asyncWriteData(const RoBuffer& data);

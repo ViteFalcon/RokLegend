@@ -5,6 +5,7 @@
 #include <core/RoLogOptions.h>
 #include <core/RoTimer.h>
 #include <core/RoVariant.h>
+#include <core/message_queue/RoMessageQueue.h>
 #include <core/task/RoTaskCollection.h>
 #include <core/task/RoTaskManager.h>
 
@@ -31,18 +32,11 @@
 #define roKEY_ESC 27
 #define roKEY_RETURN 13
 
-void roInitializeLogging();
-void roChangeRootFolder();
-void testVariants(const RoTaskArgs& args);
-void mainLoop(const RoTaskArgs& args);
-void loginPrompt(const RoTaskArgs& args);
-
-roDEFINE_PTR(RoNetworkManager);
-
 
 enum class RoCliGameState
 {
     NONE,
+    LOGIN_SERVER_READY,
     LOGIN_PROMPT,
     LOGIN_REQUEST_SENT,
     LOGIN_SUCCEEDED,
@@ -50,6 +44,23 @@ enum class RoCliGameState
 };
 using RoAtomicCliGameState = RoAtomic < RoCliGameState > ;
 roDEFINE_PTR(RoAtomicCliGameState);
+RoAtomicCliGameStatePtr gGameState{ new RoAtomicCliGameState{ RoCliGameState::NONE } };
+
+void roInitializeLogging();
+void roChangeRootFolder();
+void testVariants(const RoTaskArgs& args);
+void mainLoop(const RoTaskArgs& args);
+void connectToLoginServer();
+void loginServerConnectFailed(const RoTaskArgs& args);
+void loginServerConnected(const RoTaskArgs& args);
+void loginServerDisconnected(const RoTaskArgs& args);
+void loginPrompt(const RoTaskArgs& args);
+void loginSuccessful(const RoTaskArgs& args);
+void loginFailed(const RoTaskArgs& args);
+bool changeGameState(RoCliGameState& expectedState, const RoCliGameState newState);
+RoCliGameState getGameState();
+
+roDEFINE_PTR(RoNetworkManager);
 
 roDEFINE_TASK_ARGS(RoLoginPromptEvent)
 {
@@ -77,6 +88,10 @@ int main() {
         tasks.add("RunVariantTests", testVariants);
         tasks.add("MainLoop", mainLoop);
         tasks.add("LoginPrompt", loginPrompt);
+        tasks.add("AccountServerInfo", loginSuccessful);
+        tasks.add("LoginServerConnectionFailed", loginServerConnectFailed);
+        tasks.add("LoginServerConnected", loginServerConnected);
+        tasks.add("LoginServerDisconnected", loginServerDisconnected);
 
         roSCHEDULE_TASK(RunVariantTests, RoEmptyArgs::INSTANCE);
         roRUN_TASK(MainLoop, RoEmptyArgs::INSTANCE);
@@ -100,7 +115,6 @@ void mainLoop(const RoTaskArgs& args)
 {
     RoConfig config;
     RoAudioManagerPtr audioManager = RoAudioManager::Get(config);
-    RoAtomicCliGameStatePtr gameState{ new RoAtomicCliGameState{ RoCliGameState::NONE } };
 
     RoAudioPtr audio = audioManager->getBackgroundMusic(roTEST_BGM_FILE);
     audio->setIsPaused(false);
@@ -124,29 +138,69 @@ void mainLoop(const RoTaskArgs& args)
 
     std::cout << "Ready to accept inputs!" << std::endl;
     audioManager->playSound2D(testSound, false);
+    connectToLoginServer();
+    RoMessageQueue& messageQueue = RoMessageQueue::Get(RoMessageQueue::eMessageQueue_Default);
     char ch = 0;
     do
     {
+        messageQueue.dispatch();
         ch = kbhit() ? _getch() : 0;
         roSCHEDULE_TASK(_NetworkUpdate, RoEmptyArgs::INSTANCE);
         if (roKEY_RETURN == ch)
         {
-            RoCliGameState expectedState = RoCliGameState::NONE;
-            if (gameState->compare_exchange_strong(expectedState, RoCliGameState::LOGIN_PROMPT))
-            {
-                audioManager->playSound2D(testSound, false);
-                RoLoginPromptEvent event;
-                event.networkManager = networkManager;
-                event.gameState = gameState;
-                roRUN_TASK(LoginPrompt, event);
-            }
-            else
-            {
-                std::cerr << "Found unexpected state: " << as_integer(expectedState) << std::endl;
-            }
+            audioManager->playSound2D(testSound, false);
         }
         Sleep(0);
     } while (ch != roKEY_ESC);
+}
+
+bool changeGameState(RoCliGameState& expectedState, const RoCliGameState newState)
+{
+    const RoCliGameState expected = expectedState;
+    if (!gGameState->compare_exchange_strong(expectedState, newState))
+    {
+        std::cerr << "Unexpected game-state found. Current: "
+            << as_integer(expectedState)
+            << ", Transition: " << as_integer(expected) << " -> " << as_integer(newState)
+            << std::endl;
+        return false;
+    }
+    return true;
+}
+
+RoCliGameState getGameState()
+{
+    return gGameState->load();
+}
+
+void loginServerConnectFailed(const RoTaskArgs& args)
+{
+    RoCliGameState currentState = RoCliGameState::NONE;
+    changeGameState(currentState, RoCliGameState::NONE);
+    std::cerr << "Failed to connect to login server" << std::endl;
+}
+
+void loginServerConnected(const RoTaskArgs& args)
+{
+    RoCliGameState currentState = RoCliGameState::NONE;
+    if (changeGameState(currentState, RoCliGameState::LOGIN_SERVER_READY))
+    {
+        std::cout << "Connected to login server..." << std::endl;
+        RoLoginPromptEvent event;
+        roRUN_TASK(LoginPrompt, event);
+    }
+}
+
+void loginServerDisconnected(const RoTaskArgs& args)
+{
+    std::cerr << "Disconnected from login server." << std::endl;
+}
+
+#include <network/events/RoServerConnectRequestEvent.h>
+
+void connectToLoginServer()
+{
+    RoNetworkManager::Connect(RoNetServerType::LOGIN, "127.0.0.1", "6900");
 }
 
 #include <core/RoHashSet.h>
@@ -172,11 +226,15 @@ std::string readPassword(const std::string& message)
     return passwordString;
 }
 
+#include <network/events/RoSendPacketToServerEvent.h>
+#include <network/packets/RoLoginCredentials.h>
+
 void loginPrompt(const RoTaskArgs& args)
 {
+    auto currentState = RoCliGameState::LOGIN_SERVER_READY;
     auto loginPromptState = RoCliGameState::LOGIN_PROMPT;
     auto loginEvent = as_event_args<RoLoginPromptEvent>(args);
-    if (loginEvent.gameState->load() != loginPromptState)
+    if (!changeGameState(currentState, loginPromptState))
     {
         return;
     }
@@ -184,12 +242,30 @@ void loginPrompt(const RoTaskArgs& args)
     std::cout << "Enter Username: ";
     std::cin >> username;
     std::string password = readPassword("Enter Password: ");
-    if (loginEvent.gameState->compare_exchange_strong(loginPromptState, RoCliGameState::NONE))
+    if (!changeGameState(loginPromptState, RoCliGameState::LOGIN_REQUEST_SENT))
     {
-        std::cout << "TODO: Send login event via network manager." << std::endl;
         return;
     }
-    std::cerr << "Failed to login due to unexpected game-state '" << as_integer(loginPromptState) << "'" << std::endl;
+    auto loginPacket = std::make_shared<RoLoginCredentials>();
+    loginPacket->setUsername(username);
+    loginPacket->setPassword(password);
+    RoNetworkManager::SendToServer(RoNetServerType::LOGIN, loginPacket);
+}
+
+void loginSuccessful(const RoTaskArgs& args)
+{
+    std::cout << "Login succeeded!" << std::endl;
+    RoCliGameState currentState = RoCliGameState::LOGIN_REQUEST_SENT;
+    changeGameState(currentState, RoCliGameState::LOGIN_SUCCEEDED);
+    RoNetworkManager::Disconnect(RoNetServerType::LOGIN);
+}
+
+void loginFailed(const RoTaskArgs& args)
+{
+    std::cout << "Login FAILED!" << std::endl;
+    RoCliGameState currentState = RoCliGameState::LOGIN_REQUEST_SENT;
+    changeGameState(currentState, RoCliGameState::LOGIN_FAILED);
+    RoNetworkManager::Disconnect(RoNetServerType::LOGIN);
 }
 
 void roInitializeLogging() {
