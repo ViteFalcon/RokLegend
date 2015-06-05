@@ -647,10 +647,25 @@ extern "C" {
 }
 #include <core/RoHashMap.h>
 #include <core/RoScopedPtr.h>
+#include <core/RoCacheStore.h>
+#include <boost/serialization/unordered_map.hpp>
+#include <core/RoSerialization.h>
 
 using RoGrfHandle = grf_handle;
 using RoGrfFileHandle = grf_node_handle;
-using RoGrfFileCache = RoHashMap < RoString, RoGrfFileHandle > ;
+using RoGrfFileCache = RoHashMap < RoString, uint32 > ;
+using RoBoostGrfFileCache = boost::unordered_map < std::wstring, uint32 > ;
+
+struct RoGrfListingCacheHeader
+{
+    std::string filePath;
+    std::time_t lastModifiedTime;
+
+    roS11N_SERIALIZE_FUNCTION
+    {
+        archive & filePath & lastModifiedTime;
+    }
+};
 
 class RoGrf2Impl :  public RoGrf2
 {
@@ -678,14 +693,19 @@ private: // fields
     RoGrfFileCache mCache;
 };
 
-RoGrfFileCache cacheFileList(RoGrfHandle grfHandle);
+RoGrfFileCache cacheFileList(RoGrfHandle grfHandle, const RoGrfListingCacheHeader& cacheHeader);
+
+#include <core/RoTimer.h>
 
 RoGrf2Ptr RoGrf2::FromFile(const RoString& name)
 {
+    RoTimer profiler{};
     const std::string utf8Name = name.asUTF8();
     auto handle = grf_load(utf8Name.c_str(), false);
     roTHROW_IF(nullptr == handle, RoException() << RoErrorInfoDetail("Failed to load GRF!"));
-    auto cachedFileList = cacheFileList(handle);
+    roLOG_DBG << "Loaded GRF in " << profiler.getMilliseconds() / 1000.0f << " secs";
+    RoGrfListingCacheHeader cacheHeader = { utf8Name, RoFileSystem::GetLastUpdatedTime(RoPath{ name }) };
+    auto cachedFileList = cacheFileList(handle, cacheHeader);
     return std::make_shared<RoGrf2Impl>(name, handle, cachedFileList);
 }
 
@@ -693,7 +713,7 @@ RoDataStreamPtr RoGrf2Impl::getFileContentsOf(const RoString& fileName) const
 {
     auto cacheItr = mCache.find(fileName);
     roTHROW_IF(mCache.end() == cacheItr, RoItemNotFound() << RoErrorInfoItemName(fileName));
-    grf_node_handle fileHandle = static_cast<grf_node_handle>(cacheItr->second);
+    grf_node_handle fileHandle = grf_get_file_by_id(mHandle, cacheItr->second);
     uint32_t fileSize = grf_file_get_size(fileHandle);
     char *buffer = new char[fileSize];
     uint32_t bytesRead = grf_file_get_contents(fileHandle, buffer);
@@ -716,8 +736,33 @@ void RoGrf2Impl::findFiles(RoStringArray& result, const RoString& pattern) const
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
 
-RoGrfFileCache cacheFileList(RoGrfHandle grfHandle)
+RoGrfFileCache cacheFileList(RoGrfHandle grfHandle, const RoGrfListingCacheHeader& cacheHeader)
 {
+    const std::string grfFileName = RoFileSystem::GetBaseName(cacheHeader.filePath).asUTF8();
+    const RoString cacheFile = RoStringUtil::Format("%s.listing.cache", grfFileName.c_str());
+    roLOG_DBG << "Looking at cache file: " << roCacheStoreFilePath(cacheFile);
+    if (roCacheStoreExists(cacheFile))
+    {
+        RoCacheStore<RoInputArchive> archive{ cacheFile };
+        RoGrfListingCacheHeader cachedHeader;
+        archive & cachedHeader;
+        if (cacheHeader.filePath == cachedHeader.filePath && cacheHeader.lastModifiedTime == cachedHeader.lastModifiedTime)
+        {
+            RoBoostGrfFileCache boostCache;
+            archive & boostCache;
+            RoGrfFileCache cache{ boostCache.begin(), boostCache.end() };
+            roLOG_DBG << "Loaded " << cache.size() << " files from cache.";
+            return cache;
+        }
+        else
+        {
+            roLOG_DBG << "Found stale cache @ " << roCacheStoreFilePath(cacheFile);
+        }
+    }
+    else
+    {
+        roLOG_DBG << "No cache files found.";
+    }
 #if roGRF_USE_CONCURRENT_LOADING
     uint32 fileCount = grf_filecount(grfHandle);
     grf_node_handle* fileHandles = grf_get_file_id_list(grfHandle);
@@ -730,16 +775,25 @@ RoGrfFileCache cacheFileList(RoGrfHandle grfHandle)
     });
     RoGrfFileCache cache{ intermediateCache.begin(), intermediateCache.end() };
 #else
-    grf_node_handle* fileHandles = grf_get_file_id_list(grfHandle);
     RoGrfFileCache cache{};
+    grf_node_handle* fileHandles = grf_get_file_id_list(grfHandle);
     while (fileHandles && *fileHandles)
     {
         grf_node_handle currentHandle = *fileHandles++;
         RoString fileName = RoString::FromEucKr(grf_file_get_filename(currentHandle));
-        cache[fileName] = currentHandle;
+        cache[fileName] = currentHandle->id;
     }
 #endif // roGRF_USE_CONCURRENT_LOADING
     roLOG_DBG << "Loaded " << cache.size() << " files!";
+    {
+        RoCacheStore<RoOutputArchive> archive{ cacheFile };
+        archive & cacheHeader;
+        {
+            RoBoostGrfFileCache boostCache{ cache.begin(), cache.end() };
+            archive & boostCache;
+        }
+        roLOG_DBG << "Saved listing into cache file " << roCacheStoreFilePath(cacheFile);
+    }
     return cache;
 }
 

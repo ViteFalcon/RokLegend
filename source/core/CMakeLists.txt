@@ -21,6 +21,8 @@ RO_SOURCE_GROUP(message_queue FILES ${RO_MESSAGE_QUEUE_SOURCES})
 SET(RO_CORE_SOURCES
     CMakeLists.txt
 	RoAllocator.h
+	RoCacheStore.cpp
+	RoCacheStore.h
 	RoConfig.cpp
 	RoConfig.h
 	RoCpuInfo.cpp

@@ -5,14 +5,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "RoCacheStore.h"
-#include <core/RoFileSystem.h>
-#include <core/RoStringUtil.h>
-#include <boost/filesystem.hpp>
+#include "RoStringUtil.h"
+#include "RoFileSystem.h"
 
+#define roCACHEDIR_X64 L"x64"
+#define roCACHEDIR_X86 L"x86"
 #if roARCHITECTURE_IS_64
-#   define roCACHE_ARCH_SUFFIX ".x64"
+#   define roCACHEDIR roCACHEDIR_X64
 #else
-#   define roCACHE_ARCH_SUFFIX ".x86"
+#   define roCACHEDIR roCACHEDIR_X86
 #endif // roARCHITECTURE_IS_64
 //------------------------------------------------------------------------------
 bool roCacheStoreExists(RoString fileName)
@@ -22,21 +23,19 @@ bool roCacheStoreExists(RoString fileName)
 //------------------------------------------------------------------------------
 RoString roCacheStoreFilePath(RoString fileName)
 {
-    const RoPath fileNamePath{ fileName };
-    auto extension = fileNamePath.extension();
-    auto basename = fileNamePath.stem();
-    fileName = RoString{ basename.native() + roCACHE_ARCH_SUFFIX + extension.native() };
     return roCacheStoreFileNameForFile(RoStringUtil::Empty, fileName);
+}
+//------------------------------------------------------------------------------
+RoPath roGetCacheStoreDirectory(const RoString& cacheSubDir) {
+    const RoPath rootDir = RoFileSystem::GetGameDirectory() / RoPath(roCACHEDIR);
+    const RoPath cacheDir = (cacheSubDir.empty() ? rootDir : rootDir / RoPath(cacheSubDir));
+    RoFileSystem::CreateDirectories(cacheDir);
+    return cacheDir;
 }
 //------------------------------------------------------------------------------
 RoPath roCacheStoreFilePathForFile(const RoString& cacheDir, const RoString& fileName)
 {
-    const RoPath gameDir = RoFileSystem::GetGameDirectory();
-    const RoPath filePath = RoPath(fileName);
-    if (cacheDir.empty()) {
-        return gameDir / filePath;
-    }
-    return gameDir / RoPath(cacheDir) / filePath;
+    return roGetCacheStoreDirectory(cacheDir) / RoPath(fileName);
 }
 //------------------------------------------------------------------------------
 RoString roCacheStoreFileNameForFile(const RoString& cacheDir, const RoString& fileName)

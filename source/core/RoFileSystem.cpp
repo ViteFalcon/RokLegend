@@ -47,6 +47,13 @@ bool RoFileSystem::FileExists(const RoPath& filePath)
     return bf::exists(filePath);
 }
 //------------------------------------------------------------------------------
+void RoFileSystem::CreateDirectories(const RoPath& directoryPath)
+{
+    if (!bf::is_directory(directoryPath)) {
+        bf::create_directories(directoryPath);
+    }
+}
+//------------------------------------------------------------------------------
 bool RoFileSystem::FileHasExtension(const RoPath& filePath, const RoString& extension)
 {
     RoString fileExtension = bf::extension(filePath);

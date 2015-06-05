@@ -23,6 +23,8 @@ public:
 
     static bool FileExists(const RoPath& filePath);
 
+    static void CreateDirectories(const RoPath& directoryPath);
+
     static bool FileHasExtension(const RoPath& filePath, const RoString& extension);
 
     static RoPath GetWorkingDirectory();
