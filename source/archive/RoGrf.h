@@ -87,7 +87,7 @@ protected:
 
 roFORWARD_DECL_PTR(RoGrf2);
 
-using RoFileNameFilter = std::function < bool(const RoString&) > ;
+using RoFileNameFilter = std::function < bool(const std::string&) > ;
 
 class RoGrf2
 {
