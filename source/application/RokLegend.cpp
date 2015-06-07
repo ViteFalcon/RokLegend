@@ -25,10 +25,13 @@
 #include <fstream>
 
 #define roROOT_FOLDER_FILE "ROOT"
+#define roSTR_BUTTON_SOUND "str:ButtonSound"
 
 //#define roGRF_TEST_FILE "C:\\Users\\ullatil\\Games\\Ragnarok Online\\data.grf"
 #define roTEST_BGM_FILE L"C:/tmp/01.mp3"
 #define roGRF_TEST_FILE "C:\\Users\\ullatil\\Games\\InertiaRO\\data.grf"
+//C:\Users\ullatil\Games\EsunaRO
+//#define roGRF_TEST_FILE "C:\\Users\\ullatil\\Games\\Ragnarok Online\\cdata.grf"
 #define roKEY_ESC 27
 #define roKEY_RETURN 13
 
@@ -129,9 +132,9 @@ void mainLoop(const RoTaskArgs& args)
     {
         roLOG_DBG << "\t" << fileName;
     }
-    roLOG_DBG << "--- " << RoDataInfo::Get().getValue("dir:Sfx", "NOTFOUND");
-    RoString testSound = files[0];
-    auto soundDataStream = grf->getFileContentsOf(testSound);
+    RoString buttonSoundFile = RoDataInfo::Get().getValue(roSTR_BUTTON_SOUND, "NOTFOUND");
+    RoString testSound = "buttonSound.wav";
+    auto soundDataStream = grf->getFileContentsOf(buttonSoundFile);
     auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
 
     RoNetworkManagerPtr networkManager = std::make_shared<RoNetworkManager>("data/packets.xml");

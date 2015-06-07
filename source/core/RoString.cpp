@@ -584,9 +584,14 @@ RoString::operator std::string() const
     return asUTF8();
 }
 
+#include <locale>
+#include <codecvt>
+
 std::string RoString::asUTF8() const
 {
-    std::string utf8 = boost::locale::conv::utf_to_utf<char>(mString);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    //std::string utf8 = boost::locale::conv::utf_to_utf<char>(mString);
+    std::string utf8 = conv.to_bytes(mString.c_str());
     return utf8;
 }
 

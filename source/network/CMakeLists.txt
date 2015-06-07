@@ -21,7 +21,7 @@ RO_SOURCE_GROUP(packets ${RO_NETWORK_PACKETS})
 SET(RO_NETWORK_EVENTS
 	events/RoExtendedPacketReceivedEvent.h
 	events/RoPacketReceivedEvent.h
-	events/RoSendActionToServerEvent.h
+	events/RoSendPacketToServerEvent.h
 	events/RoServerConnectedEvent.h
 	events/RoServerConnectionFailedEvent.h
 	events/RoServerConnectRequestEvent.h
