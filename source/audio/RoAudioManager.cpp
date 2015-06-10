@@ -11,12 +11,12 @@
 #define roBGM_FOLDER_KEY L"Game.Bgm.Folder"
 #define roBGM_VOLUME_KEY L"Bgm.Volume"
 //------------------------------------------------------------------------------
-RoAudioManagerPtr RoAudioManager::Get(const RoConfig& config)
+RoAudioManagerPtr RoAudioManager::Get(RoConfigPtr config)
 {
     return shared_ptr < RoAudioManager > {new RoIrrKlangAudioManager(config)};
 }
 //------------------------------------------------------------------------------
-RoAudioManager::RoAudioManager(const RoConfig& config)
+RoAudioManager::RoAudioManager(RoConfigPtr config)
     : mConfigs(config)
 {
 }
@@ -26,7 +26,7 @@ RoAudioPtr RoAudioManager::getBackgroundMusic(const RoString& filename)
     RoPath bgmFilePath = filename;
     if (!RoFileSystem::FileExists(bgmFilePath))
     {
-        static const RoString bgmFolderName = mConfigs.get(roBGM_FOLDER_KEY).as<RoString>();
+        static const RoString bgmFolderName = mConfigs->get(roBGM_FOLDER_KEY).as<RoString>();
         static const RoPath bgmFolder = bgmFolderName.asWStr();
         bgmFilePath = bgmFolder / bgmFilePath.leaf();
     }

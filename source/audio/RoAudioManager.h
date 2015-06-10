@@ -20,9 +20,9 @@ roFORWARD_DECL_PTR(RoAudioManager);
 class RoAudioManager
 {
 public:
-    static RoAudioManagerPtr Get(const RoConfig& config);
+    static RoAudioManagerPtr Get(RoConfigPtr config);
  
-    RoAudioManager(const RoConfig& config);
+    RoAudioManager(RoConfigPtr config);
 
     RoAudioManager(const RoAudioManager&) = delete;
     virtual ~RoAudioManager() = default;
@@ -38,6 +38,6 @@ public:
     virtual void playSound3D(const RoString& filename, bool loop, const RoVector3f& position) = 0;
 
 private:
-    const RoConfig mConfigs;
+    const RoConfigPtr mConfigs;
 };
 

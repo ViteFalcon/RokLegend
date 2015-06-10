@@ -24,14 +24,9 @@
 #include <conio.h>
 #include <fstream>
 
-#define roROOT_FOLDER_FILE "ROOT"
-#define roSTR_BUTTON_SOUND "str:ButtonSound"
+#include "RoGameBindings.h"
 
-//#define roGRF_TEST_FILE "C:\\Users\\ullatil\\Games\\Ragnarok Online\\data.grf"
-#define roTEST_BGM_FILE L"C:/tmp/01.mp3"
-#define roGRF_TEST_FILE "C:\\Users\\ullatil\\Games\\InertiaRO\\data.grf"
-//C:\Users\ullatil\Games\EsunaRO
-//#define roGRF_TEST_FILE "C:\\Users\\ullatil\\Games\\Ragnarok Online\\cdata.grf"
+#define roROOT_FOLDER_FILE "ROOT"
 #define roKEY_ESC 27
 #define roKEY_RETURN 13
 
@@ -116,31 +111,25 @@ int main() {
 
 void mainLoop(const RoTaskArgs& args)
 {
-    RoConfig config;
-    RoAudioManagerPtr audioManager = RoAudioManager::Get(config);
-
-    RoAudioPtr audio = audioManager->getBackgroundMusic(roTEST_BGM_FILE);
-    audio->setIsPaused(false);
-
     RoTimer profiler{};
-    auto grf = RoGrf2::FromFile(roGRF_TEST_FILE);
+    auto grf = RoGameBindings::getGrf();
     roLOG_DBG << "Took " << profiler.getMilliseconds() / 1000.0f << " seconds to load GRF";
     profiler.reset();
+
+    auto audioManager = RoGameBindings::getAudioManager();
+    auto backgroundScore = RoGameBindings::getBackgroundScore();
+    auto buttonSound = RoGameBindings::getButtonSound();
+
     RoStringArray files = grf->findFiles("*\\ef_teleportation.wav");
     roLOG_DBG << "Found " << files.size() << " file(s) in " << profiler.getMilliseconds() / 1000.0f << " seconds";
     for (RoString fileName : files)
     {
         roLOG_DBG << "\t" << fileName;
     }
-    RoString buttonSoundFile = RoDataInfo::Get().getValue(roSTR_BUTTON_SOUND, "NOTFOUND");
-    RoString testSound = "buttonSound.wav";
-    auto soundDataStream = grf->getFileContentsOf(buttonSoundFile);
-    auto sound = audioManager->getSound2D(testSound, soundDataStream, false);
 
-    RoNetworkManagerPtr networkManager = std::make_shared<RoNetworkManager>("data/packets.xml");
+    auto networkManager = RoGameBindings::getNetworkManager();
 
     std::cout << "Ready to accept inputs!" << std::endl;
-    audioManager->playSound2D(testSound, false);
     connectToLoginServer();
     RoMessageQueue& messageQueue = RoMessageQueue::Get(RoMessageQueue::eMessageQueue_Default);
     char ch = 0;
@@ -149,10 +138,6 @@ void mainLoop(const RoTaskArgs& args)
         messageQueue.dispatch();
         ch = kbhit() ? _getch() : 0;
         roSCHEDULE_TASK(_NetworkUpdate, RoEmptyArgs::INSTANCE);
-        if (roKEY_RETURN == ch)
-        {
-            audioManager->playSound2D(testSound, false);
-        }
         Sleep(0);
     } while (ch != roKEY_ESC);
 }
@@ -241,10 +226,13 @@ void loginPrompt(const RoTaskArgs& args)
     {
         return;
     }
+    auto buttonSound = RoGameBindings::getButtonSound();
     std::string username;
     std::cout << "Enter Username: ";
     std::cin >> username;
+    buttonSound->play();
     std::string password = readPassword("Enter Password: ");
+    buttonSound->play();
     if (!changeGameState(loginPromptState, RoCliGameState::LOGIN_REQUEST_SENT))
     {
         return;
@@ -258,6 +246,7 @@ void loginPrompt(const RoTaskArgs& args)
 void loginSuccessful(const RoTaskArgs& args)
 {
     std::cout << "Login succeeded!" << std::endl;
+    RoGameBindings::getButtonSound()->play();
     RoCliGameState currentState = RoCliGameState::LOGIN_REQUEST_SENT;
     changeGameState(currentState, RoCliGameState::LOGIN_SUCCEEDED);
     RoNetworkManager::Disconnect(RoNetServerType::LOGIN);
@@ -266,6 +255,7 @@ void loginSuccessful(const RoTaskArgs& args)
 void loginFailed(const RoTaskArgs& args)
 {
     std::cout << "Login FAILED!" << std::endl;
+    RoGameBindings::getButtonSound()->play();
     RoCliGameState currentState = RoCliGameState::LOGIN_REQUEST_SENT;
     changeGameState(currentState, RoCliGameState::LOGIN_FAILED);
     RoNetworkManager::Disconnect(RoNetServerType::LOGIN);

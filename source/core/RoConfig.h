@@ -30,4 +30,6 @@ private:
     RoPropertyMap mConfiguration;
 };
 
+roDEFINE_PTR(RoConfig);
+
 #endif // ROKLEGEND_CONFIG_H

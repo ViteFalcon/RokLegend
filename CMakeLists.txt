@@ -47,11 +47,13 @@ LIST(APPEND CMAKE_MODULE_PATH
 INCLUDE(cotire)
 INCLUDE(roklegend_macros)
 INCLUDE(roklegend_platform)
+# Dependencies
 INCLUDE(roklegend_irrklang)
 INCLUDE(roklegend_zlib)
 INCLUDE(roklegend_grf)
 INCLUDE(roklegend_tbb)
 INCLUDE(roklegend_sqlitepp)
+INCLUDE(roklegend_entityx)
 
 FIND_PACKAGE(Boost)
 IF ("${Boost_LIBRARY_DIRS}" STREQUAL "")

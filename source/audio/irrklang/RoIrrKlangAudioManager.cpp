@@ -82,7 +82,7 @@
     };
 }*/
 //------------------------------------------------------------------------------
-RoIrrKlangAudioManager::RoIrrKlangAudioManager(const RoConfig& config)
+RoIrrKlangAudioManager::RoIrrKlangAudioManager(RoConfigPtr config)
     : RoAudioManager(config)
     , mEngine(irrklang::createIrrKlangDevice())
 {

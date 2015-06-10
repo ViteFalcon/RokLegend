@@ -71,4 +71,6 @@ private:
     RoAtomicBool            mOkToUpdate;
 };
 
+roDEFINE_PTR(RoNetworkManager);
+
 #endif // ROKLEGEND_NETWORK_MANAGER_H

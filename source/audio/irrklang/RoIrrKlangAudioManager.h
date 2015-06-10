@@ -15,7 +15,7 @@
 class RoIrrKlangAudioManager : public RoAudioManager
 {
 public:
-    RoIrrKlangAudioManager(const RoConfig& config);
+    RoIrrKlangAudioManager(RoConfigPtr config);
     virtual ~RoIrrKlangAudioManager();
 
     virtual RoAudioPtr getSound2D(const RoString& filename) override;
