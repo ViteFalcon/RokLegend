@@ -105,7 +105,7 @@ RoAudioPtr RoIrrKlangAudioManager::getSound2D(const RoString& filename)
         IS_2D,
         filename,
         *mEngine,
-        mEngine->addSoundSourceFromFile(RoString::ToCurrentEncoding(filename).c_str()),
+        mEngine->addSoundSourceFromFile(filename.asUTF8().c_str()),
         RoVec3f::ZERO);
 }
 //------------------------------------------------------------------------------
@@ -132,19 +132,19 @@ RoAudioPtr RoIrrKlangAudioManager::getSound3D(const RoString& filename)
         IS_3D,
         filename,
         *mEngine,
-        mEngine->addSoundSourceFromFile(RoString::ToCurrentEncoding(filename).c_str()),
+        mEngine->addSoundSourceFromFile(filename.asUTF8().c_str()),
         RoVec3f::ZERO);
 }
 //------------------------------------------------------------------------------
 void RoIrrKlangAudioManager::playSound2D(const RoString& filename, bool loop)
 {
-    mEngine->play2D(RoString::ToCurrentEncoding(filename).c_str(), loop);
+    mEngine->play2D(filename.asUTF8().c_str(), loop);
 }
 //------------------------------------------------------------------------------
 void RoIrrKlangAudioManager::playSound3D(const RoString& filename, bool loop, const RoVector3f& position)
 {
     mEngine->play3D(
-        RoString::ToCurrentEncoding(filename).c_str(),
+        filename.asUTF8().c_str(),
         irrklang::vec3df(position.x(), position.y(), position.z()),
         loop);
 }

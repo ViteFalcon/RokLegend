@@ -331,6 +331,7 @@ class EntityManager : entityx::help::NonCopyable {
   typedef std::bitset<entityx::MAX_COMPONENTS> ComponentMask;
 
   explicit EntityManager(EventManager &event_manager);
+  explicit EntityManager(std::shared_ptr<EventManager> event_manager);
   virtual ~EntityManager();
 
   /// An iterator over a view of the entities in an EntityManager.

@@ -12,7 +12,6 @@ public:
 
 private: // static
     static const RoString sConfigKey;
-    static const RoString sFriendlyName;
 
     static RoString retrieveFileName();
     static RoAudioPtr retrieveAudio(RoAudioManagerPtr audioManager, RoGrf2Ptr grf, RoString fileName);

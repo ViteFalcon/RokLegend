@@ -15,9 +15,10 @@ RoSharedPtr<entityx::EventManager> RoGameBindings::getEntityEventManager()
 
 RoSharedPtr<entityx::EntityManager> RoGameBindings::getEntityManager()
 {
-    static auto eventManager = getEntityEventManager();
-    static auto entityManager = std::make_shared<entityx::EntityManager>(*eventManager);
-    return entityManager;
+    //static auto eventManager = getEntityEventManager();
+    //static auto entityManager = std::make_shared<entityx::EntityManager>(*eventManager);
+    //return entityManager;
+    return getIocContainer().buildSingle<entityx::EntityManager>();
 }
 
 RoAudioManagerPtr RoGameBindings::getAudioManager()
@@ -69,11 +70,13 @@ void RoGameBindings::doBindings(Infector::Container& ioc)
 {
     ioc.bindSingleAsNothing<RoConfig>();
     ioc.bindSingleAsNothing<entityx::EventManager>();
+    ioc.bindSingleAsNothing<entityx::EntityManager>();
     ioc.bindSingleAs<RoIrrKlangAudioManager, RoAudioManager>();
     ioc.bindSingleAsNothing<RoBackgroundScore>();
 
     ioc.wire<RoConfig>();
     ioc.wire<entityx::EventManager>();
+    ioc.wire<entityx::EntityManager, entityx::EventManager>();
     ioc.wire<RoIrrKlangAudioManager, RoConfig>();
     ioc.wire<RoBackgroundScore, RoAudioManager, RoConfig>();
 

@@ -24,6 +24,13 @@ roDEFINE_PTR(RoNetTcpConnection);
 
 class RoNetTcpConnection;
 
+struct RoServerConnectRequestEvent;
+struct RoServerDisconnectRequestEvent;
+struct RoServerConnectedEvent;
+struct RoServerConnectRequestFailedEvent;
+struct RoServerDisconnectedEvent;
+struct RoSendPacketToServerEvent;
+
 /**
   * Brief description about RoNetworkManager.
  **/
@@ -44,15 +51,15 @@ public:
 
 private: // Tasks
     void update(const RoTaskArgs&);
-    void sendToLoginServer(const RoTaskArgs& args);
-    void sendToCharacterServer(const RoTaskArgs& args);
-    void sendToMapServer(const RoTaskArgs& args);
-    void sendToServer(const RoNetServerType serverType, const char* name, const RoTaskArgs& args);
-    void serverConnected(const RoTaskArgs& args);
-    void serverConnectionFailed(const RoTaskArgs& args);
-    void serverDisconnected(const RoTaskArgs& args);
-    void connect(const RoTaskArgs& args);
-    void disconnect(const RoTaskArgs& args);
+    void sendToLoginServer(const RoSendPacketToServerEvent& args);
+    void sendToCharacterServer(const RoSendPacketToServerEvent& args);
+    void sendToMapServer(const RoSendPacketToServerEvent& args);
+    void sendToServer(const RoNetServerType serverType, const char* name, const RoSendPacketToServerEvent& args);
+    void serverConnected(const RoServerConnectedEvent& args);
+    void serverConnectionFailed(const RoServerConnectRequestFailedEvent& args);
+    void serverDisconnected(const RoServerDisconnectedEvent& args);
+    void connect(const RoServerConnectRequestEvent& args);
+    void disconnect(const RoServerDisconnectRequestEvent& args);
     void loginServerConnected(const RoTaskArgs& args);
     void loginServerDisconnected(const RoTaskArgs& args);
     void characterServerConnected(const RoTaskArgs& args);

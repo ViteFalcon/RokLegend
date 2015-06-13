@@ -3,7 +3,6 @@
 #include <storage/RoDataInfo.h>
 
 const RoString RoButtonSound::sConfigKey{ L"str:ButtonSound" };
-const RoString RoButtonSound::sFriendlyName{ L"buttonSound.wav" };
 
 RoButtonSound::RoButtonSound(RoAudioManagerPtr audioManager, RoGrf2Ptr grf)
     : mAudioManager(audioManager)
@@ -20,10 +19,10 @@ RoString RoButtonSound::retrieveFileName()
 RoAudioPtr RoButtonSound::retrieveAudio(RoAudioManagerPtr audioManager, RoGrf2Ptr grf, RoString fileName)
 {
     auto soundDataStream = grf->getFileContentsOf(fileName);
-    return audioManager->getSound2D(sFriendlyName, soundDataStream, false);
+    return audioManager->getSound2D(fileName, soundDataStream, false);
 }
 
 void RoButtonSound::play()
 {
-    mAudioManager->playSound2D(sFriendlyName, false);
+    mAudioManager->playSound2D(mFileName, false);
 }

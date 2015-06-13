@@ -21,7 +21,8 @@ void RoBackgroundScore::setScore(const RoString& filename)
         mCurrentScore->setIsPaused(true);
     }
     RoPath filePath = RoPath{ mBgmFolder } / RoPath{ filename };
-    mCurrentScore = mAudioManager->getBackgroundMusic(filePath.native());
+    mFileName = RoString{ filePath.wstring() };
+    mCurrentScore = mAudioManager->getBackgroundMusic(mFileName);
     mCurrentScore->setPlayPosition(0.0f);
     mCurrentScore->setIsPaused(false);
 }

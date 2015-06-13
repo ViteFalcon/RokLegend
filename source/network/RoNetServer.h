@@ -14,6 +14,10 @@
 #include "RoNetServerType.h"
 #include "RoNetServerStatus.h"
 
+struct RoServerConnectedEvent;
+struct RoServerConnectRequestFailedEvent;
+struct RoServerDisconnectedEvent;
+
 class RoNetServerActions
 {
 public:
@@ -32,15 +36,15 @@ public:
         return mServerType;
     }
 
-    virtual void onConnectionSuccess(const RoTaskArgs& args) const
+    virtual void onConnectionSuccess(const RoServerConnectedEvent& args) const
     {
     }
 
-    virtual void onConnectionFailure(const RoTaskArgs& args) const
+    virtual void onConnectionFailure(const RoServerConnectRequestFailedEvent& args) const
     {
     }
 
-    virtual void onDisconnection(const RoTaskArgs& args) const
+    virtual void onDisconnection(const RoServerDisconnectedEvent& args) const
     {
     }
 

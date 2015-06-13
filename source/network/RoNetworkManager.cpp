@@ -61,15 +61,15 @@ RoNetworkManager::RoNetworkManager(const RoString &packetDb)
     : mMessages(RoMessageQueue::Get(RoMessageQueue::eMessageQueue_Network))
     , mPacketDb(RoNetPacketDb::LoadFromSource(packetDb))
 {
-    roBOUND_TASK(_NetworkUpdate, &RoNetworkManager::update);
-    roBOUND_TASK(NetworkServerConnect, &RoNetworkManager::connect);
-    roBOUND_TASK(NetworkServerDisconnect, &RoNetworkManager::disconnect);
-    roBOUND_TASK(NetworkServerConnected, &RoNetworkManager::serverConnected);
-    roBOUND_TASK(NetworkServerConnectFailed, &RoNetworkManager::serverConnectionFailed);
-    roBOUND_TASK(NetworkServerDisconnected, &RoNetworkManager::serverDisconnected);
-    roBOUND_TASK(NetworkLoginServerSend, &RoNetworkManager::sendToLoginServer);
-    roBOUND_TASK(NetworkCharacterServerSend, &RoNetworkManager::sendToCharacterServer);
-    roBOUND_TASK(NetworkMapServerSend, &RoNetworkManager::sendToMapServer);
+    add(L"_NetworkUpdate", &RoNetworkManager::update);
+    add<RoServerConnectRequestEvent>(L"NetworkServerConnect", &RoNetworkManager::connect);
+    add<RoServerDisconnectRequestEvent>(L"NetworkServerDisconnect", &RoNetworkManager::disconnect);
+    add<RoServerConnectedEvent>(L"NetworkServerConnected", &RoNetworkManager::serverConnected);
+    add<RoServerConnectRequestFailedEvent>(L"NetworkServerConnectFailed", &RoNetworkManager::serverConnectionFailed);
+    add<RoServerDisconnectedEvent>(L"NetworkServerDisconnected", &RoNetworkManager::serverDisconnected);
+    add<RoSendPacketToServerEvent>(L"NetworkLoginServerSend", &RoNetworkManager::sendToLoginServer);
+    add<RoSendPacketToServerEvent>(L"NetworkCharacterServerSend", &RoNetworkManager::sendToCharacterServer);
+    add<RoSendPacketToServerEvent>(L"NetworkMapServerSend", &RoNetworkManager::sendToMapServer);
 
     mOkToUpdate.store(true);
 }
@@ -82,22 +82,22 @@ RoNetworkManager::~RoNetworkManager()
     }
 }
 
-void RoNetworkManager::sendToLoginServer(const RoTaskArgs& args)
+void RoNetworkManager::sendToLoginServer(const RoSendPacketToServerEvent& args)
 {
     sendToServer(RoNetServerType::LOGIN, "Login", args);
 }
 
-void RoNetworkManager::sendToCharacterServer(const RoTaskArgs& args)
+void RoNetworkManager::sendToCharacterServer(const RoSendPacketToServerEvent& args)
 {
     sendToServer(RoNetServerType::CHARACTER, "Character", args);
 }
 
-void RoNetworkManager::sendToMapServer(const RoTaskArgs& args)
+void RoNetworkManager::sendToMapServer(const RoSendPacketToServerEvent& args)
 {
     sendToServer(RoNetServerType::MAP, "Map", args);
 }
 
-void RoNetworkManager::sendToServer(const RoNetServerType serverType, const char* name, const RoTaskArgs& args)
+void RoNetworkManager::sendToServer(const RoNetServerType serverType, const char* name, const RoSendPacketToServerEvent& args)
 {
     RoNetTcpConnectionPtr& serverConnection = mConnections[as_integer(serverType)];
     if (!serverConnection)
@@ -105,42 +105,35 @@ void RoNetworkManager::sendToServer(const RoNetServerType serverType, const char
         roLOG_ERR << name << " server is not connected for this operation to be completed.";
         return;
     }
-    auto event = as_event_args<RoSendPacketToServerEvent>(args);
-    RoNetPacketPtr packet = mPacketDb->getPacketByAction(event.packet->getActionName());
-    packet->fromProperties(event.packet->getProperties());
+    RoNetPacketPtr packet = mPacketDb->getPacketByAction(args.packet->getActionName());
+    packet->fromProperties(args.packet->getProperties());
     serverConnection->send(packet);
 }
 
-void RoNetworkManager::serverConnected(const RoTaskArgs& args)
+void RoNetworkManager::serverConnected(const RoServerConnectedEvent& args)
 {
-    auto event = as_event_args<RoServerConnectedEvent>(args);
-    RoNetServerActions::Get(event.serverType).onConnectionSuccess(args);
+    RoNetServerActions::Get(args.serverType).onConnectionSuccess(args);
 }
 
-void RoNetworkManager::serverConnectionFailed(const RoTaskArgs& args)
+void RoNetworkManager::serverConnectionFailed(const RoServerConnectRequestFailedEvent& args)
 {
-    roLOG_WARN << "Seems like a network connection failed :(";
-    auto event = as_event_args<RoServerConnectRequestFailedEvent>(args);
-    RoNetServerActions::Get(event.serverType).onConnectionFailure(args);
+    RoNetServerActions::Get(args.serverType).onConnectionFailure(args);
 }
 
-void RoNetworkManager::serverDisconnected(const RoTaskArgs& args)
+void RoNetworkManager::serverDisconnected(const RoServerDisconnectedEvent& args)
 {
-    auto event = as_event_args<RoServerDisconnectedEvent>(args);
-    mConnections[as_integer(event.serverType)].reset();
-    RoNetServerActions::Get(event.serverType).onDisconnection(args);
+    mConnections[as_integer(args.serverType)].reset();
+    RoNetServerActions::Get(args.serverType).onDisconnection(args);
 }
 
-void RoNetworkManager::connect(const RoTaskArgs& args)
+void RoNetworkManager::connect(const RoServerConnectRequestEvent& args)
 {
-    auto event = as_event_args<RoServerConnectRequestEvent>(args);
-    connectToServer(event.serverType, event.ipAddress, event.portNumber);
+    connectToServer(args.serverType, args.ipAddress, args.portNumber);
 }
 
-void RoNetworkManager::disconnect(const RoTaskArgs& args)
+void RoNetworkManager::disconnect(const RoServerDisconnectRequestEvent& args)
 {
-    auto event = as_event_args<RoServerDisconnectRequestEvent>(args);
-    disconnectFrom(event.serverType);
+    disconnectFrom(args.serverType);
 }
 
 void RoNetworkManager::update(const RoTaskArgs &)

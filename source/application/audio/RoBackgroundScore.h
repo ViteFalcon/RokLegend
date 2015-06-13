@@ -10,6 +10,11 @@ public:
     RoBackgroundScore(RoAudioManagerPtr audioManager, RoConfigPtr config);
     ~RoBackgroundScore() = default;
 
+    RoString getFileName() const
+    {
+        return mFileName;
+    }
+
     void setScore(const RoString& filename);
     void setIsPaused(bool isPaused);
     bool isPaused() const;
@@ -22,7 +27,8 @@ private:
 
 private:
     RoAudioManagerPtr mAudioManager;
-    RoString mBgmFolder;
+    const RoString mBgmFolder;
+    RoString mFileName;
     RoAudioPtr mCurrentScore;
 };
 

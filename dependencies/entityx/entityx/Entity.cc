@@ -34,6 +34,9 @@ std::bitset<entityx::MAX_COMPONENTS> Entity::component_mask() const {
 EntityManager::EntityManager(EventManager &event_manager) : event_manager_(event_manager) {
 }
 
+EntityManager::EntityManager(std::shared_ptr<EventManager> event_manager) : event_manager_(*event_manager) {
+}
+
 EntityManager::~EntityManager() {
   reset();
 }

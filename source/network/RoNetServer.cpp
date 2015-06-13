@@ -11,6 +11,10 @@
 
 #include <tbb/concurrent_hash_map.h>
 
+#include "events/RoServerConnectedEvent.h"
+#include "events/RoServerConnectionFailedEvent.h"
+#include "events/RoServerDisconnectedEvent.h"
+
 class RoNetLoginServerActions : public RoNetServerActions
 {
 public:
@@ -19,17 +23,17 @@ public:
     {
     }
 
-    virtual void onConnectionSuccess(const RoTaskArgs& args) const
+    virtual void onConnectionSuccess(const RoServerConnectedEvent& args) const
     {
         roPOST_MSG(LoginServerConnected, args);
     }
 
-    virtual void onConnectionFailure(const RoTaskArgs& args) const
+    virtual void onConnectionFailure(const RoServerConnectRequestFailedEvent& args) const
     {
         roPOST_MSG(LoginServerConnectionFailed, args);
     }
 
-    virtual void onDisconnection(const RoTaskArgs& args) const
+    virtual void onDisconnection(const RoServerDisconnectedEvent& args) const override
     {
         roPOST_MSG(LoginServerDisconnected, args);
     }
@@ -43,17 +47,17 @@ public:
     {
     }
 
-    virtual void onConnectionSuccess(const RoTaskArgs& args) const
+    virtual void onConnectionSuccess(const RoServerConnectedEvent& args) const
     {
         roPOST_MSG(CharacterServerConnected, args);
     }
 
-    virtual void onConnectionFailure(const RoTaskArgs& args) const
+    virtual void onConnectionFailure(const RoServerConnectRequestFailedEvent& args) const
     {
         roPOST_MSG(CharacterServerConnectionFailed, args);
     }
 
-    virtual void onDisconnection(const RoTaskArgs& args) const
+    virtual void onDisconnection(const RoServerDisconnectedEvent& args) const override
     {
         roPOST_MSG(CharacterServerDisconnected, args);
     }
@@ -67,17 +71,17 @@ public:
     {
     }
 
-    virtual void onConnectionSuccess(const RoTaskArgs& args) const
+    virtual void onConnectionSuccess(const RoServerConnectedEvent& args) const
     {
         roPOST_MSG(MapServerConnected, args);
     }
 
-    virtual void onConnectionFailure(const RoTaskArgs& args) const
+    virtual void onConnectionFailure(const RoServerConnectRequestFailedEvent& args) const
     {
         roPOST_MSG(MapServerConnectionFailed, args);
     }
 
-    virtual void onDisconnection(const RoTaskArgs& args) const
+    virtual void onDisconnection(const RoServerDisconnectedEvent& args) const override
     {
         roPOST_MSG(MapServerDisconnected, args);
     }
