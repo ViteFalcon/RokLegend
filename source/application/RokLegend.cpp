@@ -1,98 +1,87 @@
-#include <core/RoPrerequisites.h>
+#include "RokLegend.h"
+
 #include <core/RoCpuInfo.h>
 #include <core/RoFileSystem.h>
 #include <core/RoLog.h>
 #include <core/RoLogOptions.h>
 #include <core/RoTimer.h>
-#include <core/RoVariant.h>
 #include <core/message_queue/RoMessageQueue.h>
-#include <core/task/RoTaskCollection.h>
 #include <core/task/RoTaskManager.h>
 
-#include <archive/RoDataFolder.h>
-#include <archive/RoGrfStorageBackend.h>
-#include <archive/RoGrfFactory.h>
 #include <archive/RoGrf.h>
-
 #include <audio/RoAudioManager.h>
-#include <audio/RoAudio.h>
-
 #include <network/RoNetworkManager.h>
 
 #include <storage/RoDataInfo.h>
 
-#include <conio.h>
-#include <fstream>
-
 #include "RoGameBindings.h"
+#include "gamestates/RoLoginState.h"
 
-#define roROOT_FOLDER_FILE "ROOT"
-#define roKEY_ESC 27
-#define roKEY_RETURN 13
+const RoString RokLegend::EXIT_TASK{ L"_ExitGame" };
 
-
-enum class RoCliGameState
+RokLegend::RokLegend(RoAudioManagerPtr audioManager, RoNetworkManagerPtr networkManager)
+    : mAudioManager(audioManager)
+    , mNetworkManager(networkManager)
 {
-    NONE,
-    LOGIN_SERVER_READY,
-    LOGIN_PROMPT,
-    LOGIN_REQUEST_SENT,
-    LOGIN_SUCCEEDED,
-    LOGIN_FAILED
-};
-using RoAtomicCliGameState = RoAtomic < RoCliGameState > ;
-roDEFINE_PTR(RoAtomicCliGameState);
-RoAtomicCliGameStatePtr gGameState{ new RoAtomicCliGameState{ RoCliGameState::NONE } };
+    addTaskHandler(EXIT_TASK, &RokLegend::stopGame);
+}
+
+void RokLegend::run()
+{
+    bool expectedCanRunState = false;
+    if (!mCanRunGame.compare_exchange_strong(expectedCanRunState, true))
+    {
+        roLOG_CRIT << "Cannot run game as it seems like a game-loop is already running.";
+        return;
+    }
+
+    {
+        RoTimer profiler{};
+        auto grf = RoGameBindings::getGrf();
+        roLOG_DBG << "Took " << profiler.getMilliseconds() / 1000.0f << " seconds to load GRF";
+        profiler.reset();
+
+        RoStringArray files = grf->findFiles("*\\ef_teleportation.wav");
+        roLOG_DBG << "Found " << files.size() << " file(s) in " << profiler.getMilliseconds() / 1000.0f << " seconds";
+        for (RoString fileName : files)
+        {
+            roLOG_DBG << "\t" << fileName;
+        }
+    }
+
+    RoGameStatePtr gameState = RoGameBindings::getLoginState();
+    RoMessageQueue& messageQueue = RoMessageQueue::Get(RoMessageQueue::eMessageQueue_Default);
+    RoTimer deltaTimer;
+    do
+    {
+        auto deltaSeconds = deltaTimer.getMilliseconds() / 1000.0f;
+        RoNetworkManager::ScheduleUpdate();
+        messageQueue.dispatch();
+        gameState->update(deltaSeconds);
+        Sleep(0);
+    } while (mCanRunGame.load());
+}
+
+void RokLegend::exit() const
+{
+    roRUN_TASK_NAMED(EXIT_TASK, RoEmptyArgs::INSTANCE);
+}
+
+void RokLegend::stopGame(const RoTaskArgs& args)
+{
+    mCanRunGame.store(false);
+}
 
 void roInitializeLogging();
 void roChangeRootFolder();
-void testVariants(const RoTaskArgs& args);
-void mainLoop(const RoTaskArgs& args);
-void connectToLoginServer();
-void loginServerConnectFailed(const RoTaskArgs& args);
-void loginServerConnected(const RoTaskArgs& args);
-void loginServerDisconnected(const RoTaskArgs& args);
-void loginPrompt(const RoTaskArgs& args);
-void loginSuccessful(const RoTaskArgs& args);
-void loginFailed(const RoTaskArgs& args);
-bool changeGameState(RoCliGameState& expectedState, const RoCliGameState newState);
-RoCliGameState getGameState();
-
-roDEFINE_PTR(RoNetworkManager);
-
-roDEFINE_TASK_ARGS(RoLoginPromptEvent)
-{
-    RoNetworkManagerPtr networkManager;
-    RoAtomicCliGameStatePtr gameState;
-};
 
 int main() {
     try
     {
         roInitializeLogging();
         roChangeRootFolder();
-
-        roLOG_INFO << "Starting RokLegend...";
-        {
-            roLOG_INFO << std::endl << RoCpuInfo::Get().printString().asUTF8();
-        }
-        roLOG_DBG << "Testing";
-        roLOG_INFO << "Testing";
-        roLOG_WARN << "Testing";
-        roLOG_ERR << "Testing";
-        roLOG_CRIT << "Testing";
-
-        RoTaskCollection tasks;
-        tasks.add("RunVariantTests", testVariants);
-        tasks.add("MainLoop", mainLoop);
-        tasks.add("LoginPrompt", loginPrompt);
-        tasks.add("AccountServerInfo", loginSuccessful);
-        tasks.add("LoginServerConnectionFailed", loginServerConnectFailed);
-        tasks.add("LoginServerConnected", loginServerConnected);
-        tasks.add("LoginServerDisconnected", loginServerDisconnected);
-
-        roSCHEDULE_TASK(RunVariantTests, RoEmptyArgs::INSTANCE);
-        roRUN_TASK(MainLoop, RoEmptyArgs::INSTANCE);
+        RokLegendPtr game = RoGameBindings::getGame();
+        game->run();
     }
     catch (boost::exception& e)
     {
@@ -109,168 +98,22 @@ int main() {
     return 0;
 }
 
-void mainLoop(const RoTaskArgs& args)
+void roInitializeLogging()
 {
-    RoTimer profiler{};
-    auto grf = RoGameBindings::getGrf();
-    roLOG_DBG << "Took " << profiler.getMilliseconds() / 1000.0f << " seconds to load GRF";
-    profiler.reset();
-
-    auto audioManager = RoGameBindings::getAudioManager();
-    auto backgroundScore = RoGameBindings::getBackgroundScore();
-    auto buttonSound = RoGameBindings::getButtonSound();
-
-    RoStringArray files = grf->findFiles("*\\ef_teleportation.wav");
-    roLOG_DBG << "Found " << files.size() << " file(s) in " << profiler.getMilliseconds() / 1000.0f << " seconds";
-    for (RoString fileName : files)
-    {
-        roLOG_DBG << "\t" << fileName;
-    }
-
-    auto networkManager = RoGameBindings::getNetworkManager();
-
-    std::cout << "Ready to accept inputs!" << std::endl;
-    connectToLoginServer();
-    RoMessageQueue& messageQueue = RoMessageQueue::Get(RoMessageQueue::eMessageQueue_Default);
-    char ch = 0;
-    do
-    {
-        messageQueue.dispatch();
-        ch = kbhit() ? _getch() : 0;
-        roSCHEDULE_TASK(_NetworkUpdate, RoEmptyArgs::INSTANCE);
-        Sleep(0);
-    } while (ch != roKEY_ESC);
-}
-
-bool changeGameState(RoCliGameState& expectedState, const RoCliGameState newState)
-{
-    const RoCliGameState expected = expectedState;
-    if (!gGameState->compare_exchange_strong(expectedState, newState))
-    {
-        std::cerr << "Unexpected game-state found. Current: "
-            << as_integer(expectedState)
-            << ", Transition: " << as_integer(expected) << " -> " << as_integer(newState)
-            << std::endl;
-        return false;
-    }
-    return true;
-}
-
-RoCliGameState getGameState()
-{
-    return gGameState->load();
-}
-
-void loginServerConnectFailed(const RoTaskArgs& args)
-{
-    RoCliGameState currentState = RoCliGameState::NONE;
-    changeGameState(currentState, RoCliGameState::NONE);
-    std::cerr << "Failed to connect to login server" << std::endl;
-}
-
-void loginServerConnected(const RoTaskArgs& args)
-{
-    RoCliGameState currentState = RoCliGameState::NONE;
-    if (changeGameState(currentState, RoCliGameState::LOGIN_SERVER_READY))
-    {
-        std::cout << "Connected to login server..." << std::endl;
-        RoLoginPromptEvent event;
-        roRUN_TASK(LoginPrompt, event);
-    }
-}
-
-void loginServerDisconnected(const RoTaskArgs& args)
-{
-    std::cerr << "Disconnected from login server." << std::endl;
-}
-
-#include <network/events/RoServerConnectRequestEvent.h>
-
-void connectToLoginServer()
-{
-    RoNetworkManager::Connect(RoNetServerType::LOGIN, "127.0.0.1", "6900");
-}
-
-#include <core/RoHashSet.h>
-
-std::string readPassword(const std::string& message)
-{
-    RoHashSet<char> allowedChars = { '.', ',', '!', '@', '$', '%', '^', '&', '*', '+', '-', '_', '=' };
-    RoVector<char> password;
-    std::cout << message;
-    char ch = 0;
-    do 
-    {
-        ch = _getch();
-        if (isalnum(ch) || allowedChars.count(ch))
-        {
-            password.push_back(ch);
-            std::cout << "*";
-        }
-    } while (ch != roKEY_RETURN);
-    std::cout << std::endl;
-    password.push_back(0);
-    std::string passwordString(password.begin(), password.end());
-    return passwordString;
-}
-
-#include <network/events/RoSendPacketToServerEvent.h>
-#include <network/packets/RoLoginCredentials.h>
-
-void loginPrompt(const RoTaskArgs& args)
-{
-    auto currentState = RoCliGameState::LOGIN_SERVER_READY;
-    auto loginPromptState = RoCliGameState::LOGIN_PROMPT;
-    auto loginEvent = as_event_args<RoLoginPromptEvent>(args);
-    if (!changeGameState(currentState, loginPromptState))
-    {
-        return;
-    }
-    auto buttonSound = RoGameBindings::getButtonSound();
-    std::string username;
-    std::cout << "Enter Username: ";
-    std::cin >> username;
-    buttonSound->play();
-    std::string password = readPassword("Enter Password: ");
-    buttonSound->play();
-    if (!changeGameState(loginPromptState, RoCliGameState::LOGIN_REQUEST_SENT))
-    {
-        return;
-    }
-    auto loginPacket = std::make_shared<RoLoginCredentials>();
-    loginPacket->setUsername(username);
-    loginPacket->setPassword(password);
-    RoNetworkManager::SendToServer(RoNetServerType::LOGIN, loginPacket);
-}
-
-void loginSuccessful(const RoTaskArgs& args)
-{
-    std::cout << "Login succeeded!" << std::endl;
-    RoGameBindings::getButtonSound()->play();
-    RoCliGameState currentState = RoCliGameState::LOGIN_REQUEST_SENT;
-    changeGameState(currentState, RoCliGameState::LOGIN_SUCCEEDED);
-    RoNetworkManager::Disconnect(RoNetServerType::LOGIN);
-}
-
-void loginFailed(const RoTaskArgs& args)
-{
-    std::cout << "Login FAILED!" << std::endl;
-    RoGameBindings::getButtonSound()->play();
-    RoCliGameState currentState = RoCliGameState::LOGIN_REQUEST_SENT;
-    changeGameState(currentState, RoCliGameState::LOGIN_FAILED);
-    RoNetworkManager::Disconnect(RoNetServerType::LOGIN);
-}
-
-void roInitializeLogging() {
     RoLogOptions logOptions;
     logOptions.logFile = RoFileSystem::GetPathToGameDirForFile("roklegend2.log");
     logOptions.logLevel = RoLogLevel::All;
     roInitLogs(logOptions);
+    roLOG_INFO << "Starting RokLegend...";
+    {
+        roLOG_INFO << std::endl << RoCpuInfo::Get().printString().asUTF8();
+    }
 }
 
 void roChangeRootFolder()
 {
-    RoPath rootPathFilePath = RoFileSystem::GetWorkingDirectory() / RoPath{ roROOT_FOLDER_FILE };
+    static const RoPath ROOT_FOLDER_FILE{ "ROOT" };
+    RoPath rootPathFilePath = RoFileSystem::GetWorkingDirectory() / ROOT_FOLDER_FILE;
     if (!RoFileSystem::FileExists(rootPathFilePath))
     {
         roLOG_DBG << "No root folder defining file was found.";

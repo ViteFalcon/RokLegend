@@ -38,6 +38,7 @@ class RoNetworkManager : public RoTaskHandler<RoNetworkManager>
 {
 public:
     static void Connect(RoNetServerType serverType, const RoString& ipAddress, const RoString& portNumber);
+    static void ScheduleUpdate();
     static void SendToServer(RoNetServerType serverType, RoPacketPtr packet);
     static void Disconnect(RoNetServerType serverType);
 
@@ -70,6 +71,9 @@ private: // Tasks
 private: // Functions
     void connectToServer(RoNetServerType serverType, const RoString& host, const RoString& port);
     void disconnectFrom(RoNetServerType serverType);
+
+private: // static
+    static const RoString NETWORK_UPDATE_TASK;
 
 private:
     RoMessageQueue&         mMessages;

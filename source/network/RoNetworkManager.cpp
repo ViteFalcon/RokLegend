@@ -11,6 +11,7 @@
 #include "RoNetTcpConnection.h"
 
 #include <core/RoDict.h>
+#include <core/task/RoTaskManager.h>
 
 #include "events/RoServerConnectRequestEvent.h"
 #include "events/RoServerConnectRequestFailedEvent.h"
@@ -20,6 +21,8 @@
 #include "events/RoSendPacketToServerEvent.h"
 #include "events/RoPacketReceivedEvent.h"
 
+const RoString RoNetworkManager::NETWORK_UPDATE_TASK{ L"_NetworkUpdate" };
+
 void RoNetworkManager::Connect(RoNetServerType serverType, const RoString& ipAddress, const RoString& portNumber)
 {
     RoServerConnectRequestEvent event;
@@ -27,6 +30,11 @@ void RoNetworkManager::Connect(RoNetServerType serverType, const RoString& ipAdd
     event.ipAddress = ipAddress;
     event.portNumber = portNumber;
     roPOST_MSG(NetworkServerConnect, event);
+}
+
+void RoNetworkManager::ScheduleUpdate()
+{
+    roSCHEDULE_TASK_NAMED(NETWORK_UPDATE_TASK, RoEmptyArgs::INSTANCE);
 }
 
 void RoNetworkManager::SendToServer(RoNetServerType serverType, RoPacketPtr packet)
@@ -61,15 +69,15 @@ RoNetworkManager::RoNetworkManager(const RoString &packetDb)
     : mMessages(RoMessageQueue::Get(RoMessageQueue::eMessageQueue_Network))
     , mPacketDb(RoNetPacketDb::LoadFromSource(packetDb))
 {
-    add(L"_NetworkUpdate", &RoNetworkManager::update);
-    add<RoServerConnectRequestEvent>(L"NetworkServerConnect", &RoNetworkManager::connect);
-    add<RoServerDisconnectRequestEvent>(L"NetworkServerDisconnect", &RoNetworkManager::disconnect);
-    add<RoServerConnectedEvent>(L"NetworkServerConnected", &RoNetworkManager::serverConnected);
-    add<RoServerConnectRequestFailedEvent>(L"NetworkServerConnectFailed", &RoNetworkManager::serverConnectionFailed);
-    add<RoServerDisconnectedEvent>(L"NetworkServerDisconnected", &RoNetworkManager::serverDisconnected);
-    add<RoSendPacketToServerEvent>(L"NetworkLoginServerSend", &RoNetworkManager::sendToLoginServer);
-    add<RoSendPacketToServerEvent>(L"NetworkCharacterServerSend", &RoNetworkManager::sendToCharacterServer);
-    add<RoSendPacketToServerEvent>(L"NetworkMapServerSend", &RoNetworkManager::sendToMapServer);
+    addTaskHandler(NETWORK_UPDATE_TASK, &RoNetworkManager::update);
+    addTaskHandler<RoServerConnectRequestEvent>(L"NetworkServerConnect", &RoNetworkManager::connect);
+    addTaskHandler<RoServerDisconnectRequestEvent>(L"NetworkServerDisconnect", &RoNetworkManager::disconnect);
+    addTaskHandler<RoServerConnectedEvent>(L"NetworkServerConnected", &RoNetworkManager::serverConnected);
+    addTaskHandler<RoServerConnectRequestFailedEvent>(L"NetworkServerConnectFailed", &RoNetworkManager::serverConnectionFailed);
+    addTaskHandler<RoServerDisconnectedEvent>(L"NetworkServerDisconnected", &RoNetworkManager::serverDisconnected);
+    addTaskHandler<RoSendPacketToServerEvent>(L"NetworkLoginServerSend", &RoNetworkManager::sendToLoginServer);
+    addTaskHandler<RoSendPacketToServerEvent>(L"NetworkCharacterServerSend", &RoNetworkManager::sendToCharacterServer);
+    addTaskHandler<RoSendPacketToServerEvent>(L"NetworkMapServerSend", &RoNetworkManager::sendToMapServer);
 
     mOkToUpdate.store(true);
 }

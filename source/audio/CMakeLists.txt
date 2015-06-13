@@ -10,7 +10,7 @@ SET(RO_AUDIO_IRRKLANG_SOURCE_FILES
     irrklang/RoNullIrrKlangSound.cpp
     irrklang/RoNullIrrKlangSound.h
 )
-RO_SOURCE_GROUP(irrKlang FILES ${RO_AUDIO_IRRKLANG_SOURCE_FILES})
+RO_SOURCE_GROUP(irrKlang ${RO_AUDIO_IRRKLANG_SOURCE_FILES})
 
 SET(RO_AUDIO_SOURCES
     CMakeLists.txt

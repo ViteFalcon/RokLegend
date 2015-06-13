@@ -1,4 +1,6 @@
 #include "RoGameBindings.h"
+#include "RokLegend.h"
+#include "gamestates/RoLoginState.h"
 #include "infectorpp/InfectorContainer.hpp"
 #include <audio/irrklang/RoIrrKlangAudioManager.h>
 #include <core/RoFileSystem.h>
@@ -52,6 +54,24 @@ RoGrf2Ptr RoGameBindings::getGrf()
     static auto config = getConfigs();
     static auto grf = RoGrf2::FromFile(config->get(roGRF_TEST_FILE_KEY).as<RoString>());
     return grf;
+}
+
+RokLegendPtr RoGameBindings::getGame()
+{
+    static auto audioManager = getAudioManager();
+    static auto networkManager = getNetworkManager();
+    static auto game = std::make_shared<RokLegend>(audioManager, networkManager);
+    return game;
+}
+
+RoGameStatePtr RoGameBindings::getLoginState()
+{
+    auto game = getGame();
+    auto backgroundScore = getBackgroundScore();
+    auto buttonSound = getButtonSound();
+    auto gameState = std::make_shared<RoLoginState>(game, backgroundScore, buttonSound);
+    gameState->initialize();
+    return gameState;
 }
 
 Infector::Container& RoGameBindings::getIocContainer()

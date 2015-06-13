@@ -50,14 +50,14 @@ protected:
     };
     typedef void (DerivedType::*TaskFunction)(const RoTaskArgs&);
 
-    void add(const RoString& name, TaskFunction taskFunction)
+    void addTaskHandler(const RoString& name, TaskFunction taskFunction)
     {
         auto self = getSelf();
         mTasks.add(name, std::bind(taskFunction, self, std::placeholders::_1));
     }
 
     template <typename T>
-    void add(const RoString& name, typename RoTaskExecutorHelper<T>::Type taskFunction)
+    void addTaskHandler(const RoString& name, typename RoTaskExecutorHelper<T>::Type taskFunction)
     {
         auto self = getSelf();
         auto executor = std::make_shared<RoTaskExecutorHelper<T>>(self, taskFunction);

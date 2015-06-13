@@ -5,10 +5,11 @@ SET(RO_TASK_SOURCES
     task/RoTaskArgs.h
     task/RoTaskCollection.cpp
     task/RoTaskCollection.h
+	task/RoTaskHandler.h
     task/RoTaskManager.cpp
     task/RoTaskManager.h
 )
-RO_SOURCE_GROUP(task FILES ${RO_TASK_SOURCES})
+RO_SOURCE_GROUP(task ${RO_TASK_SOURCES})
 
 SET(RO_MESSAGE_QUEUE_SOURCES
 	message_queue/RoMessage.cpp
@@ -16,7 +17,7 @@ SET(RO_MESSAGE_QUEUE_SOURCES
 	message_queue/RoMessageQueue.cpp
 	message_queue/RoMessageQueue.h
 )
-RO_SOURCE_GROUP(message_queue FILES ${RO_MESSAGE_QUEUE_SOURCES})
+RO_SOURCE_GROUP(message_queue ${RO_MESSAGE_QUEUE_SOURCES})
 
 SET(RO_CORE_SOURCES
     CMakeLists.txt

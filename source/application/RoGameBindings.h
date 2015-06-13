@@ -1,14 +1,18 @@
 #pragma once
 #include <core/RoPrerequisites.h>
 
-#include <archive/RoGrf.h>
-#include <audio/RoAudioManager.h>
 #include "audio/RoBackgroundScore.h"
 #include "audio/RoButtonSound.h"
+#include "gamestates/RoGameState.h"
+
+#include <archive/RoGrf.h>
+#include <audio/RoAudioManager.h>
 #include <core/RoConfig.h>
 #include <network/RoNetworkManager.h>
 
 #include <entityx/entityx.h>
+
+roFORWARD_DECL_PTR(RokLegend);
 
 namespace Infector
 {
@@ -30,6 +34,10 @@ public:
 
     // FIXME: Remove this. Resource manager should be exposed instead.
     static RoGrf2Ptr getGrf();
+
+    static RokLegendPtr getGame();
+
+    static RoGameStatePtr getLoginState();
 
 private:
     static Infector::Container& getIocContainer();

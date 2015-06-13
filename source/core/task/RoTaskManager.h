@@ -24,6 +24,7 @@ protected:
     RoTaskManager& operator= (const RoTaskManager&) = delete;
 };
 
-#define roSCHEDULE_TASK(taskname, args) RoTaskManager::GetInstance().schedule(roSTRINGIFY(taskname), args)
-#define roRUN_TASK(taskname, args) RoTaskManager::GetInstance().run(roSTRINGIFY(taskname), args)
+#define roSCHEDULE_TASK(taskname, args) roSCHEDULE_TASK_NAMED(roSTRINGIFY(taskname), args)
+#define roSCHEDULE_TASK_NAMED(taskname, args) RoTaskManager::GetInstance().schedule(taskname, args)
+#define roRUN_TASK(taskname, args) roRUN_TASK_NAMED(roSTRINGIFY(taskname), args)
 #define roRUN_TASK_NAMED(taskNameString, args) RoTaskManager::GetInstance().run(taskNameString, args)
