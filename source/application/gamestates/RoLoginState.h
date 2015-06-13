@@ -45,6 +45,7 @@ private:
 private: // static
     static const RoString LOGIN_PROMPT_TASK;
     static const RoString LOGIN_SUCCESS_TASK;
+    static const RoString LOGIN_FAILED_TASK;
     static const RoString LOGIN_SERVER_CONNECT_FAILED_TASK;
     static const RoString LOGIN_SERVER_CONNECTED_TASK;
     static const RoString LOGIN_SERVER_DISCONNECTED_TASK;

@@ -16,6 +16,7 @@
 
 const RoString RoLoginState::LOGIN_PROMPT_TASK{ L"LoginPrompt" };
 const RoString RoLoginState::LOGIN_SUCCESS_TASK{L"AccountServerInfo"};
+const RoString RoLoginState::LOGIN_FAILED_TASK{ L"MasterLoginError" };
 const RoString RoLoginState::LOGIN_SERVER_CONNECT_FAILED_TASK{ L"LoginServerConnectionFailed" };
 const RoString RoLoginState::LOGIN_SERVER_CONNECTED_TASK{ L"LoginServerConnected" };
 const RoString RoLoginState::LOGIN_SERVER_DISCONNECTED_TASK{ L"LoginServerDisconnected" };
@@ -30,6 +31,8 @@ RoLoginState::RoLoginState(RokLegendPtr game, RoBackgroundScorePtr backgroundSco
 void RoLoginState::addTaskHandlers()
 {
     addTaskHandler(LOGIN_PROMPT_TASK, &RoLoginState::loginPrompt);
+    addTaskHandler(LOGIN_SUCCESS_TASK, &RoLoginState::loginSuccessful);
+    addTaskHandler(LOGIN_FAILED_TASK, &RoLoginState::loginFailed);
     addTaskHandler<RoServerConnectRequestFailedEvent>(LOGIN_SERVER_CONNECT_FAILED_TASK, &RoLoginState::loginServerConnectFailed);
     addTaskHandler<RoServerConnectedEvent>(LOGIN_SERVER_CONNECTED_TASK, &RoLoginState::loginServerConnected);
     addTaskHandler<RoServerDisconnectedEvent>(LOGIN_SERVER_DISCONNECTED_TASK, &RoLoginState::loginServerDisconnected);
@@ -131,8 +134,10 @@ void RoLoginState::loginServerDisconnected(const RoServerDisconnectedEvent& args
 void RoLoginState::loginSuccessful(const RoTaskArgs& args)
 {
     auto currentStage = RoLoginStage::LOGIN_REQUEST_SENT;
+    std::cout << "Login was SUCCESSFUL!" << std::endl;
     if (changeGameState(currentStage, RoLoginStage::LOGIN_SUCCEEDED))
     {
+        // FIXME: This should propagate to the next state
         RoNetworkManager::Disconnect(RoNetServerType::LOGIN);
     }
 }
@@ -140,6 +145,7 @@ void RoLoginState::loginSuccessful(const RoTaskArgs& args)
 void RoLoginState::loginFailed(const RoTaskArgs& args)
 {
     auto currentStage = RoLoginStage::LOGIN_REQUEST_SENT;
+    std::cout << "Login FAILED!" << std::endl;
     if (changeGameState(currentStage, RoLoginStage::LOGIN_SUCCEEDED))
     {
         RoNetworkManager::Disconnect(RoNetServerType::LOGIN);

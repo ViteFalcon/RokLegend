@@ -62,7 +62,7 @@ void RoNetworkManager::Disconnect(RoNetServerType serverType)
 {
     RoServerDisconnectRequestEvent event;
     event.serverType = serverType;
-    roPOST_MSG(NetworkLoginServerDisconnect, event);
+    roPOST_MSG(NetworkServerDisconnect, event);
 }
 
 RoNetworkManager::RoNetworkManager(const RoString &packetDb)

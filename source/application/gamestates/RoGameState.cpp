@@ -2,6 +2,7 @@
 #include "../RokLegend.h"
 
 #include <core/RoHashSet.h>
+#include <core/RoLog.h>
 
 #if roCOMPILER_IS_MSVC
 #   include <conio.h>
@@ -11,6 +12,7 @@
 
 #define roKEY_ESC 27
 #define roKEY_RETURN 13
+#define roKEY_BACKSPACE 8
 
 void RoGameState::initialize()
 {
@@ -44,24 +46,44 @@ RoOptionalUtf8 RoGameState::readInput(std::string message, bool isPassword) cons
     RoVector<char> inputChars;
     std::cout << message;
     char ch = 0;
+    auto masked_chars = [](const char ch) {
+        std::cout << "*";
+    };
+    auto echo_chars = [](const char ch) {
+        std::cout << ch;
+    };
+    std::function<void(const char)> echo_func = echo_chars;
+    if (isPassword)
+    {
+        echo_func = masked_chars;
+    }
     do
     {
         ch = roGETCH();
         if (isalnum(ch) || allowedChars.count(ch))
         {
             inputChars.push_back(ch);
-            if (isPassword)
-            {
-                std::cout << "*";
-            }
-            else
-            {
-                std::cout << ch;
-            }
+            echo_func(ch);
         }
         else if (ch == roKEY_ESC)
         {
             return RoOptionalUtf8{};
+        }
+        else if (ch == roKEY_BACKSPACE)
+        {
+            int clearCharCount = message.length() + inputChars.size();
+            std::cout << "\r";
+            for (int i = 0; i < clearCharCount; ++i)
+            {
+                std::cout << ' ';
+            }
+            inputChars.pop_back();
+            std::cout << "\r" << message;
+            std::for_each(inputChars.begin(), inputChars.end(), echo_func);
+        }
+        else
+        {
+            roLOG_DBG << (int)ch;
         }
     } while (ch != roKEY_RETURN);
     std::cout << std::endl;
