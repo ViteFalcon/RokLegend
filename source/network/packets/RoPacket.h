@@ -143,7 +143,7 @@ public:
 
 #define roDEFINE_PACKET(PacketClassname) class PacketClassname : public RoPacketT<PacketClassname>
 #define roREGISTER_PACKET(PacketName, PacketClassname) \
-    const RoString RoPacketT<PacketClassname>::sClassName{ roSTRINGIFY(PacketName) };\
+    const RoString RoPacketT<PacketClassname>::sClassName{ roSTRINGIFY(PacketClassname) };\
     const RoHashString RoPacketT<PacketClassname>::sActionName{ PacketName };\
     const size_t RoPacketT<PacketClassname>::sRegistrationId = RoPacketTranslator::Get().add<PacketClassname>(_H(PacketName))
 #define roREGISTER_SUB_PACKET(PacketClassname) \

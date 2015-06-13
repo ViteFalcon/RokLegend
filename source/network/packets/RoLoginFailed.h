@@ -12,12 +12,20 @@ enum class RoLoginFailureReason
     SERVER_BLOCKED_CONNECTION
 };
 
+std::ostream& operator << (std::ostream& stream, const RoLoginFailureReason& reason);
+
 roDEFINE_PACKET(RoLoginFailed)
 {
 public:
     RoLoginFailed();
 
     RoLoginFailureReason getReason() const;
+
+    RoString getDetail() const
+    {
+        return mErrorDetail;
+    }
 private:
     uint8 mErrorCode;
+    RoString mErrorDetail;
 };

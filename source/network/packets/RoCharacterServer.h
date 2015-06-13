@@ -12,6 +12,8 @@ enum class RoServerType
     PAY_TO_PLAY
 };
 
+std::string to_string(const RoServerType& serverType);
+
 roDEFINE_PACKET(RoCharacterServer)
 {
 public:

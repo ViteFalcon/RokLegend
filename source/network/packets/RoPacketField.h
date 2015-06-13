@@ -33,13 +33,13 @@ public:
 
     virtual void write(RoPropertyMap& properties) const override
     {
-        auto value = getField();
+        const auto& value = getField();
         properties.set(mName, value);
     }
 
     virtual void read(const RoPropertyMap& properties) override
     {
-        auto field = getField();
+        auto& field = getField();
         properties.get(mName, field);
     }
 

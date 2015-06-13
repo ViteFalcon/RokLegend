@@ -31,3 +31,22 @@ RoServerType RoCharacterServer::getServerType() const
     return RoServerType::UNKNOWN;
 }
 
+std::string to_string(const RoServerType& serverType)
+{
+    switch (serverType)
+    {
+    case RoServerType::NORMAL:
+        return "Normal Server";
+    case RoServerType::MAINTENANCE:
+        return "Maintenance Server";
+    case RoServerType::OVER_18:
+        return "Over 18 Server";
+    case RoServerType::PAID:
+        return "Paid Server";
+    case RoServerType::PAY_TO_PLAY:
+        return "Pay-to-Play Server";
+    default:
+        break;
+    }
+    return "Unknown Server Type";
+}

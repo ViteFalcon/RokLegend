@@ -1,9 +1,12 @@
 #include "RoLoginFailed.h"
 
+roREGISTER_PACKET("MasterLoginError", RoLoginFailed);
+
 RoLoginFailed::RoLoginFailed()
     : mErrorCode(-1)
 {
     add<uint8>("error_code", &RoLoginFailed::mErrorCode);
+    add<RoString>("error_detail", &RoLoginFailed::mErrorDetail);
 }
 
 RoLoginFailureReason RoLoginFailed::getReason() const
@@ -26,4 +29,33 @@ RoLoginFailureReason RoLoginFailed::getReason() const
         break;
     }
     return RoLoginFailureReason::UNKNOWN;
+}
+
+std::ostream& operator<<(std::ostream& stream, const RoLoginFailureReason& reason)
+{
+    switch (reason)
+    {
+    case RoLoginFailureReason::ACCOUNT_DOESNT_EXIST:
+        stream << "Account does not exist";
+        break;
+    case RoLoginFailureReason::INCORRECT_PASSWORD:
+        stream << "Incorrect password";
+        break;
+    case RoLoginFailureReason::REJECTED_FROM_SERVER:
+        stream << "Rejected from server";
+        break;
+    case RoLoginFailureReason::BLOCKED_ACCOUNT:
+        stream << "Account is currently banned by the server";
+        break;
+    case RoLoginFailureReason::NOT_LATEST_CLIENT:
+        stream << "Client is out-of-date";
+        break;
+    case RoLoginFailureReason::SERVER_BLOCKED_CONNECTION:
+        stream << "Server blocked connection";
+        break;
+    default:
+        stream << "UNKNOWN login failure reason";
+        break;
+    }
+    return stream;
 }

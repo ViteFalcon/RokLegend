@@ -10,6 +10,8 @@ enum class RoAccountGender
     SERVER
 };
 
+std::string to_string(const RoAccountGender gender);
+
 using RoCharacterServerCollection = RoVector < RoCharacterServerPtr > ;
 
 roDEFINE_PACKET(RoLoginSuccessful)

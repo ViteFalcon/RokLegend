@@ -5,6 +5,7 @@
 
 roFORWARD_DECL_PTR(RoButtonSound);
 
+struct RoPacketReceivedEvent;
 struct RoServerConnectedEvent;
 struct RoServerConnectRequestFailedEvent;
 struct RoServerDisconnectedEvent;
@@ -39,8 +40,8 @@ private:
     void loginServerConnectFailed(const RoServerConnectRequestFailedEvent& args);
     void loginServerConnected(const RoServerConnectedEvent& args);
     void loginServerDisconnected(const RoServerDisconnectedEvent& args);
-    void loginSuccessful(const RoTaskArgs& args);
-    void loginFailed(const RoTaskArgs& args);
+    void loginSuccessful(const RoPacketReceivedEvent& args);
+    void loginFailed(const RoPacketReceivedEvent& args);
 
 private: // static
     static const RoString LOGIN_PROMPT_TASK;
