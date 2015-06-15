@@ -145,7 +145,7 @@
 
     <structures>
         <struct name="ServerInfo" version="73">
-            <data name="ipaddress" type="uint32"/>
+            <data name="ip_number" type="uint32"/>
             <data name="port" type="uint16"/>
             <data name="server_name" type="string" size="20"/>
             <data name="players" type="uint16"/>
@@ -169,7 +169,7 @@
             <data name="sp" type="uint16"/>
             <data name="maxsp" type="uint16"/>
             <data name="walk_speed" type="uint16"/>
-            <data name="job" type="uint16"/>
+            <data name="job_id" type="uint16"/>
             <data name="hair" type="uint16"/>
             <data name="weapon" type="uint16"/>
             <data name="base_level" type="uint16"/>
@@ -178,8 +178,8 @@
             <data name="shield" type="uint16"/>
             <data name="head_top" type="uint16"/>
             <data name="head_mid" type="uint16"/>
-            <data name="hair_colour" type="uint16"/>
-            <data name="cloth_colour" type="uint16"/>
+            <data name="hair_color" type="uint16"/>
+            <data name="cloth_color" type="uint16"/>
             <data name="name" type="string" size="24"/>
             <data name="str" type="byte"/>
             <data name="agi" type="byte"/>
@@ -208,7 +208,7 @@
             <data name="sp" type="uint16"/>
             <data name="maxsp" type="uint16"/>
             <data name="walk_speed" type="uint16"/>
-            <data name="job" type="uint16"/>
+            <data name="job_id" type="uint16"/>
             <data name="hair" type="uint16"/>
             <data name="weapon" type="uint16"/>
             <data name="base_level" type="uint16"/>
@@ -217,8 +217,8 @@
             <data name="shield" type="uint16"/>
             <data name="head_top" type="uint16"/>
             <data name="head_mid" type="uint16"/>
-            <data name="hair_colour" type="uint16"/>
-            <data name="cloth_colour" type="uint16"/>
+            <data name="hair_color" type="uint16"/>
+            <data name="cloth_color" type="uint16"/>
             <data name="name" type="string" size="24"/>
             <data name="str" type="byte"/>
             <data name="agi" type="byte"/>
@@ -271,7 +271,7 @@
         <data name="dex" type="byte"/>
         <data name="luk" type="byte"/>
         <data name="slot" type="byte"/>
-        <data name="hair_colour" type="uint16"/>
+        <data name="hair_color" type="uint16"/>
         <data name="hair" type="uint16"/>
     </packet>
     <packet id="0x68" name="CharacterDelete" version="73">

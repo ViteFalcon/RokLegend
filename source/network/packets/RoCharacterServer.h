@@ -19,10 +19,7 @@ roDEFINE_PACKET(RoCharacterServer)
 public:
     RoCharacterServer();
 
-    RoString getIpAddress() const
-    {
-        return mIpAddress;
-    }
+    RoString getIpAddress() const;
 
     uint16 getPortNumber() const
     {
@@ -41,7 +38,7 @@ public:
 
     RoServerType getServerType() const;
 private:
-    RoString mIpAddress;
+    uint32 mIpNumber;
     uint16 mPort;
     RoString mServerName;
     uint16 mPlayers;

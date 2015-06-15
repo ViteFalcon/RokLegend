@@ -1,16 +1,7 @@
 #pragma once
 #include "RoPacket.h"
 #include "RoCharacterServer.h"
-
-enum class RoAccountGender
-{
-    UNKNOWN = -1,
-    FEMALE,
-    MALE,
-    SERVER
-};
-
-std::string to_string(const RoAccountGender gender);
+#include "RoAccountGender.h"
 
 using RoCharacterServerCollection = RoVector < RoCharacterServerPtr > ;
 

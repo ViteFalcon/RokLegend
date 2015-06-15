@@ -15,13 +15,19 @@
 #include <storage/RoDataInfo.h>
 
 #include "RoGameBindings.h"
-#include "gamestates/RoLoginState.h"
+#include "gamestates/RoGameState.h"
 
 const RoString RokLegend::EXIT_TASK{ L"_ExitGame" };
 
-RokLegend::RokLegend(RoAudioManagerPtr audioManager, RoNetworkManagerPtr networkManager)
+RokLegend::RokLegend(
+    RoAudioManagerPtr audioManager,
+    RoNetworkManagerPtr networkManager,
+    RoGameStateFactoryPtr gameStateFactory)
     : mAudioManager(audioManager)
     , mNetworkManager(networkManager)
+    , mGameStateFactory(gameStateFactory)
+    , mGameState{ RoGameStates::NONE }
+    , mNewGameState{ RoGameStates::NONE }
 {
     addTaskHandler(EXIT_TASK, &RokLegend::stopGame);
 }
@@ -49,17 +55,32 @@ void RokLegend::run()
         }
     }
 
-    RoGameStatePtr gameState = RoGameBindings::getLoginState();
+    setGameState(RoGameStates::LOGIN);
+
     RoMessageQueue& messageQueue = RoMessageQueue::Get(RoMessageQueue::eMessageQueue_Default);
     RoTimer deltaTimer;
+    RoGameStatePtr gameState;
     do
     {
+        const RoGameStates newGameState = mNewGameState.load();
+        if (newGameState != mGameState)
+        {
+            gameState = mGameStateFactory->getGameState(newGameState);
+            mGameState = newGameState;
+        }
+
         auto deltaSeconds = deltaTimer.getMilliseconds() / 1000.0f;
         RoNetworkManager::ScheduleUpdate();
         messageQueue.dispatch();
         gameState->update(deltaSeconds);
+        // FIXME: Get rid of this sleep once moved to graphics
         Sleep(0);
     } while (mCanRunGame.load());
+}
+
+void RokLegend::setGameState(RoGameStates gameState)
+{
+    mNewGameState.store(gameState);
 }
 
 void RokLegend::exit() const

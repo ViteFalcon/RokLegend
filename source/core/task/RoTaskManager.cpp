@@ -1,6 +1,7 @@
 #include "RoTaskManager.h"
 #include "../RoException.h"
 #include "../RoErrorInfo.h"
+#include "../RoLog.h"
 
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/task.h>
@@ -46,7 +47,20 @@ public:
     }
     virtual void unregisterTask(const std::string& taskName) override
     {
-        mTasks.erase(taskName);
+        TaskInfoMap::accessor accessor;
+        if (!mTasks.find(accessor, taskName))
+        {
+            roLOG_INFO << "Failed to find task named '" << taskName << "' to remove it.";
+            return;
+        }
+        if (mTasks.erase(accessor))
+        {
+            roLOG_INFO << "Erased task named '" << taskName << "'.";
+        }
+        else
+        {
+            roLOG_INFO << "Failed to erase task named '" << taskName << "'.";
+        }
     }
 
     virtual void run(const std::string& taskName) const override

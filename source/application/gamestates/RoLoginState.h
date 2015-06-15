@@ -4,6 +4,7 @@
 #include "RoGameState.h"
 
 roFORWARD_DECL_PTR(RoButtonSound);
+roFORWARD_DECL_PTR(RoLoginSuccessful);
 
 struct RoPacketReceivedEvent;
 struct RoServerConnectedEvent;
@@ -25,7 +26,7 @@ enum class RoLoginStage
 class RoLoginState : public RoGameStateT<RoLoginState>
 {
 public:
-    RoLoginState(RokLegendPtr game, RoBackgroundScorePtr backgroundScore, RoButtonSoundPtr buttonSound);
+    RoLoginState(RokLegendPtr game, RoBackgroundScorePtr backgroundScore, RoButtonSoundPtr buttonSound, RoLoginSuccessfulPtr accountInfo);
 
 protected:
     virtual void addTaskHandlers() override;
@@ -34,7 +35,7 @@ protected:
 private:
     void loginPrompt(const RoTaskArgs& args);
     RoLoginStage getCurrentStage() const;
-    bool changeGameState(RoLoginStage& expectedState, const RoLoginStage newState);
+    bool changeStage(RoLoginStage& expectedState, const RoLoginStage newState);
 
 private:
     void loginServerConnectFailed(const RoServerConnectRequestFailedEvent& args);
@@ -56,6 +57,7 @@ private:
 
     RoAtomicLoginStage mStage;
     RoButtonSoundPtr mButtonSound;
+    RoLoginSuccessfulPtr mAccountInfo;
     RoOptionalString mUsername;
     RoOptionalString mPassword;
 };

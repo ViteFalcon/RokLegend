@@ -14,18 +14,34 @@
 #define roKEY_RETURN 13
 #define roKEY_BACKSPACE 8
 
+RoGameState::RoGameState(RokLegendPtr game, RoBackgroundScorePtr backgroundScore)
+    : mGame(game)
+    , mBackgroundScore(backgroundScore)
+    , mShouldInitialize(true)
+{
+}
+
+RoGameState::~RoGameState()
+{
+    //
+}
+
 void RoGameState::initialize()
 {
-    static bool shouldInitialize = true;
-    if (shouldInitialize)
+    if (mShouldInitialize)
     {
         addTaskHandlers();
-        shouldInitialize = false;
+        roLOG_DBG << "Initialized game state: " << typeid(*this).name();
+        mShouldInitialize = false;
     }
 }
 
 bool RoGameState::update(float timeSinceLastFrameInSecs)
 {
+    if (mShouldInitialize)
+    {
+        initialize();
+    }
     int ch = roKBHIT() ? roGETCH() : 0;
     if (ch == roKEY_ESC)
     {
@@ -43,6 +59,22 @@ void RoGameState::exitGame() const
 RoOptionalUtf8 RoGameState::readInput(std::string message, bool isPassword) const
 {
     static RoHashSet<char> allowedChars = { '.', ',', '!', '@', '$', '%', '^', '&', '*', '+', '-', '_', '=' };
+    return readRaw(message, isPassword, allowedChars);
+}
+
+RoOptionalUInt32 RoGameState::readInteger(std::string message, bool isPassword) const
+{
+    static RoHashSet<char> allowedChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    RoOptionalUtf8 rawInput = readRaw(message, isPassword, allowedChars);
+    if (rawInput.is_initialized())
+    {
+        return RoOptionalUInt32{ atoi(rawInput->asUTF8().c_str()) };
+    }
+    return RoOptionalUInt32{};
+}
+
+RoOptionalUtf8 RoGameState::readRaw(std::string message, bool isPassword, const RoHashSet<char> allowedChars) const
+{
     RoVector<char> inputChars;
     std::cout << message;
     char ch = 0;
@@ -60,20 +92,21 @@ RoOptionalUtf8 RoGameState::readInput(std::string message, bool isPassword) cons
     do
     {
         ch = roGETCH();
-        if (isalnum(ch) || allowedChars.count(ch))
+        if (isalnum(ch) || allowedChars.empty() || allowedChars.count(ch))
         {
             inputChars.push_back(ch);
             echo_func(ch);
         }
         else if (ch == roKEY_ESC)
         {
+            std::cout << std::endl;
             return RoOptionalUtf8{};
         }
         else if (ch == roKEY_BACKSPACE)
         {
-            int clearCharCount = message.length() + inputChars.size();
+            size_t clearCharCount = message.length() + inputChars.size();
             std::cout << "\r";
-            for (int i = 0; i < clearCharCount; ++i)
+            for (size_t i = 0; i < clearCharCount; ++i)
             {
                 std::cout << ' ';
             }
@@ -81,13 +114,50 @@ RoOptionalUtf8 RoGameState::readInput(std::string message, bool isPassword) cons
             std::cout << "\r" << message;
             std::for_each(inputChars.begin(), inputChars.end(), echo_func);
         }
-        else
-        {
-            roLOG_DBG << (int)ch;
-        }
     } while (ch != roKEY_RETURN);
     std::cout << std::endl;
     inputChars.push_back(0);
     std::string inputString(inputChars.begin(), inputChars.end());
     return RoOptionalUtf8{ inputString };
+}
+
+#include "../RoGameBindings.h"
+#include <core/RoException.h>
+#include <core/RoErrorInfo.h>
+
+RoGameStatePtr RoGameStateFactory::getGameState(RoGameStates gameStateType)
+{
+    switch (gameStateType)
+    {
+    case RoGameStates::LOGIN:
+        return RoGameBindings::getLoginState();
+    case RoGameStates::CHARACTER_SERVER_SELECT:
+        return RoGameBindings::getCharacterServerSelectState();
+    }
+    roTHROW(RoInvalidOperation()
+        << RoErrorInfoDetail("Unimplemented game state.")
+        << RoErrorInfoItemName(to_string(gameStateType)));
+}
+
+std::string to_string(const RoGameStates gameStateType)
+{
+    switch (gameStateType)
+    {
+    case RoGameStates::LOGIN_SERVER_SELECT:
+        return "Login Server Select";
+    case RoGameStates::LOGIN:
+        return "Login";
+    case RoGameStates::CHARACTER_SERVER_SELECT:
+        return "Character Server Select";
+    case RoGameStates::CHARACTER_SELECT:
+        return "Character Select";
+    case RoGameStates::MAP:
+        return "Map";
+    }
+    return "UKNOWN state type";
+}
+
+std::ostream& operator<<(std::ostream& stream, const RoGameStates gameStateType)
+{
+    return stream << to_string(gameStateType);
 }

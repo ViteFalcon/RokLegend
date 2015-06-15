@@ -1,9 +1,12 @@
 #include "RoGameBindings.h"
 #include "RokLegend.h"
 #include "gamestates/RoLoginState.h"
+#include "gamestates/RoCharacterServerSelectState.h"
 #include "infectorpp/InfectorContainer.hpp"
 #include <audio/irrklang/RoIrrKlangAudioManager.h>
 #include <core/RoFileSystem.h>
+#include <network/packets/RoLoginSuccessful.h>
+#include <network/packets/RoCharacterListing.h>
 
 RoConfigPtr RoGameBindings::getConfigs()
 {
@@ -60,8 +63,14 @@ RokLegendPtr RoGameBindings::getGame()
 {
     static auto audioManager = getAudioManager();
     static auto networkManager = getNetworkManager();
-    static auto game = std::make_shared<RokLegend>(audioManager, networkManager);
+    static auto gameStateFactory = getGameStateFactory();
+    static auto game = std::make_shared<RokLegend>(audioManager, networkManager, gameStateFactory);
     return game;
+}
+
+RoGameStateFactoryPtr RoGameBindings::getGameStateFactory()
+{
+    return getIocContainer().buildSingle<RoGameStateFactory>();
 }
 
 RoGameStatePtr RoGameBindings::getLoginState()
@@ -69,9 +78,35 @@ RoGameStatePtr RoGameBindings::getLoginState()
     auto game = getGame();
     auto backgroundScore = getBackgroundScore();
     auto buttonSound = getButtonSound();
-    auto gameState = std::make_shared<RoLoginState>(game, backgroundScore, buttonSound);
-    gameState->initialize();
+    auto accountInfo = getAccountInfo();
+    auto gameState = std::make_shared<RoLoginState>(game, backgroundScore, buttonSound, accountInfo);
     return gameState;
+}
+
+RoGameStatePtr RoGameBindings::getCharacterServerSelectState()
+{
+    auto game = getGame();
+    auto backgroundScore = getBackgroundScore();
+    auto buttonSound = getButtonSound();
+    auto accountInfo = getAccountInfo();
+    auto characterListing = getCharacterListing();
+    auto gameState = std::make_shared<RoCharacterServerSelectState>(
+        game,
+        backgroundScore,
+        buttonSound,
+        accountInfo,
+        characterListing);
+    return gameState;
+}
+
+RoLoginSuccessfulPtr RoGameBindings::getAccountInfo()
+{
+    return getIocContainer().buildSingle<RoLoginSuccessful>();
+}
+
+RoCharacterListingPtr RoGameBindings::getCharacterListing()
+{
+    return getIocContainer().buildSingle<RoCharacterListing>();
 }
 
 Infector::Container& RoGameBindings::getIocContainer()
@@ -93,12 +128,18 @@ void RoGameBindings::doBindings(Infector::Container& ioc)
     ioc.bindSingleAsNothing<entityx::EntityManager>();
     ioc.bindSingleAs<RoIrrKlangAudioManager, RoAudioManager>();
     ioc.bindSingleAsNothing<RoBackgroundScore>();
+    ioc.bindSingleAsNothing<RoLoginSuccessful>();
+    ioc.bindSingleAsNothing<RoCharacterListing>();
+    ioc.bindSingleAsNothing<RoGameStateFactory>();
 
     ioc.wire<RoConfig>();
     ioc.wire<entityx::EventManager>();
     ioc.wire<entityx::EntityManager, entityx::EventManager>();
     ioc.wire<RoIrrKlangAudioManager, RoConfig>();
     ioc.wire<RoBackgroundScore, RoAudioManager, RoConfig>();
+    ioc.wire<RoLoginSuccessful>();
+    ioc.wire<RoCharacterListing>();
+    ioc.wire<RoGameStateFactory>();
 
     initConfigs(ioc.buildSingle<RoConfig>());
 }

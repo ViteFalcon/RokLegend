@@ -9,6 +9,7 @@ RoTaskCollection::~RoTaskCollection()
 void RoTaskCollection::add(const RoString& name, const RoTask& task)
 {
     RoTaskManager::GetInstance().registerTask(name, task);
+    mTaskNames.push_back(name);
 }
 
 void RoTaskCollection::clear()

@@ -9,10 +9,13 @@
 #include <audio/RoAudioManager.h>
 #include <core/RoConfig.h>
 #include <network/RoNetworkManager.h>
+#include <network/packets/RoCharacterServerCollection.h>
 
 #include <entityx/entityx.h>
 
 roFORWARD_DECL_PTR(RokLegend);
+roFORWARD_DECL_PTR(RoLoginSuccessful);
+roFORWARD_DECL_PTR(RoCharacterListing);
 
 namespace Infector
 {
@@ -37,7 +40,12 @@ public:
 
     static RokLegendPtr getGame();
 
+    static RoGameStateFactoryPtr getGameStateFactory();
     static RoGameStatePtr getLoginState();
+    static RoGameStatePtr getCharacterServerSelectState();
+
+    static RoLoginSuccessfulPtr getAccountInfo();
+    static RoCharacterListingPtr getCharacterListing();
 
 private:
     static Infector::Container& getIocContainer();

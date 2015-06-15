@@ -64,6 +64,12 @@ protected:
         mExecutors.push_back(executor);
         mTasks.add(name, executor->getTask());
     }
+
+    void clearTaskHandlers()
+    {
+        mExecutors.clear();
+        mTasks.clear();
+    }
 private:
     DerivedType* getSelf()
     {
