@@ -11,7 +11,7 @@
 #include <core/RoLog.h>
 #include <core/RoZipIterator.h>
 
-#define roDEBUG_PACKET 0
+#define roDEBUG_PACKET 1
 
 #if defined(roDEBUG_PACKET) && roDEBUG_PACKET
 #   define roPKT_LOG_DBG(msg) roLOG_DBG << msg
@@ -84,9 +84,9 @@ void RoNetPacket::readFromStream(RoDataStream& stream)
         {
             return;
         }
-        roPKT_LOG_DBG("Reading field '" << field.getName() << "'...");
+        roPKT_LOG_DBG("Reading field '" << field->getName() << "'...");
         field->readFromStream(stream);
-        roPKT_LOG_DBG("Reading field '" << field.getName() << "'... [DONE]");
+        roPKT_LOG_DBG("Reading field '" << field->getName() << "'... [DONE]");
     });
     roPKT_LOG_DBG("Reading data for packet '" << mAction << "'... [DONE]");
 }

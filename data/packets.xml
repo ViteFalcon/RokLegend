@@ -164,8 +164,8 @@
             <data name="karma" type="uint32"/>
             <data name="manner" type="uint32"/>
             <data name="status_point" type="uint16"/>
-            <data name="hp" type="uint16"/>
-            <data name="maxhp" type="uint16"/>
+            <data name="hp" type="uint32"/>
+            <data name="maxhp" type="uint32"/>
             <data name="sp" type="uint16"/>
             <data name="maxsp" type="uint16"/>
             <data name="walk_speed" type="uint16"/>
@@ -226,14 +226,13 @@
             <data name="int" type="byte"/>
             <data name="dex" type="byte"/>
             <data name="luk" type="byte"/>
-            <data name="slot" type="byte"/>
-            <data name="unknown1" type="byte"/>
-            <data name="can_rename" type="bool"/>
-            <data name="unknown2" type="byte"/>
+            <data name="slot" type="uint16"/>
+            <data name="can_rename" type="uint16"/>
             <data name="map_name" type="string" size="16"/>
             <data name="delete_date" type="uint32"/>
-            <data name="robe" type="uint16"/>
-            <data name="unknown3" type="uint16"/>
+            <data name="robe" type="uint32"/>
+            <data name="can_change_slot" type="uint32"/>
+            <data name="show_addon_sidebar" type="uint32"/>
         </struct>
         <struct name="byte2" version="0">
             <data name="x" type="byte"/>
@@ -244,10 +243,14 @@
             <data name="y" type="byte"/>
             <data name="z" type="byte"/>
         </struct>
+        <struct name="BannedCharacterInfo" version="114">
+            <data name="account_id" type="uint32"/>
+            <data name="unban_time" type="string" size="20"/>
+        </struct>
     </structures>
 
     <packet id="0x64" name="MasterLogin" version="73">
-        <data name="version" type="uint32" value="20"/>
+        <data name="version" type="uint32" value="45"/>
         <data name="username" type="string" size="24"/>
         <data name="password" type="string" size="24"/>
         <data name="master_version" type="byte" value="8"/>
@@ -392,9 +395,40 @@
         <data name="packet_size" type="uint16"/>
         <data name="message" type="string" dependson="packet_size"/>
     </packet>
+    <packet id="0x082D" name="CharacterSelectNotification" version="114">
+        <data name="unknown" type="uint16"/>
+        <data name="available_slots" type="byte"/>
+        <data name="blocked_slots1" type="byte"/>
+        <data name="blocked_slots2" type="byte"/>
+        <data name="available_slots2" type="byte"/>
+        <data name="available_slots3" type="byte"/>
+        <data name="unused" type="string" size="20"/>
+    </packet>
+    <packet id="0x9A0" name="CharacterSelectPage" version="114">
+        <data name="page_count" type="uint32"/>
+    </packet>
+    <packet id="0x20D" name="BlockedCharacters" version="114">
+        <data name="packet_size" type="uint16"/>
+        <data name="banned_characters" type="list" element="BannedCharacterInfo" containertype="restOfPacket" dependson="packet_size"/>
+    </packet>
     <packet id="0x08B9" name="PinCodeSystemDisabled" version="114">
-        <data name="unknown" type="uint32"/>
+        <data name="pincode_seed" type="uint32"/>
         <data name="account_id" type="uint32"/>
-        <data name="unknown2" type="uint16"/>
+        <!--
+            0 - disabled / pin is correct
+            1 - ask for pin - client sends 0x8b8
+            2 - create new pin - client sends 0x8ba
+            3 - pin must be changed - client 0x8be
+            4 - create new pin - client sends 0x8ba
+            5 - client shows msgstr(1896)
+            6- client shows msgstr(1897) Unable to use your KSSN number
+            7 - char select window shows a button - client sends 0x8c5
+            8 - pincode was incorrect
+        -->
+        <data name="state" type="uint16"/>
+    </packet>
+    <packet id="0x8ba" name="CreateNewPin" version="114">
+        <data name="unknown" type="uint16"/>
+        <data name="pincode" type="string" size="5"/>
     </packet>
 </packets>

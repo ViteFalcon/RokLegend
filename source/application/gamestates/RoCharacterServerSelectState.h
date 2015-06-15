@@ -47,13 +47,21 @@ private:
     void characterServerConnectFailed(const RoServerConnectRequestFailedEvent& args);
     void characterServerConnected(const RoServerConnectedEvent& args);
     void characterServerDisconnected(const RoServerDisconnectedEvent& args);
+    void charactersReceived(const RoPacketReceivedEvent& args);
     void loginSuccessful(const RoPacketReceivedEvent& args);
+    void characterSelectPages(const RoPacketReceivedEvent& args);
+    void blockedCharacters(const RoPacketReceivedEvent& args);
     void loginFailed(const RoPacketReceivedEvent& args);
+    void pincodeSystemDisabled(const RoPacketReceivedEvent& args);
 
 private: // static
     static const RoString SERVER_SELECT_PROMPT_TASK;
-    static const RoString LOGIN_SUCCESS_TASK;
+    static const RoString CHARACTER_SELECT_NOTIFICATION;
+    static const RoString CHARACTER_SELECT_PAGES;
+    static const RoString BLOCKED_CHARACTER_INFORMATION;
+    static const RoString CHARACTER_LISTING_TASK;
     static const RoString LOGIN_FAILED_TASK;
+    static const RoString PINCODE_SYSTEM_DISABLED;
     static const RoString CHARACTER_SERVER_CONNECT_FAILED_TASK;
     static const RoString CHARACTER_SERVER_CONNECTED_TASK;
     static const RoString CHARACTER_SERVER_DISCONNECTED_TASK;

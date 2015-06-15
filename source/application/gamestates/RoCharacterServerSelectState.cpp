@@ -22,8 +22,12 @@
 #include <network/packets/RoLoginSuccessful.h>
 
 const RoString RoCharacterServerSelectState::SERVER_SELECT_PROMPT_TASK{ L"CharacterServerSelectPrompt" };
-const RoString RoCharacterServerSelectState::LOGIN_SUCCESS_TASK{ L"CharactersReceived" };
+const RoString RoCharacterServerSelectState::CHARACTER_SELECT_NOTIFICATION{ L"CharacterSelectNotification" };
+const RoString RoCharacterServerSelectState::CHARACTER_SELECT_PAGES{ L"CharacterSelectPage" };
+const RoString RoCharacterServerSelectState::BLOCKED_CHARACTER_INFORMATION{ L"BlockedCharacters" };
+const RoString RoCharacterServerSelectState::CHARACTER_LISTING_TASK{ L"CharactersReceived" };
 const RoString RoCharacterServerSelectState::LOGIN_FAILED_TASK{ L"GameLoginError" };
+const RoString RoCharacterServerSelectState::PINCODE_SYSTEM_DISABLED{ L"PinCodeSystemDisabled" };
 const RoString RoCharacterServerSelectState::CHARACTER_SERVER_CONNECT_FAILED_TASK{ L"CharacterServerConnectionFailed" };
 const RoString RoCharacterServerSelectState::CHARACTER_SERVER_CONNECTED_TASK{ L"CharacterServerConnected" };
 const RoString RoCharacterServerSelectState::CHARACTER_SERVER_DISCONNECTED_TASK{ L"CharacterServerDisconnected" };
@@ -45,8 +49,12 @@ RoCharacterServerSelectState::RoCharacterServerSelectState(
 void RoCharacterServerSelectState::addTaskHandlers()
 {
     addTaskHandler(SERVER_SELECT_PROMPT_TASK, &RoCharacterServerSelectState::serverSelectPrompt);
-    addTaskHandler<RoPacketReceivedEvent>(LOGIN_SUCCESS_TASK, &RoCharacterServerSelectState::loginSuccessful);
+    addTaskHandler<RoPacketReceivedEvent>(CHARACTER_LISTING_TASK, &RoCharacterServerSelectState::charactersReceived);
+    addTaskHandler<RoPacketReceivedEvent>(CHARACTER_SELECT_NOTIFICATION, &RoCharacterServerSelectState::loginSuccessful);
+    addTaskHandler<RoPacketReceivedEvent>(CHARACTER_SELECT_PAGES, &RoCharacterServerSelectState::characterSelectPages);
+    addTaskHandler<RoPacketReceivedEvent>(BLOCKED_CHARACTER_INFORMATION, &RoCharacterServerSelectState::blockedCharacters);
     addTaskHandler<RoPacketReceivedEvent>(LOGIN_FAILED_TASK, &RoCharacterServerSelectState::loginFailed);
+    addTaskHandler<RoPacketReceivedEvent>(PINCODE_SYSTEM_DISABLED, &RoCharacterServerSelectState::pincodeSystemDisabled);
     addTaskHandler<RoServerConnectRequestFailedEvent>(CHARACTER_SERVER_CONNECT_FAILED_TASK, &RoCharacterServerSelectState::characterServerConnectFailed);
     addTaskHandler<RoServerConnectedEvent>(CHARACTER_SERVER_CONNECTED_TASK, &RoCharacterServerSelectState::characterServerConnected);
     addTaskHandler<RoServerDisconnectedEvent>(CHARACTER_SERVER_DISCONNECTED_TASK, &RoCharacterServerSelectState::characterServerDisconnected);
@@ -157,10 +165,9 @@ void RoCharacterServerSelectState::characterServerDisconnected(const RoServerDis
     changeStage(currentStage, Stage::LOGIN_CANCELLED);
 }
 
-void RoCharacterServerSelectState::loginSuccessful(const RoPacketReceivedEvent& args)
+void RoCharacterServerSelectState::charactersReceived(const RoPacketReceivedEvent& args)
 {
     auto currentStage = Stage::LOGIN_REQUEST_SENT;
-    std::cout << "Login was SUCCESSFUL!" << std::endl;
     const auto& characterListing = args.packet->castTo<RoCharacterListing>();
     std::cout << "Max Slots: " << characterListing.getMaxSlots().get() << std::endl;
     std::cout << "Available Slots: " << characterListing.getAvailableSlots().get() << std::endl;
@@ -215,5 +222,59 @@ bool RoCharacterServerSelectState::changeStage(Stage& expectedState, const Stage
         return false;
     }
     return true;
+}
+
+void RoCharacterServerSelectState::pincodeSystemDisabled(const RoPacketReceivedEvent& args)
+{
+    auto pincodeSystemState = args.getProperties().get(_H("state")).as<uint16>();
+    switch (pincodeSystemState)
+    {
+    case 0:
+        std::cout << "Pincode System is disabled!" << std::endl;
+        break;
+    case 1:
+        std::cout << "Ask for pin" << std::endl;
+        break;
+    case 2:
+        std::cout << "Create new pin" << std::endl;
+        break;
+    case 3:
+        std::cout << "Pin must be changed." << std::endl;
+        break;
+    case 4:
+        std::cout << "Create new pin2" << std::endl;
+        break;
+    case 5:
+        std::cout << "Client shows message string (1896)" << std::endl;
+        break;
+    case 6:
+        std::cout << "Client shows a message (1897). Unable to use your KSSN number." << std::endl;
+        break;
+    case 7:
+        std::cout << "Char select shows a button." << std::endl;
+        break;
+    case 8:
+        std::cout << "Pincode was incorrect!" << std::endl;
+        break;
+    default:
+        std::cout << "Unknown pincode system state: " << pincodeSystemState << std::endl;
+        break;
+    }
+}
+
+void RoCharacterServerSelectState::loginSuccessful(const RoPacketReceivedEvent& args)
+{
+    std::cout << "Login was SUCCESSFUL!" << std::endl;
+}
+
+void RoCharacterServerSelectState::characterSelectPages(const RoPacketReceivedEvent& args)
+{
+    auto pageCount = args.getProperties().get("page_count").as<uint32>();
+    std::cout << "Received page count: " << pageCount << std::endl;
+}
+
+void RoCharacterServerSelectState::blockedCharacters(const RoPacketReceivedEvent& args)
+{
+    std::cout << "Received blocked characters list (ignoring for now)." << std::endl;
 }
 
