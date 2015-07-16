@@ -3,12 +3,12 @@
 #include "../audio/RoBackgroundScore.h"
 #include "../RoGameBindings.h"
 #include "../RokLegend.h"
+#include "../services/RoLoginServer.h"
 
 #include <core/RoHashSet.h>
 #include <core/RoLog.h>
 #include <core/task/RoTaskManager.h>
 
-#include <network/RoNetworkManager.h>
 #include <network/events/RoPacketReceivedEvent.h>
 #include <network/events/RoSendPacketToServerEvent.h>
 #include <network/events/RoServerConnectRequestEvent.h>
@@ -52,14 +52,47 @@ std::string roGetLoginStageString(RoLoginStage stage)
     return ss.str();
 }
 
+RoString to_string(RoLoginStage stage)
+{
+    switch (stage)
+    {
+    case RoLoginStage::NONE:
+        return "NONE";
+    case RoLoginStage::LOGIN_PROMPT:
+        return "LOGIN_PROMPT";
+    case RoLoginStage::LOGIN_SERVER_CONNECTING:
+        return "LOGIN_SERVER_CONNECTING";
+    case RoLoginStage::LOGIN_SERVER_READY:
+        return "LOGIN_SERVER_READY";
+    case RoLoginStage::LOGIN_REQUEST_SENT:
+        return "LOGIN_REQUEST_SENT";
+    case RoLoginStage::LOGIN_SUCCEEDED:
+        return "LOGIN_SUCCEEDED";
+    case RoLoginStage::LOGIN_FAILED:
+        return "LOGIN_FAILED";
+    case RoLoginStage::LOGIN_CANCELLED:
+        return "LOGIN_CANCELLED";
+    default:
+        break;
+    }
+    std::stringstream error;
+    error << "UNKNOWN LOGIN STAGE (" << as_integer(stage) << ")";
+    return error.str();
+}
+
+std::ostream& operator<<(std::ostream& stream, const RoLoginStage& stage)
+{
+    return stream << to_string(stage);
+}
+
 RoLoginState::RoLoginState(
     RokLegendPtr game,
     RoBackgroundScorePtr backgroundScore,
     RoButtonSoundPtr buttonSound,
-    RoLoginSuccessfulPtr accountInfo)
+    RoLoginServerPtr loginServer)
     : RoGameStateT{ game, backgroundScore }
     , mButtonSound{ buttonSound }
-    , mAccountInfo{ accountInfo }
+    , mLoginServer{ loginServer }
     , mStage{ RoLoginStage::NONE }
 {
 }
@@ -67,11 +100,6 @@ RoLoginState::RoLoginState(
 void RoLoginState::addTaskHandlers()
 {
     addTaskHandler(LOGIN_PROMPT_TASK, &RoLoginState::loginPrompt);
-    addTaskHandler<RoPacketReceivedEvent>(LOGIN_SUCCESS_TASK, &RoLoginState::loginSuccessful);
-    addTaskHandler<RoPacketReceivedEvent>(LOGIN_FAILED_TASK, &RoLoginState::loginFailed);
-    addTaskHandler<RoServerConnectRequestFailedEvent>(LOGIN_SERVER_CONNECT_FAILED_TASK, &RoLoginState::loginServerConnectFailed);
-    addTaskHandler<RoServerConnectedEvent>(LOGIN_SERVER_CONNECTED_TASK, &RoLoginState::loginServerConnected);
-    addTaskHandler<RoServerDisconnectedEvent>(LOGIN_SERVER_DISCONNECTED_TASK, &RoLoginState::loginServerDisconnected);
 }
 
 bool RoLoginState::updateState(float timeSinceLastFrameInSecs)
@@ -123,20 +151,25 @@ void RoLoginState::loginPrompt(const RoTaskArgs& args)
     {
         std::cout << "Connecting to login server... ";
         // FIXME: This should come from clientinfo.xml
-        RoNetworkManager::Connect(RoNetServerType::LOGIN, "127.0.0.1", "6900");
+        RoLoginServer::ConnectCallback callback = std::bind(
+            &RoLoginState::serverConnectResponse,
+            this,
+            std::placeholders::_1,
+            std::placeholders::_2);
+        mLoginServer->connect(L"127.0.0.1", L"6900", callback);
     }
 }
 
-void RoLoginState::loginServerConnectFailed(const RoServerConnectRequestFailedEvent& args)
+void RoLoginState::serverConnectResponse(RoNetServerType type, RoOptionalString error)
 {
-    std::cerr << "[FAILED]" << std::endl;
-    std::cerr << "\tReason: " << args.reason << std::endl;
-    auto currentState = getCurrentStage();
-    changeStage(currentState, RoLoginStage::NONE);
-}
-
-void RoLoginState::loginServerConnected(const RoServerConnectedEvent& args)
-{
+    if (error.is_initialized())
+    {
+        std::cerr << "[FAILED]" << std::endl;
+        std::cerr << "\tReason: " << error.get() << std::endl;
+        auto currentState = getCurrentStage();
+        changeStage(currentState, RoLoginStage::NONE);
+        return;
+    }
     std::cout << "[SUCCESS]" << std::endl;
     auto currentStage = RoLoginStage::LOGIN_SERVER_CONNECTING;
     if (getCurrentStage() != currentStage)
@@ -148,58 +181,37 @@ void RoLoginState::loginServerConnected(const RoServerConnectedEvent& args)
     if (!mUsername || !mPassword)
     {
         std::cerr << "Login credential is not initialized! Aborting login!" << std::endl;
-        RoNetworkManager::Disconnect(RoNetServerType::LOGIN);
+        mLoginServer->disconnect();
         return;
     }
-
-    auto loginPacket = std::make_shared<RoLoginCredentials>();
-    loginPacket->setUsername(mUsername.get());
-    loginPacket->setPassword(mPassword.get());
-    mUsername.reset();
-    mPassword.reset();
 
     if (changeStage(currentStage, RoLoginStage::LOGIN_REQUEST_SENT))
     {
         std::cout << "Logging in using credentials provided... ";
-        RoNetworkManager::SendToServer(RoNetServerType::LOGIN, loginPacket);
+        RoLoginServer::LoginCallback callback = std::bind(&RoLoginState::loginResponse, this, std::placeholders::_1);
+        mLoginServer->login(mUsername.get(), mPassword.get(), callback);
+        mUsername.reset();
+        mPassword.reset();
     }
 }
 
-void RoLoginState::loginServerDisconnected(const RoServerDisconnectedEvent& args)
-{
-    std::cerr << "Disconnected from login server!" << std::endl;
-    auto currentStage = getCurrentStage();
-    changeStage(currentStage, RoLoginStage::NONE);
-}
-
-void RoLoginState::loginSuccessful(const RoPacketReceivedEvent& args)
+void RoLoginState::loginResponse(optional<RoLoginFailed> error)
 {
     auto currentStage = RoLoginStage::LOGIN_REQUEST_SENT;
-    std::cout << "[SUCCESS]" << std::endl;
-    const auto& loginSuccess = args.packet->castTo<RoLoginSuccessful>();
-    std::cout << "Account ID: " << loginSuccess.getId() << std::endl;
-    std::cout << "Gender: " << to_string(loginSuccess.getGender()) << std::endl;
-    std::cout << "Login ID1: " << loginSuccess.getLoginId1() << std::endl;
-    std::cout << "Login ID2: " << loginSuccess.getLoginId2() << std::endl;
-    std::cout << "Last Login IP: " << loginSuccess.getLastLoginIp() << std::endl;
-    std::cout << "Last Login Time: " << loginSuccess.getLastLoginTime() << std::endl;
-    mAccountInfo->fromProperties(loginSuccess.getProperties());
-    if (changeStage(currentStage, RoLoginStage::LOGIN_SUCCEEDED))
+    if (error)
+    {
+        std::cout << "[FAILED]" << std::endl;
+        const auto& loginFailed = error.get();
+        std::cout << "\tReason: " << loginFailed.getReason() << std::endl;
+        std::cout << "\tDetail: " << loginFailed.getDetail() << std::endl;
+        if (changeStage(currentStage, RoLoginStage::LOGIN_SUCCEEDED))
+        {
+            mLoginServer->disconnect();
+        }
+    }
+    else if (changeStage(currentStage, RoLoginStage::LOGIN_SUCCEEDED))
     {
         mGame->setGameState(RoGameStates::CHARACTER_SERVER_SELECT);
-    }
-}
-
-void RoLoginState::loginFailed(const RoPacketReceivedEvent& args)
-{
-    auto currentStage = RoLoginStage::LOGIN_REQUEST_SENT;
-    std::cout << "[FAILED]" << std::endl;
-    const auto& loginFailed = args.packet->castTo<RoLoginFailed>();
-    std::cout << "\tReason: " << loginFailed.getReason() << std::endl;
-    std::cout << "\tDetail: " << loginFailed.getDetail() << std::endl;
-    if (changeStage(currentStage, RoLoginStage::LOGIN_SUCCEEDED))
-    {
-        RoNetworkManager::Disconnect(RoNetServerType::LOGIN);
     }
 }
 
@@ -214,8 +226,12 @@ inline bool RoLoginState::changeStage(RoLoginStage& expectedState, const RoLogin
     if (!mStage.compare_exchange_strong(expectedState, newState))
     {
         std::cerr << "Unexpected game-state found. Current: "
-            << as_integer(expectedState)
-            << ", Transition: " << as_integer(expected) << " -> " << as_integer(newState)
+            << expectedState
+            << ", Transition: " << expected << " -> " << newState
+            << std::endl;
+        roLOG_ERR << "Unexpected game-state found. Current: "
+            << expectedState
+            << ", Transition: " << expected << " -> " << newState
             << std::endl;
         return false;
     }

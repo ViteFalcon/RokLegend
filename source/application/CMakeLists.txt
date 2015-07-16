@@ -20,6 +20,8 @@ SET(ROKLEGEND_AUDIO_SOURCES
 RO_SOURCE_GROUP(audio ${ROKLEGEND_AUDIO_SOURCES})
 
 SET(ROKLEGEND_GAMESTATE_SOURCES
+    gamestates/RoCharacterSelectState.cpp
+    gamestates/RoCharacterSelectState.h
     gamestates/RoCharacterServerSelectState.cpp
     gamestates/RoCharacterServerSelectState.h
     gamestates/RoGameState.cpp
@@ -28,6 +30,20 @@ SET(ROKLEGEND_GAMESTATE_SOURCES
     gamestates/RoLoginState.h
 )
 RO_SOURCE_GROUP(gamestates ${ROKLEGEND_GAMESTATE_SOURCES})
+
+SET(ROKLEGEND_SERVICES_SOURCES
+    services/RoCharacterServer.cpp
+    services/RoCharacterServer.h
+    services/RoLoginServer.cpp
+    services/RoLoginServer.h
+    services/RoMapServer.cpp
+    services/RoMapServer.h
+    services/RoPlayerService.cpp
+    services/RoPlayerService.h
+    services/RoServerInterface.cpp
+    services/RoServerInterface.h
+)
+RO_SOURCE_GROUP(services ${ROKLEGEND_SERVICES_SOURCES})
 
 SET(ROKLEGEND_SOURCES
     CMakeLists.txt
@@ -50,6 +66,7 @@ ADD_EXECUTABLE(${ROKLEGEND_PROJECT_NAME} ${APP_TYPE}
     ${ROKLEGEND_SOURCES}
     ${ROKLEGEND_AUDIO_SOURCES}
     ${ROKLEGEND_GAMESTATE_SOURCES}
+    ${ROKLEGEND_SERVICES_SOURCES}
     ${INFECTORPP_SOURCES}
 )
 RO_TARGET_LINK_LIBRARIES(${ROKLEGEND_PROJECT_NAME}

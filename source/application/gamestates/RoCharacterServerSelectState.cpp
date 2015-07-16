@@ -83,6 +83,7 @@ bool RoCharacterServerSelectState::updateState(float timeSinceLastFrameInSecs)
 
 void RoCharacterServerSelectState::serverSelectPrompt(const RoTaskArgs& args)
 {
+    roLOG_INFO << "Selecting server prompt...";
     auto currentStage = Stage::SERVER_SELECT_PROMPT;
     if (getCurrentStage() != currentStage)
     {

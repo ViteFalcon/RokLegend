@@ -1,10 +1,13 @@
 #pragma once
 #include <core/RoPrerequisites.h>
 
+#include <network/RoNetServerType.h>
+#include <network/packets/RoLoginFailed.h>
+
 #include "RoGameState.h"
 
 roFORWARD_DECL_PTR(RoButtonSound);
-roFORWARD_DECL_PTR(RoLoginSuccessful);
+roFORWARD_DECL_PTR(RoLoginServer);
 
 struct RoPacketReceivedEvent;
 struct RoServerConnectedEvent;
@@ -23,10 +26,13 @@ enum class RoLoginStage
     LOGIN_CANCELLED
 };
 
+RoString to_string(RoLoginStage stage);
+std::ostream& operator << (std::ostream& stream, const RoLoginStage& stage);
+
 class RoLoginState : public RoGameStateT<RoLoginState>
 {
 public:
-    RoLoginState(RokLegendPtr game, RoBackgroundScorePtr backgroundScore, RoButtonSoundPtr buttonSound, RoLoginSuccessfulPtr accountInfo);
+    RoLoginState(RokLegendPtr game, RoBackgroundScorePtr backgroundScore, RoButtonSoundPtr buttonSound, RoLoginServerPtr loginServer);
 
 protected:
     virtual void addTaskHandlers() override;
@@ -38,11 +44,8 @@ private:
     bool changeStage(RoLoginStage& expectedState, const RoLoginStage newState);
 
 private:
-    void loginServerConnectFailed(const RoServerConnectRequestFailedEvent& args);
-    void loginServerConnected(const RoServerConnectedEvent& args);
-    void loginServerDisconnected(const RoServerDisconnectedEvent& args);
-    void loginSuccessful(const RoPacketReceivedEvent& args);
-    void loginFailed(const RoPacketReceivedEvent& args);
+    void serverConnectResponse(RoNetServerType type, RoOptionalString result);
+    void loginResponse(optional<RoLoginFailed> result);
 
 private: // static
     static const RoString LOGIN_PROMPT_TASK;
@@ -57,7 +60,7 @@ private:
 
     RoAtomicLoginStage mStage;
     RoButtonSoundPtr mButtonSound;
-    RoLoginSuccessfulPtr mAccountInfo;
+    RoLoginServerPtr mLoginServer;
     RoOptionalString mUsername;
     RoOptionalString mPassword;
 };
