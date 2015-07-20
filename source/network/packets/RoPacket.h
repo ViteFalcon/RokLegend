@@ -32,7 +32,9 @@ struct RoPacket
     {
         const T* derivedType = dynamic_cast<const T*>(this);
         roTHROW_IF(derivedType == nullptr,
-            RoInvalidOperation() << RoErrorInfoDetail("Invalid packet conversion"));
+            RoInvalidOperation()
+                << RoErrorInfoDetail("Invalid packet conversion")
+                << RoErrorInfoHint(typeid(T).name()));
         return *derivedType;
     }
 };

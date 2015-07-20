@@ -1,13 +1,21 @@
 #include "RoGameBindings.h"
+
 #include "RokLegend.h"
-#include "gamestates/RoLoginState.h"
+
 #include "gamestates/RoCharacterServerSelectState.h"
-#include "services/RoLoginServer.h"
+#include "gamestates/RoLoginState.h"
+
 #include "infectorpp/InfectorContainer.hpp"
+
+#include "services/RoCharacterServerInterface.h"
+#include "services/RoLoginServerInterface.h"
+
 #include <audio/irrklang/RoIrrKlangAudioManager.h>
+
 #include <core/RoFileSystem.h>
-#include <network/packets/RoLoginSuccessful.h>
+
 #include <network/packets/RoCharacterListing.h>
+#include <network/packets/RoLoginSuccessful.h>
 
 RoConfigPtr RoGameBindings::getConfigs()
 {
@@ -89,12 +97,14 @@ RoGameStatePtr RoGameBindings::getCharacterServerSelectState()
     auto game = getGame();
     auto backgroundScore = getBackgroundScore();
     auto buttonSound = getButtonSound();
+    auto characterServer = getCharacterServer();
     auto accountInfo = getAccountInfo();
     auto characterListing = getCharacterListing();
     auto gameState = std::make_shared<RoCharacterServerSelectState>(
         game,
         backgroundScore,
         buttonSound,
+        characterServer,
         accountInfo,
         characterListing);
     return gameState;
@@ -110,9 +120,16 @@ RoCharacterListingPtr RoGameBindings::getCharacterListing()
     return getIocContainer().buildSingle<RoCharacterListing>();
 }
 
-RoLoginServerPtr RoGameBindings::getLoginServer()
+RoLoginServerInterfacePtr RoGameBindings::getLoginServer()
 {
-    auto server = getIocContainer().buildSingle<RoLoginServer>();
+    auto server = getIocContainer().buildSingle<RoLoginServerInterface>();
+    server->initialize();
+    return server;
+}
+
+RoCharacterServerInterfacePtr RoGameBindings::getCharacterServer()
+{
+    auto server = getIocContainer().buildSingle<RoCharacterServerInterface>();
     server->initialize();
     return server;
 }
@@ -139,7 +156,8 @@ void RoGameBindings::doBindings(Infector::Container& ioc)
     ioc.bindSingleAsNothing<RoLoginSuccessful>();
     ioc.bindSingleAsNothing<RoCharacterListing>();
     ioc.bindSingleAsNothing<RoGameStateFactory>();
-    ioc.bindSingleAsNothing<RoLoginServer>();
+    ioc.bindSingleAsNothing<RoLoginServerInterface>();
+    ioc.bindSingleAsNothing<RoCharacterServerInterface>();
 
     ioc.wire<RoConfig>();
     ioc.wire<entityx::EventManager>();
@@ -149,7 +167,8 @@ void RoGameBindings::doBindings(Infector::Container& ioc)
     ioc.wire<RoLoginSuccessful>();
     ioc.wire<RoCharacterListing>();
     ioc.wire<RoGameStateFactory>();
-    ioc.wire<RoLoginServer, RoLoginSuccessful>();
+    ioc.wire<RoLoginServerInterface, RoLoginSuccessful>();
+    ioc.wire<RoCharacterServerInterface, RoLoginSuccessful, RoCharacterListing>();
 
     initConfigs(ioc.buildSingle<RoConfig>());
 }

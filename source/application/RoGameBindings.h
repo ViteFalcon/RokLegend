@@ -16,7 +16,8 @@
 roFORWARD_DECL_PTR(RokLegend);
 roFORWARD_DECL_PTR(RoLoginSuccessful);
 roFORWARD_DECL_PTR(RoCharacterListing);
-roFORWARD_DECL_PTR(RoLoginServer);
+roFORWARD_DECL_PTR(RoLoginServerInterface);
+roFORWARD_DECL_PTR(RoCharacterServerInterface);
 
 namespace Infector
 {
@@ -48,7 +49,8 @@ public:
     static RoLoginSuccessfulPtr getAccountInfo();
     static RoCharacterListingPtr getCharacterListing();
 
-    static RoLoginServerPtr getLoginServer();
+    static RoLoginServerInterfacePtr getLoginServer();
+    static RoCharacterServerInterfacePtr getCharacterServer();
 
 private:
     static Infector::Container& getIocContainer();

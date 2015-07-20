@@ -11,7 +11,7 @@
 #include <core/RoLog.h>
 #include <core/RoZipIterator.h>
 
-#define roDEBUG_PACKET 1
+#define roDEBUG_PACKET 0
 
 #if defined(roDEBUG_PACKET) && roDEBUG_PACKET
 #   define roPKT_LOG_DBG(msg) roLOG_DBG << msg

@@ -7,7 +7,7 @@
 #include "RoGameState.h"
 
 roFORWARD_DECL_PTR(RoButtonSound);
-roFORWARD_DECL_PTR(RoLoginServer);
+roFORWARD_DECL_PTR(RoLoginServerInterface);
 
 struct RoPacketReceivedEvent;
 struct RoServerConnectedEvent;
@@ -32,7 +32,7 @@ std::ostream& operator << (std::ostream& stream, const RoLoginStage& stage);
 class RoLoginState : public RoGameStateT<RoLoginState>
 {
 public:
-    RoLoginState(RokLegendPtr game, RoBackgroundScorePtr backgroundScore, RoButtonSoundPtr buttonSound, RoLoginServerPtr loginServer);
+    RoLoginState(RokLegendPtr game, RoBackgroundScorePtr backgroundScore, RoButtonSoundPtr buttonSound, RoLoginServerInterfacePtr loginServer);
 
 protected:
     virtual void addTaskHandlers() override;
@@ -60,7 +60,7 @@ private:
 
     RoAtomicLoginStage mStage;
     RoButtonSoundPtr mButtonSound;
-    RoLoginServerPtr mLoginServer;
+    RoLoginServerInterfacePtr mLoginServer;
     RoOptionalString mUsername;
     RoOptionalString mPassword;
 };

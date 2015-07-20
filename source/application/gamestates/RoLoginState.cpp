@@ -3,7 +3,7 @@
 #include "../audio/RoBackgroundScore.h"
 #include "../RoGameBindings.h"
 #include "../RokLegend.h"
-#include "../services/RoLoginServer.h"
+#include "../services/RoLoginServerInterface.h"
 
 #include <core/RoHashSet.h>
 #include <core/RoLog.h>
@@ -89,7 +89,7 @@ RoLoginState::RoLoginState(
     RokLegendPtr game,
     RoBackgroundScorePtr backgroundScore,
     RoButtonSoundPtr buttonSound,
-    RoLoginServerPtr loginServer)
+    RoLoginServerInterfacePtr loginServer)
     : RoGameStateT{ game, backgroundScore }
     , mButtonSound{ buttonSound }
     , mLoginServer{ loginServer }
@@ -151,7 +151,7 @@ void RoLoginState::loginPrompt(const RoTaskArgs& args)
     {
         std::cout << "Connecting to login server... ";
         // FIXME: This should come from clientinfo.xml
-        RoLoginServer::ConnectCallback callback = std::bind(
+        RoLoginServerInterface::ConnectCallback callback = std::bind(
             &RoLoginState::serverConnectResponse,
             this,
             std::placeholders::_1,
@@ -188,7 +188,7 @@ void RoLoginState::serverConnectResponse(RoNetServerType type, RoOptionalString 
     if (changeStage(currentStage, RoLoginStage::LOGIN_REQUEST_SENT))
     {
         std::cout << "Logging in using credentials provided... ";
-        RoLoginServer::LoginCallback callback = std::bind(&RoLoginState::loginResponse, this, std::placeholders::_1);
+        RoLoginServerInterface::LoginCallback callback = std::bind(&RoLoginState::loginResponse, this, std::placeholders::_1);
         mLoginServer->login(mUsername.get(), mPassword.get(), callback);
         mUsername.reset();
         mPassword.reset();

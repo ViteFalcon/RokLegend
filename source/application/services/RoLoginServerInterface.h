@@ -6,11 +6,11 @@
 struct RoPacketReceivedEvent;
 roFORWARD_DECL_PTR(RoLoginSuccessful);
 
-class RoLoginServer : public RoServerInterfaceT<RoLoginServer>
+class RoLoginServerInterface : public RoServerInterfaceT<RoLoginServerInterface>
 {
 public:
-    RoLoginServer(RoLoginSuccessfulPtr accountInfo);
-    ~RoLoginServer() = default;
+    RoLoginServerInterface(RoLoginSuccessfulPtr accountInfo);
+    ~RoLoginServerInterface() = default;
 
     using LoginCallback = std::function < void(optional<RoLoginFailed>) > ;
     void login(const RoString& username, const RoString& password, LoginCallback callback);

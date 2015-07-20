@@ -4,8 +4,14 @@
 #include "RoGameState.h"
 
 roFORWARD_DECL_PTR(RoButtonSound);
-roFORWARD_DECL_PTR(RoLoginSuccessful);
 roFORWARD_DECL_PTR(RoCharacterListing);
+roFORWARD_DECL_PTR(RoCharacterServerConnectFailed);
+roFORWARD_DECL_PTR(RoCharacterServerInterface);
+roFORWARD_DECL_PTR(RoCharacterServerLoginFailed);
+roFORWARD_DECL_PTR(RoCharacterServerLoginResult);
+roFORWARD_DECL_PTR(RoCharacterServerLoginSucceeded);
+roFORWARD_DECL_PTR(RoCharacterServerPinCodeSystem);
+roFORWARD_DECL_PTR(RoLoginSuccessful);
 
 struct RoPacketReceivedEvent;
 struct RoServerConnectedEvent;
@@ -19,6 +25,7 @@ public:
         RokLegendPtr game,
         RoBackgroundScorePtr backgroundScore,
         RoButtonSoundPtr buttonSound,
+        RoCharacterServerInterfacePtr characterServer,
         RoLoginSuccessfulPtr accountInfo,
         RoCharacterListingPtr characterListing);
 
@@ -44,16 +51,11 @@ private:
     bool changeStage(Stage& expectedState, const Stage newState);
 
 private:
-    void characterServerConnectFailed(const RoServerConnectRequestFailedEvent& args);
-    void characterServerConnected(const RoServerConnectedEvent& args);
-    void characterServerDisconnected(const RoServerDisconnectedEvent& args);
-    void charactersReceived(const RoPacketReceivedEvent& args);
-    void loginSuccessful(const RoPacketReceivedEvent& args);
-    void characterSelectPages(const RoPacketReceivedEvent& args);
-    void blockedCharacters(const RoPacketReceivedEvent& args);
-    void loginFailed(const RoPacketReceivedEvent& args);
-    void pincodeSystemDisabled(const RoPacketReceivedEvent& args);
-
+    void loginResult(RoCharacterServerLoginResultPtr result);
+    void onConnectionFailed(RoCharacterServerConnectFailedPtr result);
+    void onLoginFailed(RoCharacterServerLoginFailedPtr result);
+    void onPinCodeSystem(RoCharacterServerPinCodeSystemPtr result);
+    void onLoginSuceeded(RoCharacterServerLoginSucceededPtr result);
 private: // static
     static const RoString SERVER_SELECT_PROMPT_TASK;
     static const RoString CHARACTER_SELECT_NOTIFICATION;
@@ -71,6 +73,7 @@ private:
 
     RoAtomicStage mStage;
     RoButtonSoundPtr mButtonSound;
+    RoCharacterServerInterfacePtr mCharacterServer;
     RoLoginSuccessfulPtr mAccountInfo;
     RoCharacterListingPtr mCharacterListing;
 };

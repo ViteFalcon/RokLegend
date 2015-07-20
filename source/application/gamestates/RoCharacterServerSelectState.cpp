@@ -3,6 +3,7 @@
 #include "../audio/RoBackgroundScore.h"
 #include "../RoGameBindings.h"
 #include "../RokLegend.h"
+#include "../services/RoCharacterServerInterface.h"
 
 #include <core/RoHashSet.h>
 #include <core/RoLog.h>
@@ -36,11 +37,13 @@ RoCharacterServerSelectState::RoCharacterServerSelectState(
     RokLegendPtr game,
     RoBackgroundScorePtr backgroundScore,
     RoButtonSoundPtr buttonSound,
+    RoCharacterServerInterfacePtr characterServer,
     RoLoginSuccessfulPtr accountInfo,
     RoCharacterListingPtr characterListing)
     : RoGameStateT{ game, backgroundScore }
     , mStage{ Stage::NONE }
     , mButtonSound{ buttonSound }
+    , mCharacterServer{ characterServer }
     , mAccountInfo{ accountInfo }
     , mCharacterListing{ characterListing }
 {
@@ -49,15 +52,6 @@ RoCharacterServerSelectState::RoCharacterServerSelectState(
 void RoCharacterServerSelectState::addTaskHandlers()
 {
     addTaskHandler(SERVER_SELECT_PROMPT_TASK, &RoCharacterServerSelectState::serverSelectPrompt);
-    addTaskHandler<RoPacketReceivedEvent>(CHARACTER_LISTING_TASK, &RoCharacterServerSelectState::charactersReceived);
-    addTaskHandler<RoPacketReceivedEvent>(CHARACTER_SELECT_NOTIFICATION, &RoCharacterServerSelectState::loginSuccessful);
-    addTaskHandler<RoPacketReceivedEvent>(CHARACTER_SELECT_PAGES, &RoCharacterServerSelectState::characterSelectPages);
-    addTaskHandler<RoPacketReceivedEvent>(BLOCKED_CHARACTER_INFORMATION, &RoCharacterServerSelectState::blockedCharacters);
-    addTaskHandler<RoPacketReceivedEvent>(LOGIN_FAILED_TASK, &RoCharacterServerSelectState::loginFailed);
-    addTaskHandler<RoPacketReceivedEvent>(PINCODE_SYSTEM_DISABLED, &RoCharacterServerSelectState::pincodeSystemDisabled);
-    addTaskHandler<RoServerConnectRequestFailedEvent>(CHARACTER_SERVER_CONNECT_FAILED_TASK, &RoCharacterServerSelectState::characterServerConnectFailed);
-    addTaskHandler<RoServerConnectedEvent>(CHARACTER_SERVER_CONNECTED_TASK, &RoCharacterServerSelectState::characterServerConnected);
-    addTaskHandler<RoServerDisconnectedEvent>(CHARACTER_SERVER_DISCONNECTED_TASK, &RoCharacterServerSelectState::characterServerDisconnected);
 }
 
 bool RoCharacterServerSelectState::updateState(float timeSinceLastFrameInSecs)
@@ -72,8 +66,9 @@ bool RoCharacterServerSelectState::updateState(float timeSinceLastFrameInSecs)
             roSCHEDULE_TASK_NAMED(SERVER_SELECT_PROMPT_TASK, RoEmptyArgs::INSTANCE);
         }
         break;
+    case Stage::LOGIN_FAILED:
     case Stage::LOGIN_CANCELLED:
-        RoNetworkManager::Disconnect(RoNetServerType::CHARACTER);
+        mCharacterServer->disconnect();
         mGame->setGameState(RoGameStates::LOGIN);
         continueState = false;
         break;
@@ -93,17 +88,16 @@ void RoCharacterServerSelectState::serverSelectPrompt(const RoTaskArgs& args)
 
     auto hasValidEntry = false;
     auto selectedServer = 0;
-    auto characterServers = mAccountInfo->getCharacterServers();
+    auto characterServers = mCharacterServer->getServerNames();
     do 
     {
         int i = 0;
         std::cout << std::endl;
         std::cout << "Select from the servers below" << std::endl;
         std::cout << "-----------------------------" << std::endl;
-        for (RoCharacterServerPtr characterServer : characterServers)
+        for (auto characterServer : characterServers)
         {
-            std::cout << "\t" << i << ". " << characterServer->getName() << " (" << characterServer->getNumberOfPlayers() << ")" << std::endl;
-            std::cout << "\t\tRemote Address: " << characterServer->getIpAddress() << ":" << characterServer->getPortNumber() << std::endl;
+            std::cout << "\t" << i << ". " << characterServer << std::endl;
         }
         RoOptionalUInt32 serverSelected = readInteger("> Select server: ", false);
         if (!serverSelected.is_initialized())
@@ -122,87 +116,8 @@ void RoCharacterServerSelectState::serverSelectPrompt(const RoTaskArgs& args)
 
     if (changeStage(currentStage, Stage::CHARACTER_SERVER_CONNECTING))
     {
-        RoCharacterServerPtr characterServer = characterServers[selectedServer];
-        RoString ipAddress = characterServer->getIpAddress();
-        RoString portNumber = RoStringUtil::Format("%d", characterServer->getPortNumber());
-        std::cout << "... connecting to server " << characterServer->getName() << "... ";
-        RoNetworkManager::Connect(RoNetServerType::CHARACTER, ipAddress, portNumber);
-    }
-}
-
-void RoCharacterServerSelectState::characterServerConnectFailed(const RoServerConnectRequestFailedEvent& args)
-{
-    std::cout << "[FAILED]" << std::endl << "\tReason: " << args.reason << std::endl;
-    auto currentState = getCurrentStage();
-    changeStage(currentState, Stage::LOGIN_CANCELLED);
-}
-
-void RoCharacterServerSelectState::characterServerConnected(const RoServerConnectedEvent& args)
-{
-    std::cout << "[SUCCESS]" << std::endl;
-    auto currentStage = Stage::CHARACTER_SERVER_CONNECTING;
-    if (getCurrentStage() != currentStage)
-    {
-        std::cerr << "Punting login due to unexpected stage" << std::endl;
-        return;
-    }
-
-    auto loginPacket = std::make_shared<RoGameLogin>();
-    loginPacket->setAccountId(mAccountInfo->getId());
-    loginPacket->setLoginId(mAccountInfo->getLoginId1());
-    loginPacket->setLoginId2(mAccountInfo->getLoginId2());
-    loginPacket->setGender(mAccountInfo->getGender());
-
-    if (changeStage(currentStage, Stage::LOGIN_REQUEST_SENT))
-    {
-        RoNetworkManager::SendToServer(RoNetServerType::CHARACTER, loginPacket);
-    }
-}
-
-void RoCharacterServerSelectState::characterServerDisconnected(const RoServerDisconnectedEvent& args)
-{
-    std::cerr << "Disconnected from character server!" << std::endl;
-    auto currentStage = getCurrentStage();
-    changeStage(currentStage, Stage::LOGIN_CANCELLED);
-}
-
-void RoCharacterServerSelectState::charactersReceived(const RoPacketReceivedEvent& args)
-{
-    auto currentStage = Stage::LOGIN_REQUEST_SENT;
-    const auto& characterListing = args.packet->castTo<RoCharacterListing>();
-    std::cout << "Max Slots: " << characterListing.getMaxSlots().get() << std::endl;
-    std::cout << "Available Slots: " << characterListing.getAvailableSlots().get() << std::endl;
-    std::cout << "Premium Slots: " << characterListing.getPremiumSlots().get() << std::endl;
-    if (characterListing.getCharacters().empty())
-    {
-        std::cout << "--- No characters available for this account" << std::endl;
-    }
-    else
-    {
-        for (auto characterInfo : characterListing.getCharacters())
-        {
-            std::cout
-                << "[" << characterInfo->getSlot() << "] "
-                << characterInfo->getName() << " "
-                << characterInfo->getBaseLevel() << "/" << characterInfo->getJobLevel() << std::endl;
-        }
-    }
-    mCharacterListing->fromProperties(characterListing.getProperties());
-    if (changeStage(currentStage, Stage::LOGIN_SUCCEEDED))
-    {
-        // FIXME: This should propagate to the next state
-        RoNetworkManager::Disconnect(RoNetServerType::CHARACTER);
-    }
-}
-
-void RoCharacterServerSelectState::loginFailed(const RoPacketReceivedEvent& args)
-{
-    auto currentStage = Stage::LOGIN_REQUEST_SENT;
-    std::cout << "Login FAILED!" << std::endl;
-    std::cout << "\tReason: Rejected from server!" << std::endl;
-    if (changeStage(currentStage, Stage::LOGIN_CANCELLED))
-    {
-        RoNetworkManager::Disconnect(RoNetServerType::CHARACTER);
+        auto callback = std::bind(&RoCharacterServerSelectState::loginResult, this, std::placeholders::_1);
+        mCharacterServer->loginToServerAtIndex(selectedServer, callback);
     }
 }
 
@@ -225,57 +140,73 @@ bool RoCharacterServerSelectState::changeStage(Stage& expectedState, const Stage
     return true;
 }
 
-void RoCharacterServerSelectState::pincodeSystemDisabled(const RoPacketReceivedEvent& args)
+void RoCharacterServerSelectState::loginResult(RoCharacterServerLoginResultPtr result)
 {
-    auto pincodeSystemState = args.getProperties().get(_H("state")).as<uint16>();
-    switch (pincodeSystemState)
+    switch (result->getType())
     {
-    case 0:
-        std::cout << "Pincode System is disabled!" << std::endl;
+    case RoCharacterServerLoginResult::Type::CONNECT_FAILED:
+        onConnectionFailed(std::dynamic_pointer_cast<RoCharacterServerConnectFailed>(result));
         break;
-    case 1:
-        std::cout << "Ask for pin" << std::endl;
+    case RoCharacterServerLoginResult::Type::LOGIN_FAILED:
+        onLoginFailed(std::dynamic_pointer_cast<RoCharacterServerLoginFailed>(result));
         break;
-    case 2:
-        std::cout << "Create new pin" << std::endl;
+    case RoCharacterServerLoginResult::Type::PIN_CODE_SYSTEM:
+        onPinCodeSystem(std::dynamic_pointer_cast<RoCharacterServerPinCodeSystem>(result));
         break;
-    case 3:
-        std::cout << "Pin must be changed." << std::endl;
-        break;
-    case 4:
-        std::cout << "Create new pin2" << std::endl;
-        break;
-    case 5:
-        std::cout << "Client shows message string (1896)" << std::endl;
-        break;
-    case 6:
-        std::cout << "Client shows a message (1897). Unable to use your KSSN number." << std::endl;
-        break;
-    case 7:
-        std::cout << "Char select shows a button." << std::endl;
-        break;
-    case 8:
-        std::cout << "Pincode was incorrect!" << std::endl;
+    case RoCharacterServerLoginResult::Type::SUCCESS:
+        onLoginSuceeded(std::dynamic_pointer_cast<RoCharacterServerLoginSucceeded>(result));
         break;
     default:
-        std::cout << "Unknown pincode system state: " << pincodeSystemState << std::endl;
         break;
     }
 }
 
-void RoCharacterServerSelectState::loginSuccessful(const RoPacketReceivedEvent& args)
+void RoCharacterServerSelectState::onConnectionFailed(RoCharacterServerConnectFailedPtr result)
 {
-    std::cout << "Login was SUCCESSFUL!" << std::endl;
+    std::cout << "Failed to connect to character server.\n\tReason: " << result->getReason() << std::endl;
+    auto currentStage = getCurrentStage();
+    changeStage(currentStage, Stage::NONE);
 }
 
-void RoCharacterServerSelectState::characterSelectPages(const RoPacketReceivedEvent& args)
+void RoCharacterServerSelectState::onLoginFailed(RoCharacterServerLoginFailedPtr result)
 {
-    auto pageCount = args.getProperties().get("page_count").as<uint32>();
-    std::cout << "Received page count: " << pageCount << std::endl;
+    std::cout << "Failed to login to character server.\n\tReason: " << result->getReason() << std::endl;
+    auto currentStage = getCurrentStage();
+    changeStage(currentStage, Stage::LOGIN_FAILED);
 }
 
-void RoCharacterServerSelectState::blockedCharacters(const RoPacketReceivedEvent& args)
+void RoCharacterServerSelectState::onPinCodeSystem(RoCharacterServerPinCodeSystemPtr result)
 {
-    std::cout << "Received blocked characters list (ignoring for now)." << std::endl;
+    switch (result->getPinCodeRequest())
+    {
+    case RoPinCodeSystemRequest::DISABLED:
+        roLOG_INFO << RoPinCodeSystemRequest::DISABLED;
+        break;
+    default:
+        roLOG_ERR << "Cannot handle Pincode system request: " << result->getPinCodeRequest();
+        break;
+    }
+}
+
+void RoCharacterServerSelectState::onLoginSuceeded(RoCharacterServerLoginSucceededPtr result)
+{
+    auto characterListing = result->getCharacterListing();
+    if (characterListing->getCharacters().empty())
+    {
+        std::cout << "--- No characters available for this account" << std::endl;
+    }
+    else
+    {
+        for (auto characterInfo : characterListing->getCharacters())
+        {
+            std::cout
+                << "[" << characterInfo->getSlot() << "] "
+                << characterInfo->getName() << " "
+                << characterInfo->getBaseLevel() << "/" << characterInfo->getJobLevel() << std::endl;
+        }
+    }
+    auto currentStage = Stage::CHARACTER_SERVER_CONNECTING;
+    // FIXME: This should propagate to the next state
+    changeStage(currentStage, Stage::LOGIN_CANCELLED);
 }
 

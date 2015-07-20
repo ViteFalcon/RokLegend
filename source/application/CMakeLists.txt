@@ -32,12 +32,12 @@ SET(ROKLEGEND_GAMESTATE_SOURCES
 RO_SOURCE_GROUP(gamestates ${ROKLEGEND_GAMESTATE_SOURCES})
 
 SET(ROKLEGEND_SERVICES_SOURCES
-    services/RoCharacterServer.cpp
-    services/RoCharacterServer.h
-    services/RoLoginServer.cpp
-    services/RoLoginServer.h
-    services/RoMapServer.cpp
-    services/RoMapServer.h
+    services/RoCharacterServerInterface.cpp
+    services/RoCharacterServerInterface.h
+    services/RoLoginServerInterface.cpp
+    services/RoLoginServerInterface.h
+    services/RoMapServerInterface.cpp
+    services/RoMapServerInterface.h
     services/RoPlayerService.cpp
     services/RoPlayerService.h
     services/RoServerInterface.cpp

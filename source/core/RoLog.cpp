@@ -13,6 +13,7 @@
 #if roLOG_USE_BOOST_LOG
 #   include <boost/log/common.hpp>
 #   include <boost/log/trivial.hpp>
+#   include <boost/log/utility/setup/console.hpp>
 #   include <boost/log/utility/setup/file.hpp>
 #   include <boost/log/utility/setup/common_attributes.hpp>
 //------------------------------------------------------------------------------
@@ -36,6 +37,7 @@ void roInitBoostLog(const RoLogOptions& options)
         keywords::time_based_rotation = sinks::file::rotation_at_time_point(0,0,0),
         keywords::format = "%TimeStamp%: [%Severity%] %Message%"
         );
+    log::add_console_log(std::cout, keywords::format = "%Message%");
 }
 //------------------------------------------------------------------------------
 boost::log::trivial::severity_level roGetBoostLogLevel(const RoLogOptions& options)
