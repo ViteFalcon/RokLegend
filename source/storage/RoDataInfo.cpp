@@ -46,7 +46,7 @@ void RoDataInfoImpl::LoadDataIntoMap(RoDataStore& dataStore, KeyValueMap& map)
     sqlitepp::session& dataSession = dataStore.getSession();
     sqlitepp::string_t key, val;
     sqlitepp::statement selectAllDataStrings(dataSession);
-    selectAllDataStrings << "SELECT Name, Value FROM "roDATAINFO_TABLE";",
+    selectAllDataStrings << "SELECT Name, Value FROM " << roDATAINFO_TABLE << ";",
         sqlitepp::into(key), sqlitepp::into(val);
     while (selectAllDataStrings.exec())
     {

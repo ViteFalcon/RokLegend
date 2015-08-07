@@ -118,14 +118,14 @@ roINLINE bool RoGrfVersion2::populateFileListFromCache()
     RoStringBuilder cacheLoadingMessage;
     cacheLoadingMessage << "Loading GRF file-list from cache (" << cacheFileName << ") for GRF (" << mFileName << ")...";
 
-    roLOG_INFO << cacheLoadingMessage;
+    roLOG_INFO << cacheLoadingMessage.toString().asWStr();
     RoGrf2FileList fileList;
     cacheStore & fileList;
     for (auto file : fileList.files)
     {
         addFile(file);
     }
-    roLOG_INFO << cacheLoadingMessage << " [DONE]";
+    roLOG_INFO << cacheLoadingMessage.toString().asWStr() << " [DONE]";
 
     return true;
 }

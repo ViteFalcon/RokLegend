@@ -28,6 +28,7 @@ RokLegend::RokLegend(
     , mGameStateFactory(gameStateFactory)
     , mGameState{ RoGameStates::NONE }
     , mNewGameState{ RoGameStates::NONE }
+    , mCanRunGame{ false }
 {
     addTaskHandler(EXIT_TASK, &RokLegend::stopGame);
 }

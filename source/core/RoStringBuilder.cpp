@@ -80,7 +80,7 @@ RoStringBuilder& RoStringBuilder::appendLine(const wchar_t* format, ...)
     return *this;
 }
 
-RoStringBuilder& RoStringBuilder::appendStr(const RoString& format, ...)
+RoStringBuilder& RoStringBuilder::appendStr(const RoString format, ...)
 {
     va_list argList;
     va_start(argList, format);
@@ -89,7 +89,7 @@ RoStringBuilder& RoStringBuilder::appendStr(const RoString& format, ...)
     return *this;
 }
 
-RoStringBuilder& RoStringBuilder::appendStrLine(const RoString& format, ...)
+RoStringBuilder& RoStringBuilder::appendStrLine(const RoString format, ...)
 {
     va_list argList;
     va_start(argList, format);

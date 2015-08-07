@@ -164,7 +164,7 @@ namespace std {
     template <>
     struct hash<RoHashString>
     {
-        inline size_t operator()(const RoHashString& key)
+        inline size_t operator()(const RoHashString& key) const
         {
             return key.hash();
         }

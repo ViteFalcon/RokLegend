@@ -11,7 +11,7 @@ roDEFINE_PTR(RoTaskArgs);
  */
 struct RoTaskArgs
 {
-    RoTaskId taskId{ -1 };
+    RoTaskId taskId{ 0ULL };
 
     RoTaskArgsPtr clone() const;
     virtual RoTaskArgsPtr clone(const RoTaskId taskId) const = 0;

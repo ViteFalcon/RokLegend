@@ -37,7 +37,7 @@ class RoTaskManagerImpl : public RoTaskManager
 public:
     RoTaskManagerImpl()
     {
-        sNextId = 1;
+        sNextId = 1ULL;
     }
     ~RoTaskManagerImpl() = default;
 

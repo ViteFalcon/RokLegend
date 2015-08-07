@@ -143,8 +143,13 @@ private: // fields
 bool RoDataStoreImpl::hasKey(const RoString& key)
 {
     sqlitepp::statement hasKeyStatement{ mSession };
-    hasKeyStatement <<
-        "SELECT "roREPO_KEY_STORE_ID" FROM "roREPO_KEY_STORE" WHERE "roREPO_KEY_STORE_KEYNAME" = :keyname;",
+    hasKeyStatement
+        << "SELECT "
+        << roREPO_KEY_STORE_ID
+        << " FROM "
+        << roREPO_KEY_STORE
+        << " WHERE "
+        << roREPO_KEY_STORE_KEYNAME << " = :keyname;",
         sqlitepp::use(key.asUTF8());
     return hasKeyStatement.exec();
 }
@@ -227,10 +232,12 @@ void RoDataStoreImpl::putValue(const RoString& key, const T& val, RoDataType typ
         else
         {
             sqlitepp::statement valueUpdateStatement(mSession);
-            valueUpdateStatement <<
-                "UPDATE " << valueTable << " SET "
-                roREPO_VALUE_STORE_VALUE" = :value,"
-                roREPO_VALUE_STORE_TYPE" = :valueType;",
+            valueUpdateStatement
+                << "UPDATE "
+                << valueTable
+                << " SET "
+                << roREPO_VALUE_STORE_VALUE << " = :value,"
+                << roREPO_VALUE_STORE_TYPE << " = :valueType;",
                 sqlitepp::use(val),
                 sqlitepp::use((int)type);
             valueUpdateStatement.exec();
@@ -239,10 +246,14 @@ void RoDataStoreImpl::putValue(const RoString& key, const T& val, RoDataType typ
     else
     {
         sqlitepp::statement valueInsertStatement(mSession);
-        valueInsertStatement <<
-            "INSERT INTO " << valueTable <<
-            " ("roREPO_VALUE_STORE_KEYID", "roREPO_VALUE_STORE_VALUE", "roREPO_VALUE_STORE_TYPE")"
-            " VALUES(:keyid, :value, :type);",
+        valueInsertStatement
+            << "INSERT INTO "
+            << valueTable
+            << " ("
+            << roREPO_VALUE_STORE_KEYID << ", "
+            << roREPO_VALUE_STORE_VALUE << ", "
+            << roREPO_VALUE_STORE_TYPE << ")"
+            << " VALUES(:keyid, :value, :type);",
             sqlitepp::use(keyInfo.id),
             sqlitepp::use(val),
             sqlitepp::use((int)type);
@@ -319,9 +330,13 @@ template <typename T>
 void RoDataStoreImpl::getValue(const KeyInfo& key, T& val)
 {
     sqlitepp::statement getValueStatement(mSession);
-    getValueStatement <<
-        "SELECT "roREPO_VALUE_STORE_VALUE" FROM " << key.valueTable <<
-        " WHERE "roREPO_VALUE_STORE_KEYID" = :keyid;",
+    getValueStatement
+        << "SELECT "
+        << roREPO_VALUE_STORE_VALUE
+        << " FROM "
+        << key.valueTable
+        << " WHERE "
+        << roREPO_VALUE_STORE_KEYID << " = :keyid;",
         sqlitepp::use(key.id),
         sqlitepp::into(val);
     if (!getValueStatement.exec())
@@ -372,11 +387,13 @@ void RoDataStoreImpl::createTables()
 void RoDataStoreImpl::createKeyStore()
 {
     sqlitepp::statement createStoreStatement(mSession);
-    createStoreStatement <<
-        "CREATE TABLE IF NOT EXISTS " roREPO_KEY_STORE "("
-        roREPO_KEY_STORE_ID " INTEGER PRIMARY KEY,"
-        roREPO_KEY_STORE_KEYNAME " TEXT UNIQUE NOT NULL,"
-        roREPO_KEY_STORE_VALUETABLE " TEXT);";
+    createStoreStatement
+        << "CREATE TABLE IF NOT EXISTS "
+        << roREPO_KEY_STORE
+        << "("
+        << roREPO_KEY_STORE_ID << " INTEGER PRIMARY KEY,"
+        << roREPO_KEY_STORE_KEYNAME << " TEXT UNIQUE NOT NULL,"
+        << roREPO_KEY_STORE_VALUETABLE << " TEXT);";
     createStoreStatement.exec();
 }
 
@@ -408,22 +425,24 @@ void RoDataStoreImpl::createRealStore()
 void RoDataStoreImpl::createValueStore(const char* typeName, const char* tableName)
 {
     sqlitepp::statement createStoreStatement(mSession);
-    createStoreStatement <<
-        "CREATE TABLE IF NOT EXISTS " << tableName << "("
-        roREPO_VALUE_STORE_ID " INTEGER PRIMARY KEY,"
-        roREPO_VALUE_STORE_KEYID " INTEGER UNIQUE NOT NULL REFERENCES " roREPO_KEY_STORE "("roREPO_KEY_STORE_ID") ON DELETE CASCADE,"
-        roREPO_VALUE_STORE_VALUE " " << typeName << " NOT NULL,"
-        roREPO_VALUE_STORE_TYPE" INTEGER NOT NULL);";
+    createStoreStatement
+        << "CREATE TABLE IF NOT EXISTS "
+        << tableName
+        << "(" << roREPO_VALUE_STORE_ID << " INTEGER PRIMARY KEY,"
+        << roREPO_VALUE_STORE_KEYID << " INTEGER UNIQUE NOT NULL REFERENCES " << roREPO_KEY_STORE << "(" << roREPO_KEY_STORE_ID << ") ON DELETE CASCADE,"
+        << roREPO_VALUE_STORE_VALUE << " " << typeName << " NOT NULL,"
+        << roREPO_VALUE_STORE_TYPE << " INTEGER NOT NULL);";
     createStoreStatement.exec();
 }
 
 RoDataStoreImpl::KeyInfo RoDataStoreImpl::addKey(const RoString& key, const std::string& valueTable)
 {
     sqlitepp::statement insertKeyStatement(mSession);
-    insertKeyStatement <<
-        "INSERT INTO "roREPO_KEY_STORE
-        " ("roREPO_KEY_STORE_KEYNAME","roREPO_KEY_STORE_VALUETABLE")"
-        " VALUES(:keyname, :valuetable);",
+    insertKeyStatement
+        << "INSERT INTO "
+        << roREPO_KEY_STORE
+        << " (" << roREPO_KEY_STORE_KEYNAME << "," << roREPO_KEY_STORE_VALUETABLE << ")"
+        << " VALUES(:keyname, :valuetable);",
         sqlitepp::use(key),
         sqlitepp::use(valueTable);
     insertKeyStatement.exec();
@@ -433,9 +452,13 @@ RoDataStoreImpl::KeyInfo RoDataStoreImpl::addKey(const RoString& key, const std:
 void RoDataStoreImpl::updateKey(const KeyInfo& key)
 {
     sqlitepp::statement updateKeyStatement(mSession);
-    updateKeyStatement <<
-        "UPDATE "roREPO_KEY_STORE" SET "
-        roREPO_KEY_STORE_VALUETABLE" = :valuetable WHERE "roREPO_KEY_STORE_ID" = :keyid;",
+    updateKeyStatement
+        << "UPDATE "
+        << roREPO_KEY_STORE
+        << " SET "
+        << roREPO_KEY_STORE_VALUETABLE << " = :valuetable"
+        << " WHERE "
+        << roREPO_KEY_STORE_ID << " = :keyid;",
         sqlitepp::use(key.valueTable),
         sqlitepp::use(key.id);
     updateKeyStatement.exec();
@@ -444,9 +467,11 @@ void RoDataStoreImpl::updateKey(const KeyInfo& key)
 void RoDataStoreImpl::removeValue(const ValueInfo& value)
 {
     sqlitepp::statement removeValueStatement(mSession);
-    removeValueStatement <<
-        "DELETE FROM " << value.tableName << " WHERE "
-        roREPO_VALUE_STORE_ID" = :valueid;",
+    removeValueStatement
+        << "DELETE FROM "
+        << value.tableName
+        << " WHERE "
+        << roREPO_VALUE_STORE_ID << " = :valueid;",
         sqlitepp::use(value.id);
     removeValueStatement.exec();
 }
@@ -467,10 +492,14 @@ RoDataStoreImpl::OptionalValueInfo RoDataStoreImpl::getValueInfo(const KeyInfo& 
     sqlitepp::statement getValueTypeStatement(mSession);
     OptionalValueInfo result;
     size_t valueId = 0, valueTypeNum = 0;
-    getValueTypeStatement << "SELECT "
-        roREPO_VALUE_STORE_ID", "
-        roREPO_VALUE_STORE_TYPE" FROM " <<
-        key.valueTable << " WHERE "roREPO_VALUE_STORE_KEYID" = :keyid;",
+    getValueTypeStatement
+        << "SELECT "
+        << roREPO_VALUE_STORE_ID << ", "
+        << roREPO_VALUE_STORE_TYPE
+        << " FROM "
+        << key.valueTable
+        << " WHERE "
+        << roREPO_VALUE_STORE_KEYID << " = :keyid;",
         sqlitepp::use(key.id),
         sqlitepp::into(valueId), sqlitepp::into(valueTypeNum);
     if (getValueTypeStatement.exec())
@@ -487,9 +516,14 @@ RoDataStoreImpl::OptionalKeyInfo RoDataStoreImpl::getKeyInfo(const RoString& key
     sqlitepp::statement getKeyIdAndValueTableStatement(mSession);
     size_t keyId = 0;
     std::string valueTable;
-    getKeyIdAndValueTableStatement <<
-        "SELECT "roREPO_KEY_STORE_ID","roREPO_KEY_STORE_VALUETABLE" FROM "roREPO_KEY_STORE
-        " WHERE "roREPO_KEY_STORE_KEYNAME" = :keyname;",
+    getKeyIdAndValueTableStatement
+        << "SELECT "
+        << roREPO_KEY_STORE_ID <<","
+        << roREPO_KEY_STORE_VALUETABLE
+        << " FROM "
+        << roREPO_KEY_STORE
+        << " WHERE "
+        << roREPO_KEY_STORE_KEYNAME" = :keyname;",
         sqlitepp::use(key), sqlitepp::into(keyId), sqlitepp::into(valueTable);
     if (getKeyIdAndValueTableStatement.exec())
     {

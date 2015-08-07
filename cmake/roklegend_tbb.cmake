@@ -41,6 +41,8 @@ IF (MSVC)
 
     IF (MSVC12)
         SET(_TBB_MSVC_LIB_DIR "vc12")
+    ELSEIF (MSVC14)
+        SET(_TBB_MSVC_LIB_DIR "vc14")
     ELSE ()
         MESSAGE(FATAL_ERROR "Unsupported Visual Studio version: '${ROKLEGEND_MSVC}'!")
     ENDIF ()

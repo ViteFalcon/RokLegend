@@ -9,7 +9,6 @@
 #include "RoPrerequisites.h"
 
 #include <boost/unordered_map.hpp>
-#include <hash_map>
 #include <boost/utility/value_init.hpp>
 
 namespace Detail

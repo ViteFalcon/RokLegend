@@ -180,7 +180,7 @@ void RoCharacterServerSelectState::onPinCodeSystem(RoCharacterServerPinCodeSyste
     switch (result->getPinCodeRequest())
     {
     case RoPinCodeSystemRequest::DISABLED:
-        roLOG_INFO << RoPinCodeSystemRequest::DISABLED;
+        roLOG_INFO << to_string(RoPinCodeSystemRequest::DISABLED).asWStr();
         break;
     default:
         roLOG_ERR << "Cannot handle Pincode system request: " << result->getPinCodeRequest();

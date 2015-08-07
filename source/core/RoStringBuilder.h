@@ -51,8 +51,8 @@ public:
     RoStringBuilder& append(const wchar_t* format, ...);
     RoStringBuilder& appendLine(const wchar_t* format, ...);
 
-    RoStringBuilder& appendStr(const RoString& format, ...);
-    RoStringBuilder& appendStrLine(const RoString& format, ...);
+    RoStringBuilder& appendStr(const RoString format, ...);
+    RoStringBuilder& appendStrLine(const RoString format, ...);
 
     inline RoStringBuilder& increaseIndentation()
     {
