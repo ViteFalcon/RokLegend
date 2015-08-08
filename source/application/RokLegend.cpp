@@ -14,6 +14,8 @@
 
 #include <storage/RoDataInfo.h>
 
+#include <tbb/tbb_thread.h>
+
 #include "RoGameBindings.h"
 #include "gamestates/RoGameState.h"
 
@@ -74,9 +76,10 @@ void RokLegend::run()
         RoNetworkManager::ScheduleUpdate();
         messageQueue.dispatch();
         gameState->update(deltaSeconds);
-        // FIXME: Get rid of this sleep once moved to graphics
-        Sleep(0);
+        // FIXME: Get rid of this yield once moved to graphics
+        tbb::this_tbb_thread::yield();
     } while (mCanRunGame.load());
+    gameState.reset();
 }
 
 void RokLegend::setGameState(RoGameStates gameState)
