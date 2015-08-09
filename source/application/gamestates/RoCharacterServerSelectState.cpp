@@ -4,6 +4,7 @@
 #include "../RoGameBindings.h"
 #include "../RokLegend.h"
 #include "../services/RoCharacterServerInterface.h"
+#include "../utilities/RoCliMenu.h"
 
 #include <core/RoHashSet.h>
 #include <core/RoLog.h>
@@ -89,35 +90,18 @@ void RoCharacterServerSelectState::serverSelectPrompt(const RoTaskArgs& args)
     auto hasValidEntry = false;
     auto selectedServer = 0;
     auto characterServers = mCharacterServer->getServerNames();
-    do 
-    {
-        int i = 0;
-        std::cout << std::endl;
-        std::cout << "Select from the servers below" << std::endl;
-        std::cout << "-----------------------------" << std::endl;
-        for (auto characterServer : characterServers)
-        {
-            std::cout << "\t" << i << ". " << characterServer << std::endl;
-        }
-        RoOptionalUInt32 serverSelected = readInteger("> Select server: ", false);
-        if (!serverSelected.is_initialized())
-        {
-            changeStage(currentStage, Stage::LOGIN_CANCELLED);
-            return;
-        }
-        mButtonSound->play();
-        selectedServer = serverSelected.get();
-        hasValidEntry = selectedServer < characterServers.size();
-        if (!hasValidEntry)
-        {
-            std::cout << "Invalid server selection. Please try again!" << std::endl;
-        }
-    } while (!hasValidEntry);
-
-    if (changeStage(currentStage, Stage::CHARACTER_SERVER_CONNECTING))
+    RoOptionalUInt32 serverSelected = RoCliMenu("Select from the servers below")
+        .withOptions(characterServers)
+        .withAcknowledgementSound(mButtonSound)
+        .getSelection();
+    if (serverSelected.is_initialized() && changeStage(currentStage, Stage::CHARACTER_SERVER_CONNECTING))
     {
         auto callback = std::bind(&RoCharacterServerSelectState::loginResult, this, std::placeholders::_1);
         mCharacterServer->loginToServerAtIndex(selectedServer, callback);
+    }
+    else
+    {
+        changeStage(currentStage, Stage::LOGIN_CANCELLED);
     }
 }
 

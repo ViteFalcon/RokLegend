@@ -129,6 +129,7 @@
         <version id="126" client="RagexeRE_2010_11_24a"/>
         <version id="127" client="RagexeRE_2011_10_05a"/>
         <version id="128" client="RagexeRE_2011_11_02a"/>
+        <version id="129" client="RagexeRE_2012_03_07"/>
     </versions>
 
     <heartbeatpackets>
@@ -273,6 +274,12 @@
         <data name="int" type="byte"/>
         <data name="dex" type="byte"/>
         <data name="luk" type="byte"/>
+        <data name="slot" type="byte"/>
+        <data name="hair_color" type="uint16"/>
+        <data name="hair" type="uint16"/>
+    </packet>
+    <packet id="0x970" name="CharacterCreate" version="114">
+        <data name="name" type="string" size="24"/>
         <data name="slot" type="byte"/>
         <data name="hair_color" type="uint16"/>
         <data name="hair" type="uint16"/>

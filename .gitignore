@@ -313,3 +313,4 @@ install_manifest.txt
 ### RokLegend ###
 dependencies/zlib/include/zconf.h
 dependencies/entityx/entityx/config.h
+/Build_VS2013

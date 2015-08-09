@@ -1,9 +1,9 @@
 #include "RoLoginState.h"
-#include "../audio/RoButtonSound.h"
 #include "../audio/RoBackgroundScore.h"
 #include "../RoGameBindings.h"
 #include "../RokLegend.h"
 #include "../services/RoLoginServerInterface.h"
+#include "../utilities/RoCli.h"
 
 #include <core/RoHashSet.h>
 #include <core/RoLog.h>
@@ -130,20 +130,18 @@ void RoLoginState::loginPrompt(const RoTaskArgs& args)
         return;
     }
 
-    auto username = readInput("Enter Username: ", false);
+    auto username = RoCli::ReadString("Enter Username: ", false, mButtonSound);
     if (!username)
     {
         mStage.store(RoLoginStage::LOGIN_CANCELLED);
         return;
     }
-    mButtonSound->play();
-    auto password = readInput("Enter Password: ", true);
+    auto password = RoCli::ReadString("Enter Password: ", true, mButtonSound);
     if (!password)
     {
         mStage.store(RoLoginStage::LOGIN_CANCELLED);
         return;
     }
-    mButtonSound->play();
     mUsername = username;
     mPassword = password;
 

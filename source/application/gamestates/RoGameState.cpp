@@ -1,18 +1,8 @@
 #include "RoGameState.h"
 #include "../RokLegend.h"
+#include "../utilities/RoCli.h"
 
-#include <core/RoHashSet.h>
 #include <core/RoLog.h>
-
-#if roCOMPILER_IS_MSVC
-#   include <conio.h>
-#   define roKBHIT _kbhit
-#   define roGETCH _getch
-#endif // roCOMPILER_IS_MSVC
-
-#define roKEY_ESC 27
-#define roKEY_RETURN 13
-#define roKEY_BACKSPACE 8
 
 RoGameState::RoGameState(RokLegendPtr game, RoBackgroundScorePtr backgroundScore)
     : mGame(game)
@@ -42,8 +32,8 @@ bool RoGameState::update(float timeSinceLastFrameInSecs)
     {
         initialize();
     }
-    int ch = roKBHIT() ? roGETCH() : 0;
-    if (ch == roKEY_ESC)
+    auto inputKey = RoCli::GetCharacterIfEntered();
+    if (RoCli::IsEscapeKey(inputKey.get_value_or(0)))
     {
         mGame->exit();
         return false;
@@ -54,71 +44,6 @@ bool RoGameState::update(float timeSinceLastFrameInSecs)
 void RoGameState::exitGame() const
 {
     mGame->exit();
-}
-
-RoOptionalUtf8 RoGameState::readInput(std::string message, bool isPassword) const
-{
-    static RoHashSet<char> allowedChars = { '.', ',', '!', '@', '$', '%', '^', '&', '*', '+', '-', '_', '=' };
-    return readRaw(message, isPassword, allowedChars);
-}
-
-RoOptionalUInt32 RoGameState::readInteger(std::string message, bool isPassword) const
-{
-    static RoHashSet<char> allowedChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-    RoOptionalUtf8 rawInput = readRaw(message, isPassword, allowedChars);
-    if (rawInput.is_initialized())
-    {
-        return RoOptionalUInt32{ atoi(rawInput->asUTF8().c_str()) };
-    }
-    return RoOptionalUInt32{};
-}
-
-RoOptionalUtf8 RoGameState::readRaw(std::string message, bool isPassword, const RoHashSet<char> allowedChars) const
-{
-    RoVector<char> inputChars;
-    std::cout << message;
-    char ch = 0;
-    auto masked_chars = [](const char ch) {
-        std::cout << "*";
-    };
-    auto echo_chars = [](const char ch) {
-        std::cout << ch;
-    };
-    std::function<void(const char)> echo_func = echo_chars;
-    if (isPassword)
-    {
-        echo_func = masked_chars;
-    }
-    do
-    {
-        ch = roGETCH();
-        if (isalnum(ch) || allowedChars.empty() || allowedChars.count(ch))
-        {
-            inputChars.push_back(ch);
-            echo_func(ch);
-        }
-        else if (ch == roKEY_ESC)
-        {
-            std::cout << std::endl;
-            return RoOptionalUtf8{};
-        }
-        else if (ch == roKEY_BACKSPACE)
-        {
-            size_t clearCharCount = message.length() + inputChars.size();
-            std::cout << "\r";
-            for (size_t i = 0; i < clearCharCount; ++i)
-            {
-                std::cout << ' ';
-            }
-            inputChars.pop_back();
-            std::cout << "\r" << message;
-            std::for_each(inputChars.begin(), inputChars.end(), echo_func);
-        }
-    } while (ch != roKEY_RETURN);
-    std::cout << std::endl;
-    inputChars.push_back(0);
-    std::string inputString(inputChars.begin(), inputChars.end());
-    return RoOptionalUtf8{ inputString };
 }
 
 #include "../RoGameBindings.h"

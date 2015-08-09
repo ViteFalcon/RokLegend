@@ -32,10 +32,6 @@ public:
 protected: // methods
     void exitGame() const;
 
-    RoOptionalUtf8 readInput(std::string message, bool isPassword) const;
-    RoOptionalUInt32 readInteger(std::string message, bool isPassword) const;
-    RoOptionalUtf8 readRaw(std::string message, bool isPassword, const RoHashSet<char> allowedChars) const;
-
     virtual void addTaskHandlers() = 0;
     virtual bool updateState(float timeSinceLastFrameInSecs) = 0;
 
