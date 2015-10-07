@@ -50,7 +50,7 @@ public:
         TaskInfoMap::accessor accessor;
         if (!mTasks.find(accessor, taskName))
         {
-            roLOG_ERR << "Failed to find task named '" << taskName << "' to remove it.";
+            roLOG_WARN << "Failed to find task named '" << taskName << "' to remove it.";
             return;
         }
         if (!mTasks.erase(accessor))

@@ -58,6 +58,8 @@ RoGameStatePtr RoGameStateFactory::getGameState(RoGameStates gameStateType)
         return RoGameBindings::getLoginState();
     case RoGameStates::CHARACTER_SERVER_SELECT:
         return RoGameBindings::getCharacterServerSelectState();
+    case RoGameStates::CHARACTER_SELECT:
+        return RoGameBindings::getCharacterSelectionState();
     }
     roTHROW(RoInvalidOperation()
         << RoErrorInfoDetail("Unimplemented game state.")

@@ -45,6 +45,7 @@ public:
     static RoGameStateFactoryPtr getGameStateFactory();
     static RoGameStatePtr getLoginState();
     static RoGameStatePtr getCharacterServerSelectState();
+    static RoGameStatePtr getCharacterSelectionState();
 
     static RoLoginSuccessfulPtr getAccountInfo();
     static RoCharacterListingPtr getCharacterListing();

@@ -8,6 +8,9 @@ roFORWARD_DECL_PTR(RoButtonSound);
 class RoCli
 {
 public:
+    static const RoHashSet<char> INTEGER_CHARS;
+    static const RoHashSet<char> TEXT_SPECIAL_CHARS;
+
     static bool HasKeyboardHit();
 
     static char GetCharacter();

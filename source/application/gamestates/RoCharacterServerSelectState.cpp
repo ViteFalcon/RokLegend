@@ -98,11 +98,9 @@ void RoCharacterServerSelectState::serverSelectPrompt(const RoTaskArgs& args)
     {
         auto callback = std::bind(&RoCharacterServerSelectState::loginResult, this, std::placeholders::_1);
         mCharacterServer->loginToServerAtIndex(selectedServer, callback);
+        return;
     }
-    else
-    {
-        changeStage(currentStage, Stage::LOGIN_CANCELLED);
-    }
+    changeStage(currentStage, Stage::LOGIN_CANCELLED);
 }
 
 RoCharacterServerSelectState::Stage RoCharacterServerSelectState::getCurrentStage() const
@@ -190,7 +188,6 @@ void RoCharacterServerSelectState::onLoginSuceeded(RoCharacterServerLoginSucceed
         }
     }
     auto currentStage = Stage::CHARACTER_SERVER_CONNECTING;
-    // FIXME: This should propagate to the next state
-    changeStage(currentStage, Stage::LOGIN_CANCELLED);
+    mGame->setGameState(RoGameStates::CHARACTER_SELECT);
 }
 

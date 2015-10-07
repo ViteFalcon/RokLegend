@@ -14,6 +14,8 @@ public:
 
     RoCliMenu& withPrompt(const RoString& prompt);
 
+    RoCliMenu& withExitText(const RoString& exitText);
+
     RoCliMenu& withAcknowledgementSound(RoButtonSoundPtr acknowledgementSound);
 
     RoOptionalUInt32 getSelection() const;
@@ -22,5 +24,6 @@ private: // fields
     const RoString mTitle;
     RoStringArray mOptions;
     RoOptionalString mPrompt;
+    RoOptionalString mExitText;
     optional<RoButtonSoundPtr> mAcknowledgementSound;
 };

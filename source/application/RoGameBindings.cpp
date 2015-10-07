@@ -2,6 +2,7 @@
 
 #include "RokLegend.h"
 
+#include "gamestates/RoCharacterSelectState.h"
 #include "gamestates/RoCharacterServerSelectState.h"
 #include "gamestates/RoLoginState.h"
 
@@ -108,6 +109,19 @@ RoGameStatePtr RoGameBindings::getCharacterServerSelectState()
         accountInfo,
         characterListing);
     return gameState;
+}
+
+RoGameStatePtr RoGameBindings::getCharacterSelectionState()
+{
+    auto game = getGame();
+    auto backgroundScore = getBackgroundScore();
+    auto buttonSound = getButtonSound();
+    auto characterServer = getCharacterServer();
+    return std::make_shared<RoCharacterSelectState>(
+        game,
+        backgroundScore,
+        buttonSound,
+        characterServer);
 }
 
 RoLoginSuccessfulPtr RoGameBindings::getAccountInfo()

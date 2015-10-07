@@ -38,6 +38,8 @@ public:
 
     uint32 getCharacterPageCount() const;
 
+    RoCharacterListingPtr getCharacterListing() const;
+
 protected:
     virtual void addTaskHandlers() override;
 

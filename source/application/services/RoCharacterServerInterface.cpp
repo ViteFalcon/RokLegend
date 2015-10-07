@@ -161,6 +161,11 @@ uint32 RoCharacterServerInterface::getCharacterPageCount() const
     return mCharacterPageCount.get_value_or(3);
 }
 
+RoCharacterListingPtr RoCharacterServerInterface::getCharacterListing() const
+{
+    return mCharacterListing;
+}
+
 RoCharacterServerConnectFailed::RoCharacterServerConnectFailed(const RoString& reason)
     : mReason(reason)
 {

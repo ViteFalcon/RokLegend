@@ -40,6 +40,12 @@ RoCliMenu& RoCliMenu::withPrompt(const RoString& prompt)
     return *this;
 }
 
+RoCliMenu& RoCliMenu::withExitText(const RoString& exitText)
+{
+    mExitText = exitText;
+    return *this;
+}
+
 RoCliMenu& RoCliMenu::withAcknowledgementSound(RoButtonSoundPtr acknowledgementSound)
 {
     if (acknowledgementSound)
@@ -67,7 +73,10 @@ RoOptionalUInt32 RoCliMenu::getSelection() const
         {
             std::cout << "\t" << i << ". " << mOptions[i] << std::endl;
         }
-        RoOptionalUInt32 selectedOption = RoCli::ReadInteger("> Select server: ", false, mAcknowledgementSound);
+        std::cout << "(" << mExitText.get_value_or("Press 'Enter' alone to exit menu") << ")" << std::endl;
+        RoStringBuilder promptText;
+        promptText.append("> ").append(mPrompt.get_value_or("Select option")).append(": ");
+        RoOptionalUInt32 selectedOption = RoCli::ReadInteger(promptText.toString(), false, mAcknowledgementSound);
         if (!selectedOption)
         {
             return selectedOption;

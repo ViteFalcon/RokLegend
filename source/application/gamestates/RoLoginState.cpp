@@ -109,6 +109,10 @@ bool RoLoginState::updateState(float timeSinceLastFrameInSecs)
     switch (stage)
     {
     case RoLoginStage::NONE:
+        if (mLoginServer->isConnected())
+        {
+            mLoginServer->disconnect();
+        }
         changeStage(stage, RoLoginStage::LOGIN_PROMPT);
         roSCHEDULE_TASK_NAMED(LOGIN_PROMPT_TASK, RoEmptyArgs::INSTANCE);
         break;

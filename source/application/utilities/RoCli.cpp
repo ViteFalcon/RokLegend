@@ -1,6 +1,11 @@
 #include "RoCli.h"
 #include "../audio/RoButtonSound.h"
 
+#include <cstdlib>
+
+#include <boost/thread/locks.hpp>
+#include <boost/thread/mutex.hpp>
+
 #if roCOMPILER_IS_MSVC
 #   include <conio.h>
 #   define roKBHIT _kbhit
@@ -10,6 +15,9 @@
 #define roKEY_ESC 27
 #define roKEY_RETURN 13
 #define roKEY_BACKSPACE 8
+
+const RoHashSet<char> RoCli::INTEGER_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+const RoHashSet<char> RoCli::TEXT_SPECIAL_CHARS = { '.', ',', '!', '@', '$', '%', '^', '&', '*', '+', '-', '_', '=' };
 
 bool RoCli::HasKeyboardHit()
 {
@@ -37,17 +45,21 @@ bool RoCli::IsEscapeKey(const char key)
 
 RoOptionalUtf8 RoCli::ReadString(std::string message, bool isPassword, optional<RoButtonSoundPtr> buttonSound)
 {
-    static RoHashSet<char> allowedChars = { '.', ',', '!', '@', '$', '%', '^', '&', '*', '+', '-', '_', '=' };
-    return ReadRaw(message, isPassword, allowedChars, buttonSound);
+    return ReadRaw(message, isPassword, TEXT_SPECIAL_CHARS, buttonSound);
 }
 
 RoOptionalUInt32 RoCli::ReadInteger(std::string message, bool isPassword, optional<RoButtonSoundPtr> buttonSound)
 {
-    static RoHashSet<char> allowedChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-    RoOptionalUtf8 rawInput = ReadRaw(message, isPassword, allowedChars, buttonSound);
+    RoOptionalUtf8 rawInput = ReadRaw(message, isPassword, INTEGER_CHARS, buttonSound);
     if (rawInput.is_initialized())
     {
-        return RoOptionalUInt32{ atoi(rawInput->asUTF8().c_str()) };
+        char* endChar;
+        const std::string inputString = rawInput->asUTF8();
+        uint32 result = strtol(&inputString[0], &endChar, 0);
+        if (*endChar == 0)
+        {
+            return RoOptionalUInt32{ result };
+        }
     }
     return RoOptionalUInt32{};
 }
@@ -70,7 +82,7 @@ RoOptionalUtf8 RoCli::ReadRaw(std::string message, bool isPassword, const RoHash
     }
     do
     {
-        ch = roGETCH();
+        ch = GetCharacter();
         if (isalnum(ch) || allowedChars.empty() || allowedChars.count(ch))
         {
             inputChars.push_back(ch);
@@ -95,6 +107,10 @@ RoOptionalUtf8 RoCli::ReadRaw(std::string message, bool isPassword, const RoHash
         }
     } while (ch != roKEY_RETURN);
     std::cout << std::endl;
+    if (inputChars.empty())
+    {
+        return RoOptionalUtf8{};
+    }
     inputChars.push_back(0);
     std::string inputString(inputChars.begin(), inputChars.end());
     if (buttonSound)
