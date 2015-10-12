@@ -12,6 +12,12 @@ SET(RO_NETWORK_PACKETS
     packets/RoCharacterServer.h
     packets/RoCharacterServerCollection.cpp
     packets/RoCharacterServerCollection.h
+    packets/RoCreateCharacterFailed.cpp
+    packets/RoCreateCharacterFailed.h
+    packets/RoCreateCharacterRequest.cpp
+    packets/RoCreateCharacterRequest.h
+    packets/RoCreateCharacterSuccess.cpp
+    packets/RoCreateCharacterSuccess.h
     packets/RoGameLogin.cpp
     packets/RoGameLogin.h
     packets/RoLoginCredentials.cpp

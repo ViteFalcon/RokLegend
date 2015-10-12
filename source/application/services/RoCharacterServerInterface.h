@@ -2,6 +2,7 @@
 #include "RoServerInterface.h"
 
 struct RoPacketReceivedEvent;
+roFORWARD_DECL_PTR(RoCharacterInformation);
 roFORWARD_DECL_PTR(RoCharacterListing);
 roFORWARD_DECL_PTR(RoLoginSuccessful);
 
@@ -22,6 +23,12 @@ enum class RoPinCodeSystemRequest
 RoString to_string(RoPinCodeSystemRequest request);
 std::ostream& operator << (std::ostream& stream, const RoPinCodeSystemRequest& request);
 
+struct RoCreateCharacterCallbacks
+{
+    std::function<void(RoString)> failureCallback;
+    std::function<void(RoCharacterInformationPtr)> successCallback;
+};
+
 roFORWARD_DECL_PTR(RoCharacterServerLoginResult);
 
 class RoCharacterServerInterface : public RoServerInterfaceT < RoCharacterServerInterface >
@@ -40,6 +47,10 @@ public:
 
     RoCharacterListingPtr getCharacterListing() const;
 
+    void loginCharacterAtSlot(size_t slot);
+
+    void createCharacter(const RoCreateCharacterCallbacks& callbacks, const RoString& name, uint16 hairColor, uint16 hairStyle);
+
 protected:
     virtual void addTaskHandlers() override;
 
@@ -52,6 +63,8 @@ private:
     void blockedCharacters(const RoPacketReceivedEvent& args);
     void loginFailed(const RoPacketReceivedEvent& args);
     void pincodeSystem(const RoPacketReceivedEvent& args);
+    void onSuccessfulCharacterCreation(const RoPacketReceivedEvent& args);
+    void onFailedCharacterCreation(const RoPacketReceivedEvent& args);
 
 private: // static
     static const RoString CHARACTER_SELECT_NOTIFICATION;
@@ -65,6 +78,7 @@ private:
     RoLoginSuccessfulPtr mAccountInfo;
     RoCharacterListingPtr mCharacterListing;
     optional<LoginCallback> mLoginCallback;
+    optional<RoCreateCharacterCallbacks> mCreateCharacterCallbacks;
     RoOptionalUInt32 mCharacterPageCount;
 };
 

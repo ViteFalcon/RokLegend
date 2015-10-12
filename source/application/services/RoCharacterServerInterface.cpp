@@ -6,6 +6,10 @@
 #include <network/events/RoPacketReceivedEvent.h>
 
 #include <network/packets/RoCharacterListing.h>
+#include <network/packets/RoCharacterInformation.h>
+#include <network/packets/RoCreateCharacterFailed.h>
+#include <network/packets/RoCreateCharacterRequest.h>
+#include <network/packets/RoCreateCharacterSuccess.h>
 #include <network/packets/RoGameLogin.h>
 #include <network/packets/RoLoginSuccessful.h>
 
@@ -15,6 +19,11 @@ const RoString RoCharacterServerInterface::BLOCKED_CHARACTER_INFORMATION{ L"Bloc
 const RoString RoCharacterServerInterface::CHARACTER_LISTING_TASK{ L"CharactersReceived" };
 const RoString RoCharacterServerInterface::LOGIN_FAILED_TASK{ L"GameLoginError" };
 const RoString RoCharacterServerInterface::PINCODE_SYSTEM_DISABLED{ L"PinCodeSystemDisabled" };
+
+namespace {
+    static const RoString CREATE_CHARACTER_FAILED_NOTIFICATION{ L"CharacterCreateFailed" };
+    static const RoString CREATE_CHARACTER_SUCCESS_NOTIFICATION{ L"CharacterCreateSuccess" };
+}
 
 RoCharacterServerInterface::RoCharacterServerInterface(RoLoginSuccessfulPtr accountInfo, RoCharacterListingPtr characterListing)
     : RoServerInterfaceT(RoNetServerType::CHARACTER)
@@ -64,6 +73,8 @@ void RoCharacterServerInterface::addTaskHandlers()
     addTaskHandler<RoPacketReceivedEvent>(BLOCKED_CHARACTER_INFORMATION, &RoCharacterServerInterface::blockedCharacters);
     addTaskHandler<RoPacketReceivedEvent>(LOGIN_FAILED_TASK, &RoCharacterServerInterface::loginFailed);
     addTaskHandler<RoPacketReceivedEvent>(PINCODE_SYSTEM_DISABLED, &RoCharacterServerInterface::pincodeSystem);
+    addTaskHandler<RoPacketReceivedEvent>(CREATE_CHARACTER_SUCCESS_NOTIFICATION, &RoCharacterServerInterface::onSuccessfulCharacterCreation);
+    addTaskHandler<RoPacketReceivedEvent>(CREATE_CHARACTER_FAILED_NOTIFICATION, &RoCharacterServerInterface::onFailedCharacterCreation);
 }
 
 void RoCharacterServerInterface::connectResponse(RoNetServerType type, RoOptionalString error)
@@ -156,6 +167,35 @@ void RoCharacterServerInterface::pincodeSystem(const RoPacketReceivedEvent& args
     invokeLoginCallback(std::make_shared<RoCharacterServerPinCodeSystem>(pincodeRequest));
 }
 
+void RoCharacterServerInterface::onSuccessfulCharacterCreation(const RoPacketReceivedEvent& args)
+{
+    auto response = std::dynamic_pointer_cast<RoCreateCharacterSuccess>(args.packet);
+    roLOG_INFO << "RoCharacterServerInterface: Successfully created character. Name: " << response->getCharacter()->getName();
+    if (!mCreateCharacterCallbacks || !mCreateCharacterCallbacks.get().successCallback)
+    {
+        roLOG_WARN << "RoCharacterServerInterface: No callbacks to inform successful character creation!";
+        return;
+    }
+    mCreateCharacterCallbacks.get().successCallback(response->getCharacter());
+    // Get rid of the current callback
+    mCreateCharacterCallbacks.reset();
+}
+
+void RoCharacterServerInterface::onFailedCharacterCreation(const RoPacketReceivedEvent& args)
+{
+    auto response = std::dynamic_pointer_cast<RoCreateCharacterFailed>(args.packet);
+    auto failureDescription = response->getFailureDescription();
+    roLOG_INFO << "RoCharacterServerInterface: Failed to create character. Reason: " << failureDescription;
+    if (!mCreateCharacterCallbacks || !mCreateCharacterCallbacks.get().failureCallback)
+    {
+        roLOG_WARN << "RoCharacterServerInterface: No callbacks to inform failed character creation!";
+        return;
+    }
+    mCreateCharacterCallbacks.get().failureCallback(failureDescription);
+    // Get rid of the current callback
+    mCreateCharacterCallbacks.reset();
+}
+
 uint32 RoCharacterServerInterface::getCharacterPageCount() const
 {
     return mCharacterPageCount.get_value_or(3);
@@ -164,6 +204,36 @@ uint32 RoCharacterServerInterface::getCharacterPageCount() const
 RoCharacterListingPtr RoCharacterServerInterface::getCharacterListing() const
 {
     return mCharacterListing;
+}
+
+void RoCharacterServerInterface::loginCharacterAtSlot(size_t slot)
+{
+    RoCharacterInformationPtr selectedCharacter;
+    for each (auto character in mCharacterListing->getCharacters())
+    {
+        if (character->getSlot() == slot)
+        {
+            selectedCharacter = character;
+            break;
+        }
+    }
+    if (!selectedCharacter)
+    {
+        auto slotHint = RoStringUtil::Format(L"Slot: %d", slot);
+        roTHROW(RoInvalidOperation()
+            << RoErrorInfoDetail("The selected slot does not have a character associated with it.")
+            << RoErrorInfoHint(slotHint));
+    }
+}
+
+void RoCharacterServerInterface::createCharacter(const RoCreateCharacterCallbacks& callbacks, const RoString& name, uint16 hairColor, uint16 hairStyle)
+{
+    mCreateCharacterCallbacks = callbacks;
+    auto request = std::make_shared<RoCreateCharacterRequest>();
+    request->setName(name);
+    request->setHairColor(hairColor);
+    request->setHairStyle(hairStyle);
+    asyncSendPacket(request);
 }
 
 RoCharacterServerConnectFailed::RoCharacterServerConnectFailed(const RoString& reason)

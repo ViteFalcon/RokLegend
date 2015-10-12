@@ -323,6 +323,12 @@
         <data name="character" type="CharacterInfo"/>
     </packet>
     <packet id="0x6E" name="CharacterCreateFailed" version="73">
+        <!--
+            0x00: Charname already exists
+            0xFF: Invalid character name
+            0x01: Unknown error
+            0x03: You're not eligible to create a character in this slot
+        -->
         <data name="error_code" type="byte"/>
     </packet>
     <packet id="0x6F" name="CharacterDeleteSuccess" version="73"/>

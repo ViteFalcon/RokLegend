@@ -13,6 +13,56 @@ const RoString RoCharacterSelectState::SELECT_CHARACTER_PROMPT_TASK = { L"Charac
 const RoString RoCharacterSelectState::CREATE_CHARACTER_PROMPT_TASK = { L"CharacterSelect:CreateCharacterPrompt" };
 const RoString RoCharacterSelectState::DELETE_CHARACTER_PROMPT_TASK = { L"CharacterSelect:DeleteCharacterPrompt" };
 
+namespace {
+    static const RoHashString CHARACTER_KEY{ "character" };
+    static const RoHashString SLOT_KEY{ "slot" };
+}
+
+roDEFINE_TASK_ARGS(RoCharacterSelectArgs)
+{
+    inline RoCharacterInformationPtr getCharacter() const
+    {
+        RoCharacterInformationPtr character;
+        get(CHARACTER_KEY, character);
+        return character;
+    }
+
+    inline void setCharacter(RoCharacterInformationPtr character)
+    {
+        set(CHARACTER_KEY, character);
+    }
+};
+
+roDEFINE_TASK_ARGS(RoCharacterCreateArgs)
+{
+    inline size_t getSlot() const
+    {
+        size_t slot;
+        get(SLOT_KEY, slot);
+        return slot;
+    }
+
+    inline void setSlot(size_t slot)
+    {
+        set(SLOT_KEY, slot);
+    }
+};
+
+roDEFINE_TASK_ARGS(RoCharacterDeleteArgs)
+{
+    inline size_t getSlot() const
+    {
+        size_t slot;
+        get(SLOT_KEY, slot);
+        return slot;
+    }
+
+    inline void setSlot(size_t slot)
+    {
+        set(SLOT_KEY, slot);
+    }
+};
+
 RoCharacterSelectState::RoCharacterSelectState(
     RokLegendPtr game,
     RoBackgroundScorePtr backgroundScore,
@@ -28,9 +78,9 @@ RoCharacterSelectState::RoCharacterSelectState(
 void RoCharacterSelectState::addTaskHandlers()
 {
     addTaskHandler(MAIN_MENU_PROMPT_TASK, &RoCharacterSelectState::mainMenuPrompt);
-    addTaskHandler(SELECT_CHARACTER_PROMPT_TASK, &RoCharacterSelectState::selectCharacterPrompt);
-    addTaskHandler(CREATE_CHARACTER_PROMPT_TASK, &RoCharacterSelectState::createCharacterPrompt);
-    addTaskHandler(DELETE_CHARACTER_PROMPT_TASK, &RoCharacterSelectState::deleteCharacterPrompt);
+    addTaskHandler<RoCharacterSelectArgs>(SELECT_CHARACTER_PROMPT_TASK, &RoCharacterSelectState::selectCharacterPrompt);
+    addTaskHandler<RoCharacterCreateArgs>(CREATE_CHARACTER_PROMPT_TASK, &RoCharacterSelectState::createCharacterPrompt);
+    addTaskHandler<RoCharacterDeleteArgs>(DELETE_CHARACTER_PROMPT_TASK, &RoCharacterSelectState::deleteCharacterPrompt);
 }
 
 bool RoCharacterSelectState::updateState(float timeSinceLastFrameInSecs)
@@ -42,8 +92,7 @@ bool RoCharacterSelectState::updateState(float timeSinceLastFrameInSecs)
     case Stage::CHARACTER_LISTING_CANCELLED:
     case Stage::CREATE_CHARACTER_CANCELLED:
     case Stage::DELETE_CHARACTER_CANCELLED:
-        changeStage(stage, Stage::MAIN_MENU);
-        roSCHEDULE_TASK_NAMED(MAIN_MENU_PROMPT_TASK, RoEmptyArgs::INSTANCE);
+        showMainMenu();
         break;
     case Stage::MAIN_MENU_CANCELLED:
         mCharacterServer->disconnect();
@@ -105,40 +154,37 @@ std::string RoCharacterSelectState::as_string(const Stage& stage)
     return stageString.toString().asUTF8();
 }
 
-void RoCharacterSelectState::mainMenuPrompt(const RoTaskArgs & args)
+void RoCharacterSelectState::showMainMenu()
 {
-    auto stage = Stage::MAIN_MENU;
-    auto selection = RoCliMenu("Character Listing and Options")
-        .withAcknowledgementSound(mButtonSound)
-        .withOption("Select character")
-        .withOption("Create character")
-        .withOption("Delete character")
-        .getSelection();
-    if (!selection.is_initialized())
-    {
-        changeStage(stage, Stage::MAIN_MENU_CANCELLED);
-        return;
-    }
-    std::cout << "-- Selected option: " << selection.get() << std::endl;
-    switch (selection.get())
-    {
-    case 0:
-        changeStage(stage, Stage::CHARACTER_LISTING);
-        roSCHEDULE_TASK_NAMED(SELECT_CHARACTER_PROMPT_TASK, RoEmptyArgs::INSTANCE);
-        break;
-    case 1:
-        changeStage(stage, Stage::CREATE_CHARACTER);
-        roSCHEDULE_TASK_NAMED(CREATE_CHARACTER_PROMPT_TASK, RoEmptyArgs::INSTANCE);
-        break;
-    case 2:
-        changeStage(stage, Stage::DELETE_CHARACTER);
-        roSCHEDULE_TASK_NAMED(DELETE_CHARACTER_PROMPT_TASK, RoEmptyArgs::INSTANCE);
-        break;
-    default:
-        // Loop back to the main-menu
-        changeStage(stage, Stage::NONE);
-        break;
-    }
+    scheduleStage(Stage::MAIN_MENU, MAIN_MENU_PROMPT_TASK, RoEmptyArgs::INSTANCE);
+}
+
+void RoCharacterSelectState::showSelectedCharacterMenu(RoCharacterInformationPtr character)
+{
+    RoCharacterSelectArgs args;
+    args.setCharacter(character);
+    scheduleStage(Stage::CHARACTER_LISTING, SELECT_CHARACTER_PROMPT_TASK, args);
+}
+
+void RoCharacterSelectState::showCreateCharacterMenu(size_t slot)
+{
+    RoCharacterCreateArgs args;
+    args.setSlot(slot);
+    scheduleStage(Stage::CREATE_CHARACTER, CREATE_CHARACTER_PROMPT_TASK, args);
+}
+
+void RoCharacterSelectState::showDeleteCharacterPrompt(size_t slot)
+{
+    RoCharacterDeleteArgs args;
+    args.setSlot(slot);
+    scheduleStage(Stage::DELETE_CHARACTER, DELETE_CHARACTER_PROMPT_TASK, args);
+}
+
+inline void RoCharacterSelectState::scheduleStage(Stage stage, RoString taskName, const RoTaskArgs& args)
+{
+    Stage previousStage = mStage.load();
+    changeStage(previousStage, stage);
+    roSCHEDULE_TASK_NAMED(taskName, args);
 }
 
 namespace {
@@ -172,49 +218,88 @@ namespace {
     }
 }
 
-void RoCharacterSelectState::selectCharacterPrompt(const RoTaskArgs& args)
+void RoCharacterSelectState::mainMenuPrompt(const RoTaskArgs & args)
 {
-    auto stage = Stage::CHARACTER_LISTING;
-    auto characters = mCharacterServer->getCharacterListing()->getCharacters();
-    if (characters.empty())
-    {
-        std::cout << "There are no characters to select!" << std::endl;
-        changeStage(stage, Stage::CHARACTER_LISTING_CANCELLED);
-        return;
-    }
-    RoStringArray characterNames;
-    characterNames.reserve(characters.size());
+    static const RoString EMPTY_CHARACTER_OPTION{ L"Empty - Create character" };
+    auto characterListing = mCharacterServer->getCharacterListing();
+    auto characters = characterListing->getCharacters();
+    size_t maxSlots = static_cast<size_t>(characterListing->getMaxSlots().get_value_or(9));
+    RoStringArray characterNames(maxSlots, EMPTY_CHARACTER_OPTION);
     for each (auto character in characters)
     {
-        characterNames.push_back(toShortString(*character));
+        characterNames[character->getSlot()] = toShortString(*character);
     }
-    auto selection = RoCliMenu("Select Character")
-        .withOptions(characterNames)
+
+    auto stage = Stage::MAIN_MENU;
+    auto selection = RoCliMenu("Character Listing and Options")
         .withAcknowledgementSound(mButtonSound)
+        .withOptions(characterNames)
         .getSelection();
     if (!selection.is_initialized())
     {
-        changeStage(stage, Stage::CHARACTER_LISTING_CANCELLED);
+        changeStage(stage, Stage::MAIN_MENU_CANCELLED);
         return;
     }
-    auto selectedCharacterIndex = selection.get();
-    std::cout
-        << "Selected the following character:" << std::endl
-        << toString(*characters[selectedCharacterIndex]) << std::endl;
+
+    uint32 selectedSlot = selection.get() + 1;
+    optional<RoCharacterInformationPtr> selectedCharacter;
+    for each (auto character in characters)
+    {
+        if (character->getSlot() == selectedSlot)
+        {
+            selectedCharacter = character;
+            break;
+        }
+    }
+    if (selectedCharacter)
+    {
+        showSelectedCharacterMenu(selectedCharacter.get());
+    }
+    else
+    {
+        showCreateCharacterMenu(selectedSlot);
+    }
+}
+
+void RoCharacterSelectState::selectCharacterPrompt(const RoCharacterSelectArgs& args)
+{
+    RoCharacterInformationPtr character = args.getCharacter();
+    std::cout << "Selected character:" << std::endl << toString(*character);
     // FIXME: Canceling character listing for now
+    auto stage = mStage.load();
     changeStage(stage, Stage::CHARACTER_LISTING_CANCELLED);
 }
 
-void RoCharacterSelectState::createCharacterPrompt(const RoTaskArgs & args)
+void RoCharacterSelectState::createCharacterPrompt(const RoCharacterCreateArgs & args)
 {
     // FIXME: Canceling character creation for now
     auto stage = Stage::CREATE_CHARACTER;
-    changeStage(stage, Stage::CREATE_CHARACTER_CANCELLED);
+    std::string name;
+    std::cout << "Name: ";
+    std::cin >> name;
+    uint16 hairColor = 1;
+    uint16 hairStyle = 1;
+    RoCreateCharacterCallbacks callbacks;
+    callbacks.failureCallback = std::bind(&RoCharacterSelectState::onFailedCharacterCreation, this, std::placeholders::_1);
+    callbacks.successCallback = std::bind(&RoCharacterSelectState::onSuccessfulCharacterCreation, this, std::placeholders::_1);
+    mCharacterServer->createCharacter(callbacks, name, hairColor, hairStyle);
 }
 
-void RoCharacterSelectState::deleteCharacterPrompt(const RoTaskArgs & args)
+void RoCharacterSelectState::deleteCharacterPrompt(const RoCharacterDeleteArgs & args)
 {
     // FIXME: Canceling character deletion for now
     auto stage = Stage::DELETE_CHARACTER;
     changeStage(stage, Stage::DELETE_CHARACTER_CANCELLED);
+}
+
+void RoCharacterSelectState::onSuccessfulCharacterCreation(const RoCharacterInformationPtr character)
+{
+    std::cout << "Successfully created character:" << std::endl << toString(*character) << std::endl;
+    showMainMenu();
+}
+
+void RoCharacterSelectState::onFailedCharacterCreation(const RoString& reason)
+{
+    std::cout << "Failed to create character. Reason: " << reason << std::endl;
+    showMainMenu();
 }

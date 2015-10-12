@@ -56,6 +56,8 @@ private:
     template <typename T>
     using OptionalFieldType = typename RoClassField<DerivedType, optional<T>>::Type;
     template <typename T>
+    using StructFieldType = typename RoClassField<DerivedType, RoSharedPtr<T>>::Type;
+    template <typename T>
     using ListFieldType = typename RoClassField<DerivedType, RoVector<RoSharedPtr<T>>>::Type;
 
     static const RoString sClassName;
@@ -89,6 +91,20 @@ protected:
             return;
         }
         PacketFieldPtr field{ new RoPacketOptionalFieldT<DerivedType, T>(propertyName, fieldPtr, *derivedThis) };
+        mFields.push_back(field);
+    }
+
+    template <typename T>
+    void addStruct(const char* propertyName, StructFieldType<T> fieldPtr)
+    {
+        static_assert(std::is_base_of<RoPacket, T>::value, "Sub-packet should inherit from RoPacket");
+
+        DerivedType* derivedThis = dynamic_cast<DerivedType*>(this);
+        if (nullptr == derivedThis)
+        {
+            return;
+        }
+        PacketFieldPtr field = std::make_shared<RoPacketStructFieldT<DerivedType, T>>(propertyName, fieldPtr, *derivedThis);
         mFields.push_back(field);
     }
 

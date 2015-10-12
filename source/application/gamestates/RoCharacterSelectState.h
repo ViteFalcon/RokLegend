@@ -1,7 +1,12 @@
 #pragma once
 #include "RoGameState.h"
 
+struct RoCharacterSelectArgs;
+struct RoCharacterCreateArgs;
+struct RoCharacterDeleteArgs;
+
 roFORWARD_DECL_PTR(RoButtonSound);
+roFORWARD_DECL_PTR(RoCharacterInformation);
 roFORWARD_DECL_PTR(RoCharacterServerInterface);
 
 class RoCharacterSelectState : public RoGameStateT < RoCharacterSelectState >
@@ -42,11 +47,22 @@ private:
     bool changeStage(Stage& expectedState, const Stage newState);
     std::string as_string(const Stage& stage);
 
+private: // task schedulers
+    void showMainMenu();
+    void showSelectedCharacterMenu(RoCharacterInformationPtr character);
+    void showCreateCharacterMenu(size_t slot);
+    void showDeleteCharacterPrompt(size_t slot);
+    void scheduleStage(Stage stage, RoString taskName, const RoTaskArgs& args);
+
 private: // tasks
     void mainMenuPrompt(const RoTaskArgs& args);
-    void selectCharacterPrompt(const RoTaskArgs& args);
-    void createCharacterPrompt(const RoTaskArgs& args);
-    void deleteCharacterPrompt(const RoTaskArgs& args);
+    void selectCharacterPrompt(const RoCharacterSelectArgs& args);
+    void createCharacterPrompt(const RoCharacterCreateArgs& args);
+    void deleteCharacterPrompt(const RoCharacterDeleteArgs& args);
+
+private: // callbacks
+    void onSuccessfulCharacterCreation(const RoCharacterInformationPtr character);
+    void onFailedCharacterCreation(const RoString& reason);
 
 private: // static
     static const RoString MAIN_MENU_PROMPT_TASK;
