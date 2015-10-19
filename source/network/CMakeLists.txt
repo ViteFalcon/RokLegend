@@ -18,6 +18,18 @@ SET(RO_NETWORK_PACKETS
     packets/RoCreateCharacterRequest.h
     packets/RoCreateCharacterSuccess.cpp
     packets/RoCreateCharacterSuccess.h
+    packets/RoDeleteCharacterRequest.cpp
+    packets/RoDeleteCharacterRequest.h
+    packets/RoDeleteCharacterResponse.cpp
+    packets/RoDeleteCharacterResponse.h
+    packets/RoDeleteCharacterAcceptRequest.cpp
+    packets/RoDeleteCharacterAcceptRequest.h
+    packets/RoDeleteCharacterAcceptResponse.cpp
+    packets/RoDeleteCharacterAcceptResponse.h
+    packets/RoDeleteCharacterCancelRequest.cpp
+    packets/RoDeleteCharacterCancelRequest.h
+    packets/RoDeleteCharacterCancelResponse.cpp
+    packets/RoDeleteCharacterCancelResponse.h
     packets/RoGameLogin.cpp
     packets/RoGameLogin.h
     packets/RoLoginCredentials.cpp

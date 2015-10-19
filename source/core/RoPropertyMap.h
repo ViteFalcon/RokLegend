@@ -144,6 +144,8 @@ public:
 
     void merge(const RoPropertyMap& other, MergeStrategy mergeStrategy);
 
+    friend std::ostream& operator << (std::ostream& stream, const RoPropertyMap& properties);
+
 private:
     using PropertyPtr = std::shared_ptr<RoProperty>;
     using StrToPropertyMap = boost::unordered_map < RoHashString, PropertyPtr > ;

@@ -241,7 +241,7 @@ void RoCharacterSelectState::mainMenuPrompt(const RoTaskArgs & args)
         return;
     }
 
-    uint32 selectedSlot = selection.get() + 1;
+    uint32 selectedSlot = selection.get();
     optional<RoCharacterInformationPtr> selectedCharacter;
     for each (auto character in characters)
     {
@@ -282,7 +282,7 @@ void RoCharacterSelectState::createCharacterPrompt(const RoCharacterCreateArgs &
     RoCreateCharacterCallbacks callbacks;
     callbacks.failureCallback = std::bind(&RoCharacterSelectState::onFailedCharacterCreation, this, std::placeholders::_1);
     callbacks.successCallback = std::bind(&RoCharacterSelectState::onSuccessfulCharacterCreation, this, std::placeholders::_1);
-    mCharacterServer->createCharacter(callbacks, name, hairColor, hairStyle);
+    mCharacterServer->createCharacter(callbacks, args.getSlot(), name, hairColor, hairStyle);
 }
 
 void RoCharacterSelectState::deleteCharacterPrompt(const RoCharacterDeleteArgs & args)
@@ -292,9 +292,9 @@ void RoCharacterSelectState::deleteCharacterPrompt(const RoCharacterDeleteArgs &
     changeStage(stage, Stage::DELETE_CHARACTER_CANCELLED);
 }
 
-void RoCharacterSelectState::onSuccessfulCharacterCreation(const RoCharacterInformationPtr character)
+void RoCharacterSelectState::onSuccessfulCharacterCreation(const RoCharacterInformation& character)
 {
-    std::cout << "Successfully created character:" << std::endl << toString(*character) << std::endl;
+    std::cout << "Successfully created character:" << std::endl << toString(character) << std::endl;
     showMainMenu();
 }
 

@@ -7,6 +7,7 @@
 #include "RoNetPacketBuilder.h"
 #include "RoNetPacket.h"
 #include "RoNetList.h"
+#include "RoNetStructure.h"
 
 #include <core/RoException.h>
 #include <core/RoErrorInfo.h>
@@ -66,6 +67,7 @@ void RoNetPacketBuilder::addList(const RoHashString& name, RoNetPacketPtr elemen
 
 void RoNetPacketBuilder::addStructure(const RoHashString& name, RoNetPacketPtr structure)
 {
+    addField(new RoNetStructure(name, structure));
 }
 
 RoNetPacketPtr RoNetPacketBuilder::getPacket() const

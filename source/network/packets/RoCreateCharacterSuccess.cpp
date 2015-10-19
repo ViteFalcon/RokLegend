@@ -7,3 +7,8 @@ RoCreateCharacterSuccess::RoCreateCharacterSuccess()
 {
     addStruct<RoCharacterInformation>("character", &RoCreateCharacterSuccess::mCharacter);
 }
+
+const RoCharacterInformation& RoCreateCharacterSuccess::getCharacter() const
+{
+    return mCharacter;
+}

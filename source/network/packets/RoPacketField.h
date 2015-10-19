@@ -117,7 +117,7 @@ template <class Class, typename T>
 class RoPacketStructFieldT : public RoPacketField
 {
 public:
-    using ValueType = RoSharedPtr<T>;
+    using ValueType = T;
     using FieldType = typename RoClassField<Class, ValueType>::Type;
 
     RoPacketStructFieldT(const char* name, FieldType field, Class& instance)
@@ -129,17 +129,25 @@ public:
 
     virtual void write(RoPropertyMap& properties) const override
     {
-        const ValueType& value = mInstance.*mField;
-        properties.merge(value->getProperties(), RoPropertyMap::MergeStrategy::OVERWRITE);
+        properties.merge(getField().getProperties(), RoPropertyMap::MergeStrategy::OVERWRITE);
     }
 
     virtual void read(const RoPropertyMap& properties) override
     {
-        const ValueType& value = mInstance.*mField;
-        value->fromProperties(properties);
+        getField().fromProperties(properties);
     }
 
 private:
+    ValueType& getField()
+    {
+        return mInstance.*mField;
+    }
+
+    const ValueType& getField() const
+    {
+        return mInstance.*mField;
+    }
+
     const RoHashString mName;
     FieldType mField;
     Class& mInstance;

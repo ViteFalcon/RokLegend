@@ -26,7 +26,7 @@ std::ostream& operator << (std::ostream& stream, const RoPinCodeSystemRequest& r
 struct RoCreateCharacterCallbacks
 {
     std::function<void(RoString)> failureCallback;
-    std::function<void(RoCharacterInformationPtr)> successCallback;
+    std::function<void(const RoCharacterInformation&)> successCallback;
 };
 
 roFORWARD_DECL_PTR(RoCharacterServerLoginResult);
@@ -34,7 +34,10 @@ roFORWARD_DECL_PTR(RoCharacterServerLoginResult);
 class RoCharacterServerInterface : public RoServerInterfaceT < RoCharacterServerInterface >
 {
 public:
-    using LoginCallback = std::function < void(RoCharacterServerLoginResultPtr) > ;
+    using LoginCallback = std::function <void(RoCharacterServerLoginResultPtr)> ;
+    using DeleteRequestResponseCallback = std::function<void(RoOptionalString)>;
+    using DeleteAcceptResponseCallback = std::function<void(RoOptionalString)>;
+    using DeleteCancelResponseCallback = std::function<void(RoOptionalString)>;
 
     RoCharacterServerInterface(RoLoginSuccessfulPtr accountInfo, RoCharacterListingPtr characterListing);
     ~RoCharacterServerInterface() = default;
@@ -49,7 +52,13 @@ public:
 
     void loginCharacterAtSlot(size_t slot);
 
-    void createCharacter(const RoCreateCharacterCallbacks& callbacks, const RoString& name, uint16 hairColor, uint16 hairStyle);
+    void createCharacter(const RoCreateCharacterCallbacks& callbacks, size_t slot, const RoString& name, uint16 hairColor, uint16 hairStyle);
+
+    void deleteCharacterAtSlot(DeleteRequestResponseCallback callback, uint16 slot);
+
+    void deleteCharacterConfirm(DeleteAcceptResponseCallback callback, const RoDate& birthDate);
+
+    void deleteCharacterCancel(DeleteCancelResponseCallback callback);
 
 protected:
     virtual void addTaskHandlers() override;
@@ -65,6 +74,9 @@ private:
     void pincodeSystem(const RoPacketReceivedEvent& args);
     void onSuccessfulCharacterCreation(const RoPacketReceivedEvent& args);
     void onFailedCharacterCreation(const RoPacketReceivedEvent& args);
+    void onDeleteCharacterResponse(const RoPacketReceivedEvent& args);
+    void onDeleteCharacterAcceptResponse(const RoPacketReceivedEvent& args);
+    void onDeleteCharacterCancelResponse(const RoPacketReceivedEvent& args);
 
 private: // static
     static const RoString CHARACTER_SELECT_NOTIFICATION;
@@ -80,6 +92,10 @@ private:
     optional<LoginCallback> mLoginCallback;
     optional<RoCreateCharacterCallbacks> mCreateCharacterCallbacks;
     RoOptionalUInt32 mCharacterPageCount;
+    optional<uint32> mCharacterQueuedForDeletion;
+    optional<DeleteRequestResponseCallback> mDeleteRequestResponseCallback;
+    optional<DeleteAcceptResponseCallback> mDeleteAcceptResponseCallback;
+    optional<DeleteCancelResponseCallback> mDeleteCancelResponseCallback;
 };
 
 class RoCharacterServerLoginResult

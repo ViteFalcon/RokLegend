@@ -288,6 +288,9 @@
         <data name="character_id" type="uint32"/>
         <data name="email" type="string" size="40"/>
     </packet>
+    <packet id="0x827" name="CharacterDeleteRequest" version="114">
+        <data name="character_id" type="uint32"/>
+    </packet>
     <packet id="0x69" name="AccountServerInfo" version="73">
         <data name="packet_size" type="uint16"/>
         <data name="login_id1" type="uint32"/>
@@ -319,7 +322,7 @@
     <packet id="0x6C" name="GameLoginError" version="73">
         <data name="error_code" type="byte"/>
     </packet>
-    <packet id="0x6D" name="CharacterCreateSuccess" version="0">
+    <packet id="0x6D" name="CharacterCreateSuccess" version="114">
         <data name="character" type="CharacterInfo"/>
     </packet>
     <packet id="0x6E" name="CharacterCreateFailed" version="73">
@@ -440,8 +443,51 @@
         -->
         <data name="state" type="uint16"/>
     </packet>
-    <packet id="0x8ba" name="CreateNewPin" version="114">
+    <packet id="0x8bA" name="CreateNewPin" version="114">
         <data name="unknown" type="uint16"/>
         <data name="pincode" type="string" size="5"/>
+    </packet>
+    <packet id="0x828" name="CharacterDeleteResponse" version="114">
+        <data name="character_id" type="uint32"/>
+        <!--
+            0 (0x718): An unknown error has occurred.
+            1: none/success
+            3 (0x719): A database error occurred.
+            4 (0x71a): To delete a character you must withdraw from the guild.
+            5 (0x71b): To delete a character you must withdraw from the party.
+            Any (0x718): An unknown error has occurred.
+        -->
+        <data name="response_code" type="uint32"/>
+        <data name="delete_date" type="uint32"/>
+    </packet>
+    <packet id="0x829" name="CharacterDeleteAcceptRequest" version="114">
+        <data name="character_id" type="uint32"/>
+        <!-- Date format: 'YYMMDD' -->
+        <data name="birth_date" type="string" size="6"/>
+    </packet>
+    <packet id="0x82A" name="CharacterDeleteAcceptResponse" version="114">
+        <data name="character_id" type="uint32"/>
+        <!--
+            0 (0x718): An unknown error has occurred.
+            1: none/success
+            2 (0x71c): Due to system settings can not be deleted.
+            3 (0x719): A database error occurred.
+            4 (0x71d): Deleting not yet possible time.
+            5 (0x71e): Date of birth do not match.
+            Any (0x718): An unknown error has occurred.
+        -->
+        <data name="response_code" type="uint32"/>
+    </packet>
+    <packet id="0x82B" name="CharacterDeleteCancelRequest" version="114">
+        <data name="character_id" type="uint32"/>
+    </packet>
+    <packet id="0x82C" name="CharacterDeleteCancelResponse" version="114">
+        <data name="character_id" type="uint32"/>
+        <!--
+            1 (0x718): none/success, (if char id not in deletion process): An unknown error has occurred.
+            2 (0x719): A database error occurred.
+            Any (0x718): An unknown error has occurred.
+        -->
+        <data name="response_code" type="uint32"/>
     </packet>
 </packets>

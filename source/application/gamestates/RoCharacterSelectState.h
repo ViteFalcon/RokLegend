@@ -61,7 +61,7 @@ private: // tasks
     void deleteCharacterPrompt(const RoCharacterDeleteArgs& args);
 
 private: // callbacks
-    void onSuccessfulCharacterCreation(const RoCharacterInformationPtr character);
+    void onSuccessfulCharacterCreation(const RoCharacterInformation& character);
     void onFailedCharacterCreation(const RoString& reason);
 
 private: // static

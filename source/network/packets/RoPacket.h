@@ -56,7 +56,7 @@ private:
     template <typename T>
     using OptionalFieldType = typename RoClassField<DerivedType, optional<T>>::Type;
     template <typename T>
-    using StructFieldType = typename RoClassField<DerivedType, RoSharedPtr<T>>::Type;
+    using StructFieldType = typename RoClassField<DerivedType, T>::Type;
     template <typename T>
     using ListFieldType = typename RoClassField<DerivedType, RoVector<RoSharedPtr<T>>>::Type;
 

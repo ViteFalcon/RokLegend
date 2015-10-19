@@ -6,8 +6,10 @@
 
 #include "RoVariant.h"
 #include "RoStringUtil.h"
+#include "RoLog.h"
 
 #include <sstream>
+#include <typeinfo>
 
 #ifdef _MSC_VER
 #    pragma warning(disable: 4800)
@@ -118,6 +120,16 @@ namespace Detail
     {
         std::stringstream ss;
         ss << CastToRef<FromType>(inData);
+        CastToRef<RoString>(outData) = RoString{ ss.str() };
+        return true;
+    }
+
+    template <>
+    bool VariantConvertToRoString<uint8>(const void* inData, void *outData)
+    {
+        const uint8 data = CastToRef<uint8>(inData);
+        std::stringstream ss;
+        ss << (int)data;
         CastToRef<RoString>(outData) = RoString{ ss.str() };
         return true;
     }
@@ -282,4 +294,21 @@ Detail::VariantConversionTable RoVariant::sConversionTable = Detail::ConversionT
     CONVERT_TO_ROSTRING_FUNC_REGISTER(std::wstring)
     (typeid(std::string), typeid(std::wstring), Detail::VariantConvertStrToWStr)
     (typeid(std::wstring), typeid(std::string), Detail::VariantConvertWStrToStr);
+
+void RoVariant::throwConversionError(const std::type_info& from, const std::type_info& to) const
+{
+    std::stringstream errorMsg;
+    errorMsg << "Failed to convert RoVariant from '" << from.name() << "' to '" << to.name() << "'!";
+    roLOG_ERR << errorMsg.str();
+    throw std::runtime_error(errorMsg.str().c_str());
+}
+
+#include <boost/algorithm/string.hpp>
+
+bool RoVariant::isSequentialContainer() const
+{
+    static const std::string VECTOR_TYPE = "class std::vector";
+    const std::string typeName(getType().name());
+    return boost::algorithm::starts_with(typeName, VECTOR_TYPE);
+}
 

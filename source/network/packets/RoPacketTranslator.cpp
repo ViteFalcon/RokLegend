@@ -2,6 +2,7 @@
 #include "RoPacket.h"
 #include <core/RoException.h>
 #include <core/RoErrorInfo.h>
+#include <core/RoLog.h>
 
 RoPacketTranslator& RoPacketTranslator::Get()
 {
@@ -16,13 +17,24 @@ RoPacketTranslator::RoPacketTranslator()
 
 RoPacketPtr RoPacketTranslator::translate(const RoHashString& packetName, const RoPropertyMap& properties) const
 {
+    std::stringstream propertiesString;
+    propertiesString << properties;
+    roLOG_INFO << propertiesString.str();
     auto translatorItr = mTranslations.find(packetName);
     if (mTranslations.end() == translatorItr)
     {
         return RoPacketPtr{};
     }
     const RoPacketPtr translator = translatorItr->second;
-    return translator->cloneFromProperties(properties);
+    try
+    {
+        return translator->cloneFromProperties(properties);
+    }
+    catch (std::exception& e)
+    {
+        roLOG_ERR << "Failed to translate packet '" << packetName << "'. Reason: " << e.what();
+    }
+    return translator;
 }
 
 size_t RoPacketTranslator::add(const RoHashString& packetName, RoPacketPtr translation)

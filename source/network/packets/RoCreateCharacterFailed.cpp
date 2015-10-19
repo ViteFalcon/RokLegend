@@ -15,6 +15,8 @@ RoCreateCharacterFailure RoCreateCharacterFailed::getFailureCode() const
         return RoCreateCharacterFailure::CHARACTER_NAME_ALREADY_EXISTS;
     case 0x01:
         return RoCreateCharacterFailure::NOT_ELIGIBLE_TO_CREATE_IN_SLOT;
+    case 0x03:
+        return RoCreateCharacterFailure::INVALID_SLOT;
     case 0xFF:
         return RoCreateCharacterFailure::INVALID_CHARACTER_NAME;
     default:
@@ -31,6 +33,8 @@ RoString RoCreateCharacterFailed::getFailureDescription() const
         return RoString{ L"Character name already exists" };
     case RoCreateCharacterFailure::INVALID_CHARACTER_NAME:
         return RoString{ L"Invalid character name" };
+    case RoCreateCharacterFailure::INVALID_SLOT:
+        return RoString{ L"Invalid slot specified" };
     case RoCreateCharacterFailure::NOT_ELIGIBLE_TO_CREATE_IN_SLOT:
         return RoString{ L"You're not eligible to create character in this slot" };
     case RoCreateCharacterFailure::UNKNOWN:

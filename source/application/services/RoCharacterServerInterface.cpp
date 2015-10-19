@@ -5,11 +5,17 @@
 
 #include <network/events/RoPacketReceivedEvent.h>
 
-#include <network/packets/RoCharacterListing.h>
 #include <network/packets/RoCharacterInformation.h>
+#include <network/packets/RoCharacterListing.h>
 #include <network/packets/RoCreateCharacterFailed.h>
 #include <network/packets/RoCreateCharacterRequest.h>
 #include <network/packets/RoCreateCharacterSuccess.h>
+#include <network/packets/RoDeleteCharacterAcceptRequest.h>
+#include <network/packets/RoDeleteCharacterAcceptResponse.h>
+#include <network/packets/RoDeleteCharacterCancelRequest.h>
+#include <network/packets/RoDeleteCharacterCancelResponse.h>
+#include <network/packets/RoDeleteCharacterRequest.h>
+#include <network/packets/RoDeleteCharacterResponse.h>
 #include <network/packets/RoGameLogin.h>
 #include <network/packets/RoLoginSuccessful.h>
 
@@ -23,6 +29,9 @@ const RoString RoCharacterServerInterface::PINCODE_SYSTEM_DISABLED{ L"PinCodeSys
 namespace {
     static const RoString CREATE_CHARACTER_FAILED_NOTIFICATION{ L"CharacterCreateFailed" };
     static const RoString CREATE_CHARACTER_SUCCESS_NOTIFICATION{ L"CharacterCreateSuccess" };
+    static const RoString DELETE_CHARACTER_RESPONSE{ L"DeleteCharacterResponse" };
+    static const RoString DELETE_CHARACTER_ACCEPT_RESPONSE{ L"DeleteCharacterAcceptResponse" };
+    static const RoString DELETE_CHARACTER_CANCEL_RESPONSE{ L"DeleteCharacterRejectResponse" };
 }
 
 RoCharacterServerInterface::RoCharacterServerInterface(RoLoginSuccessfulPtr accountInfo, RoCharacterListingPtr characterListing)
@@ -75,6 +84,9 @@ void RoCharacterServerInterface::addTaskHandlers()
     addTaskHandler<RoPacketReceivedEvent>(PINCODE_SYSTEM_DISABLED, &RoCharacterServerInterface::pincodeSystem);
     addTaskHandler<RoPacketReceivedEvent>(CREATE_CHARACTER_SUCCESS_NOTIFICATION, &RoCharacterServerInterface::onSuccessfulCharacterCreation);
     addTaskHandler<RoPacketReceivedEvent>(CREATE_CHARACTER_FAILED_NOTIFICATION, &RoCharacterServerInterface::onFailedCharacterCreation);
+    addTaskHandler<RoPacketReceivedEvent>(DELETE_CHARACTER_RESPONSE, &RoCharacterServerInterface::onDeleteCharacterResponse);
+    addTaskHandler<RoPacketReceivedEvent>(DELETE_CHARACTER_ACCEPT_RESPONSE, &RoCharacterServerInterface::onDeleteCharacterAcceptResponse);
+    addTaskHandler<RoPacketReceivedEvent>(DELETE_CHARACTER_CANCEL_RESPONSE, &RoCharacterServerInterface::onDeleteCharacterCancelResponse);
 }
 
 void RoCharacterServerInterface::connectResponse(RoNetServerType type, RoOptionalString error)
@@ -170,7 +182,7 @@ void RoCharacterServerInterface::pincodeSystem(const RoPacketReceivedEvent& args
 void RoCharacterServerInterface::onSuccessfulCharacterCreation(const RoPacketReceivedEvent& args)
 {
     auto response = std::dynamic_pointer_cast<RoCreateCharacterSuccess>(args.packet);
-    roLOG_INFO << "RoCharacterServerInterface: Successfully created character. Name: " << response->getCharacter()->getName();
+    roLOG_INFO << "RoCharacterServerInterface: Successfully created character. Name: " << response->getCharacter().getName();
     if (!mCreateCharacterCallbacks || !mCreateCharacterCallbacks.get().successCallback)
     {
         roLOG_WARN << "RoCharacterServerInterface: No callbacks to inform successful character creation!";
@@ -194,6 +206,53 @@ void RoCharacterServerInterface::onFailedCharacterCreation(const RoPacketReceive
     mCreateCharacterCallbacks.get().failureCallback(failureDescription);
     // Get rid of the current callback
     mCreateCharacterCallbacks.reset();
+}
+
+void RoCharacterServerInterface::onDeleteCharacterResponse(const RoPacketReceivedEvent& args)
+{
+    auto response = std::dynamic_pointer_cast<RoDeleteCharacterResponse>(args.packet);
+    if (mDeleteRequestResponseCallback)
+    {
+        RoOptionalString errorDescription;
+        if (response->getResponseCode() != RoDeleteCharacterResponse::Code::SUCCESS)
+        {
+            errorDescription = response->getResponseDescription();
+        }
+        mDeleteRequestResponseCallback.get()(errorDescription);
+        mDeleteRequestResponseCallback.reset();
+    }
+}
+
+void RoCharacterServerInterface::onDeleteCharacterAcceptResponse(const RoPacketReceivedEvent& args)
+{
+    auto response = std::dynamic_pointer_cast<RoDeleteCharacterAcceptResponse>(args.packet);
+    if (mDeleteAcceptResponseCallback)
+    {
+        RoOptionalString errorDescription;
+        if (response->getResponseCode() != RoDeleteCharacterAcceptResponse::Code::SUCCESS)
+        {
+            errorDescription = response->getResponseDescription();
+        }
+        mDeleteAcceptResponseCallback.get()(errorDescription);
+        mDeleteAcceptResponseCallback.reset();
+    }
+    mCharacterQueuedForDeletion.reset();
+}
+
+void RoCharacterServerInterface::onDeleteCharacterCancelResponse(const RoPacketReceivedEvent& args)
+{
+    auto response = std::dynamic_pointer_cast<RoDeleteCharacterCancelResponse>(args.packet);
+    if (mDeleteCancelResponseCallback)
+    {
+        RoOptionalString errorDescription;
+        if (response->getResponseCode() != RoDeleteCharacterCancelResponse::Code::SUCCESS)
+        {
+            errorDescription = response->getResponseDescription();
+        }
+        mDeleteCancelResponseCallback.get()(errorDescription);
+        mDeleteCancelResponseCallback.reset();
+    }
+    mCharacterQueuedForDeletion.reset();
 }
 
 uint32 RoCharacterServerInterface::getCharacterPageCount() const
@@ -226,13 +285,78 @@ void RoCharacterServerInterface::loginCharacterAtSlot(size_t slot)
     }
 }
 
-void RoCharacterServerInterface::createCharacter(const RoCreateCharacterCallbacks& callbacks, const RoString& name, uint16 hairColor, uint16 hairStyle)
+void RoCharacterServerInterface::createCharacter(const RoCreateCharacterCallbacks& callbacks, size_t slot, const RoString& name, uint16 hairColor, uint16 hairStyle)
 {
     mCreateCharacterCallbacks = callbacks;
     auto request = std::make_shared<RoCreateCharacterRequest>();
+    request->setSlot(static_cast<uint8>(slot));
     request->setName(name);
     request->setHairColor(hairColor);
     request->setHairStyle(hairStyle);
+    asyncSendPacket(request);
+}
+
+void RoCharacterServerInterface::deleteCharacterAtSlot(DeleteRequestResponseCallback callback, uint16 slot)
+{
+    if (!mCharacterListing)
+    {
+        RoOptionalString errorMessage = RoString{ L"Character listing isn't available to delete any characters." };
+        callback(errorMessage);
+        return;
+    }
+    if (mCharacterQueuedForDeletion)
+    {
+        RoOptionalString errorMessage = RoString{ L"A character is already queued for deletion." };
+        callback(errorMessage);
+        return;
+    }
+    for each (auto character in mCharacterListing->getCharacters())
+    {
+        if (character->getSlot() == slot)
+        {
+            mCharacterQueuedForDeletion = character->getId();
+            break;
+        }
+    }
+    if (!mCharacterQueuedForDeletion)
+    {
+        RoOptionalString errorMessage = RoStringUtil::Format(L"There are no characters in slot %d to be deleted.", slot);
+        callback(errorMessage);
+        return;
+    }
+    mDeleteRequestResponseCallback = callback;
+
+    auto request = std::make_shared<RoDeleteCharacterRequest>();
+    request->setCharacterId(mCharacterQueuedForDeletion.get());
+    asyncSendPacket(request);
+}
+
+void RoCharacterServerInterface::deleteCharacterConfirm(DeleteAcceptResponseCallback callback, const RoDate& birthDate)
+{
+    if (!mCharacterQueuedForDeletion)
+    {
+        callback(RoString{ L"There are no characters queued for deletion." });
+        return;
+    }
+    mDeleteAcceptResponseCallback = callback;
+
+    auto request = std::make_shared<RoDeleteCharacterAcceptRequest>();
+    request->setCharacterId(mCharacterQueuedForDeletion.get());
+    request->setBirthDate(birthDate);
+    asyncSendPacket(request);
+}
+
+void RoCharacterServerInterface::deleteCharacterCancel(DeleteCancelResponseCallback callback)
+{
+    if (!mCharacterQueuedForDeletion)
+    {
+        callback(RoString{ L"There are no characters queued for deletion." });
+        return;
+    }
+    mDeleteCancelResponseCallback = callback;
+
+    auto request = std::make_shared<RoDeleteCharacterCancelRequest>();
+    request->setCharacterId(mCharacterQueuedForDeletion.get());
     asyncSendPacket(request);
 }
 

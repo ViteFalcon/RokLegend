@@ -67,3 +67,29 @@ void RoPropertyMap::MergeThrowIfExisting(RoPropertyMap& properties, const StrToP
             << RoErrorInfoItemName(newProperty->getName()));
     currentEntry = newProperty;
 }
+
+RoString to_string(const RoProperty& v)
+{
+    try
+    {
+        return v.as<RoString>();
+    }
+    catch (...)
+    {
+        return RoString("<Failed conversion to string>");
+    }
+}
+
+std::ostream& operator<<(std::ostream& stream, const RoPropertyMap& properties)
+{
+    if (properties.empty())
+    {
+        return stream << "{}";
+    }
+    stream << "{";
+    for each (auto entry in properties.mProperties)
+    {
+        stream << std::endl << "    " << entry.first << ": " << to_string(*entry.second) << ",";
+    }
+    return stream << std::endl << "}";
+}

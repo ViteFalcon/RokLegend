@@ -35,7 +35,8 @@ void roInitBoostLog(const RoLogOptions& options)
         keywords::file_name = options.logFile,
         keywords::rotation_size = 10 * 1024 * 1024,
         keywords::time_based_rotation = sinks::file::rotation_at_time_point(0,0,0),
-        keywords::format = "%TimeStamp%: [%Severity%] %Message%"
+        keywords::format = "%TimeStamp%: [%Severity%] %Message%",
+        keywords::auto_flush = true
         );
     log::add_console_log(std::cout, keywords::format = "%Message%");
 }

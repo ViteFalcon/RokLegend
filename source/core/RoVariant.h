@@ -420,14 +420,18 @@ public:
             if (getType() == typeid(T))
             {
                 val = static_cast<const ValueHeld<T>*>(mHolder.get())->value;
-            } else if (!sConversionTable.convert<T>(mHolder->getType(), mHolder->data(), val)) {
-                std::stringstream errorMsg;
-                errorMsg<<"Failed to convert RoVariant from '"<<getType().name()<<"' to '"<<typeid(T).name()<<"'!";
-                throw std::runtime_error(errorMsg.str().c_str());
+            }
+            else if (!sConversionTable.convert<T>(mHolder->getType(), mHolder->data(), val))
+            {
+                throwConversionError(getType(), typeid(T));
             }
         }
     }
 
+private:
+    void throwConversionError(const std::type_info& from, const std::type_info& to) const;
+
+public:
     inline bool toBool() const
     {
         return as<bool>().value();
@@ -460,6 +464,7 @@ public:
     {
         return as<std::wstring>().value();
     }
+    bool isSequentialContainer() const;
 
     friend std::ostream& operator << (std::ostream& stream, const RoVariant& var)
     {
@@ -483,17 +488,18 @@ namespace Detail {
     template <typename ToType>
     bool VariantConversionTable::convert(const std::type_info& fromType, const void* fromData, ToType& toData) const
     {
-        if (fromData)
+        if (fromData == nullptr)
         {
-            ConversionMap::const_iterator from_itr = mConversions.find(&fromType);
-            if (mConversions.end() != from_itr)
+            return false;
+        }
+        ConversionMap::const_iterator from_itr = mConversions.find(&fromType);
+        if (mConversions.end() != from_itr)
+        {
+            ToConversionMap::const_iterator to_itr = from_itr->second.find(&typeid(ToType));
+            if (from_itr->second.end() != to_itr)
             {
-                ToConversionMap::const_iterator to_itr = from_itr->second.find(&typeid(ToType));
-                if (from_itr->second.end() != to_itr)
-                {
-                    const ConversionFn& converter = to_itr->second;
-                    return converter(fromData, (void*)&toData);
-                }
+                const ConversionFn& converter = to_itr->second;
+                return converter(fromData, (void*)&toData);
             }
         }
         return false;

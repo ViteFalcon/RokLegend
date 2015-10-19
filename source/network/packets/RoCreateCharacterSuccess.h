@@ -1,18 +1,14 @@
 #pragma once
 #include "RoPacket.h"
+#include "RoCharacterInformation.h"
 
-roFORWARD_DECL_PTR(RoCharacterInformation);
-
-roDEFINE_PACKET(RoCreateCharacterSuccess)
+class RoCreateCharacterSuccess : public RoPacketT<RoCreateCharacterSuccess>
 {
 public:
     RoCreateCharacterSuccess();
     ~RoCreateCharacterSuccess() = default;
 
-    RoCharacterInformationPtr getCharacter() const
-    {
-        return mCharacter;
-    }
+    const RoCharacterInformation& getCharacter() const;
 private:
-    RoCharacterInformationPtr mCharacter;
+    RoCharacterInformation mCharacter;
 };
