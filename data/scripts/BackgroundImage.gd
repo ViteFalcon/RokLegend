@@ -1,25 +1,27 @@
-extends TextureRect
+extends Node2D
 
 export(Array, Texture) var textures
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	if self.texture == null:
-		self.texture = textures[rand_range(0, len(textures))]
+	if $BlurredImage.texture == null:
+		$BlurredImage.texture = textures[rand_range(0, len(textures))]
 	else:
 		print("SKIPPING to set texture because one is aleady defined")
-	$LoadingImage.texture = self.texture
-	self.on_viewport_size_changed()
-	get_viewport().connect("size_changed", self, "on_viewport_size_changed")
+	$LoadingImage.texture = $BlurredImage.texture
+	self._on_viewport_size_changed()
+	get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-func on_viewport_size_changed():
-	self.rect_size = get_viewport_rect().size
-	$BlurRect.rect_size = self.rect_size
-	$LoadingImage.rect_size = Vector2($LoadingImage.texture.get_width(), self.rect_size.y)
-	var padding = self.rect_size.x - $LoadingImage.rect_size.x
+func _on_viewport_size_changed():
+	print("Viewport size: ", get_viewport_rect().size)
+	$BlurredImage.rect_size = get_viewport_rect().size
+	var texture = $BlurredImage.texture
+	var aspect_ratio = float(texture.get_width()) / float(texture.get_height())
+	var image_height = $BlurredImage.rect_size.y
+	var image_width = image_height * aspect_ratio
+	print("Image width: ", image_width, ", height: ", image_height)
+	$BlurRect.rect_size = $BlurredImage.rect_size
+	$LoadingImage.rect_size = Vector2(image_width, image_height)
+	var padding = $BlurredImage.rect_size.x - image_width
 	$LoadingImage.rect_position.x = padding/2

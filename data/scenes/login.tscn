@@ -1,50 +1,19 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://data/scripts/BackgroundImage.gd" type="Script" id=1]
-[ext_resource path="res://data/textures/loading/loading04.jpg" type="Texture" id=2]
-[ext_resource path="res://data/textures/loading/loading00.jpg" type="Texture" id=3]
-[ext_resource path="res://data/textures/loading/loading03.jpg" type="Texture" id=4]
-[ext_resource path="res://data/textures/loading/loading02.jpg" type="Texture" id=5]
-[ext_resource path="res://data/textures/loading/loading01.jpg" type="Texture" id=6]
+[ext_resource path="res://data/scenes/BackgroundImage.tscn" type="PackedScene" id=1]
 [ext_resource path="res://data/materials/blur.tres" type="Material" id=7]
-[ext_resource path="res://data/textures/loading/white.png" type="Texture" id=8]
 [ext_resource path="res://data/scenes/ui/LoginDialog.tscn" type="PackedScene" id=9]
 [ext_resource path="res://data/scripts/LoginScreen.gd" type="Script" id=10]
+[ext_resource path="res://BGM/01.mp3" type="AudioStream" id=11]
 
 [node name="LoginScreen" type="Node2D"]
 material = ExtResource( 7 )
 script = ExtResource( 10 )
 
-[node name="Background" type="TextureRect" parent="."]
-show_behind_parent = true
-margin_right = 40.0
-margin_bottom = 40.0
-stretch_mode = 1
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-textures = [ ExtResource( 3 ), ExtResource( 6 ), ExtResource( 5 ), ExtResource( 4 ), ExtResource( 2 ) ]
-
-[node name="BlurRect" type="TextureRect" parent="Background"]
-material = ExtResource( 7 )
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_right = 800.0
-margin_bottom = 800.0
-size_flags_horizontal = 2
-size_flags_vertical = 2
-texture = ExtResource( 8 )
-expand = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="LoadingImage" type="TextureRect" parent="Background"]
-margin_right = 40.0
-margin_bottom = 40.0
-size_flags_horizontal = 9
-size_flags_vertical = 9
-expand = true
+[node name="Background" parent="." instance=ExtResource( 1 )]
 
 [node name="LoginDialog" parent="." instance=ExtResource( 9 )]
+
+[node name="BGM" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 11 )
+autoplay = true

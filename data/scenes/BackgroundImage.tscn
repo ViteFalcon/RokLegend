@@ -1,0 +1,47 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://data/textures/loading/loading01.jpg" type="Texture" id=1]
+[ext_resource path="res://data/textures/loading/white.png" type="Texture" id=2]
+[ext_resource path="res://data/textures/loading/loading03.jpg" type="Texture" id=3]
+[ext_resource path="res://data/textures/loading/loading02.jpg" type="Texture" id=4]
+[ext_resource path="res://data/textures/loading/loading00.jpg" type="Texture" id=5]
+[ext_resource path="res://data/textures/loading/loading04.jpg" type="Texture" id=6]
+[ext_resource path="res://data/materials/blur.tres" type="Material" id=7]
+[ext_resource path="res://data/scripts/BackgroundImage.gd" type="Script" id=8]
+
+[node name="Background" type="Node2D"]
+show_behind_parent = true
+script = ExtResource( 8 )
+textures = [ ExtResource( 5 ), ExtResource( 1 ), ExtResource( 4 ), ExtResource( 3 ), ExtResource( 6 ) ]
+
+[node name="BlurredImage" type="TextureRect" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+size_flags_horizontal = 2
+size_flags_vertical = 2
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BlurRect" type="TextureRect" parent="."]
+material = ExtResource( 7 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 119.0
+margin_bottom = 79.0
+size_flags_horizontal = 2
+size_flags_vertical = 2
+texture = ExtResource( 2 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LoadingImage" type="TextureRect" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
