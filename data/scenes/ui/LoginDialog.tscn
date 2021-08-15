@@ -1,0 +1,57 @@
+[gd_scene format=2]
+
+[node name="LoginDialog" type="WindowDialog"]
+visible = true
+margin_right = 366.0
+margin_bottom = 136.0
+popup_exclusive = true
+window_title = "Login"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Username" type="LineEdit" parent="."]
+margin_left = 75.0
+margin_top = 20.0
+margin_right = 267.0
+margin_bottom = 44.0
+placeholder_text = "Enter username"
+
+[node name="Password" type="LineEdit" parent="."]
+margin_left = 75.0
+margin_top = 58.0
+margin_right = 267.0
+margin_bottom = 82.0
+secret = true
+clear_button_enabled = true
+placeholder_text = "Password"
+
+[node name="LoginButton" type="Button" parent="."]
+margin_left = 219.0
+margin_top = 91.0
+margin_right = 315.0
+margin_bottom = 123.0
+rect_pivot_offset = Vector2( 24, 16 )
+text = "Login"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CancelButton" type="Button" parent="."]
+margin_left = 27.0
+margin_top = 91.0
+margin_right = 123.0
+margin_bottom = 123.0
+rect_pivot_offset = Vector2( 24, 16 )
+text = "Exit"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckButton" type="CheckButton" parent="."]
+margin_left = 261.0
+margin_top = 12.0
+margin_right = 370.0
+margin_bottom = 52.0
+text = "Save"
+align = 1
