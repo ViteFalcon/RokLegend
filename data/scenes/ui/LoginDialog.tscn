@@ -1,11 +1,13 @@
-[gd_scene format=2]
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://data/scenes/ui/LoginDialog.gd" type="Script" id=1]
 
 [node name="LoginDialog" type="WindowDialog"]
-visible = true
 margin_right = 366.0
 margin_bottom = 136.0
 popup_exclusive = true
 window_title = "Login"
+script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -55,3 +57,5 @@ margin_right = 370.0
 margin_bottom = 52.0
 text = "Save"
 align = 1
+
+[connection signal="about_to_show" from="." to="." method="_on_LoginDialog_about_to_show"]
