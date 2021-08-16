@@ -17,13 +17,11 @@ func _ready():
 
 
 func _on_viewport_size_changed():
-	print("Viewport size: ", get_viewport_rect().size)
 	$BlurredImage.rect_size = get_viewport_rect().size
 	var texture = $BlurredImage.texture
 	var aspect_ratio = float(texture.get_width()) / float(texture.get_height())
 	var image_height = $BlurredImage.rect_size.y
 	var image_width = image_height * aspect_ratio
-	print("Image width: ", image_width, ", height: ", image_height)
 	$BlurRect.rect_size = $BlurredImage.rect_size
 	$LoadingImage.rect_size = Vector2(image_width, image_height)
 	var padding = $BlurredImage.rect_size.x - image_width
