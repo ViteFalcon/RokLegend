@@ -4,6 +4,7 @@ export(Array, Texture) var textures
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	randomize()
 	if $BlurredImage.texture == null:
 		$BlurredImage.texture = textures[rand_range(0, len(textures))]
 	else:
