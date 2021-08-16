@@ -6,7 +6,9 @@ const TWO_THIRDS = 2.0/3.0
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	self._on_viewport_size_changed()
-	get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
+	var result = get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
+	if result != OK:
+		print("Failed to connect to viewport size change")
 
 
 func _on_viewport_size_changed():

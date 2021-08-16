@@ -11,7 +11,9 @@ func _ready():
 		print("SKIPPING to set texture because one is aleady defined")
 	$LoadingImage.texture = $BlurredImage.texture
 	self._on_viewport_size_changed()
-	get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
+	var result = get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
+	if result != OK:
+		print("Failed to connect to viewport size change")
 
 
 func _on_viewport_size_changed():
