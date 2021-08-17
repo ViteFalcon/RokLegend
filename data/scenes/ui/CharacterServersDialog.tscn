@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://data/scenes/ui/CharacterServersDialog.gd" type="Script" id=1]
+
+[node name="CharacterServers" type="WindowDialog"]
+margin_right = 365.0
+margin_bottom = 264.0
+rect_pivot_offset = Vector2( 36, 227 )
+window_title = "Select Server"
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ServerList" type="ItemList" parent="."]
+margin_left = 13.0
+margin_top = 13.0
+margin_right = 355.0
+margin_bottom = 217.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Select" type="Button" parent="."]
+margin_left = 281.0
+margin_top = 227.0
+margin_right = 351.0
+margin_bottom = 253.0
+text = "Select"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Cancel" type="Button" parent="."]
+margin_left = 14.0
+margin_top = 227.0
+margin_right = 84.0
+margin_bottom = 253.0
+text = "Cancel"
+__meta__ = {
+"_edit_use_anchors_": false
+}

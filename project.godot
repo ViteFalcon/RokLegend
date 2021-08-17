@@ -8,6 +8,16 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Resource",
+"class": "CharacterServer",
+"language": "GDScript",
+"path": "res://data/scripts/CharacterServer.gd"
+} ]
+_global_script_class_icons={
+"CharacterServer": ""
+}
+
 [application]
 
 config/name="RokLegend"

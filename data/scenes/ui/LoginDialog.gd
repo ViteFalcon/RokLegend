@@ -1,6 +1,9 @@
 extends WindowDialog
 
+const CharacterServer = preload("res://data/scripts/CharacterServer.gd")
 const TWO_THIRDS = 2.0/3.0
+
+signal login_successful(servers)
 
 
 # Called when the node enters the scene tree for the first time.
@@ -9,9 +12,15 @@ func _ready():
 	var result = get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
 	if result != OK:
 		print("Failed to connect to viewport size change")
-	$CancelButton.connect("button_down", self, "_on_LoginDialog_modal_closed")
-	get_close_button().connect("button_down", self, "_on_LoginDialog_modal_closed")
-	$ConfirmationDialog.get_cancel().connect("button_down", self, "_on_ConfirmationDialog_cancelled")
+	result = $CancelButton.connect("button_down", self, "_on_LoginDialog_modal_closed")
+	if result != OK:
+		print("Failed to connect cancel button down event")
+	result = get_close_button().connect("button_down", self, "_on_LoginDialog_modal_closed")
+	if result != OK:
+		print("Failed to connect close button down event")
+	result = $ConfirmationDialog.get_cancel().connect("button_down", self, "_on_ConfirmationDialog_cancelled")
+	if result != OK:
+		print("Failed to connect confirmation cancel button down event")
 
 
 func _on_viewport_size_changed():
@@ -34,3 +43,14 @@ func _on_ConfirmationDialog_confirmed():
 func _on_ConfirmationDialog_cancelled():
 	show_modal(true)
 	self._on_viewport_size_changed()
+
+
+func _on_LoginButton_pressed():
+	var servers = []
+	var server1 = CharacterServer.new()
+	server1.name = "The Server"
+	server1.player_count = 11
+	server1.ip_address = "127.0.0.1"
+	server1.ip_address = 3282
+	servers.append(server1)
+	emit_signal("login_successful", servers)
