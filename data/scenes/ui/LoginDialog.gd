@@ -3,6 +3,9 @@ extends WindowDialog
 const CharacterServer = preload("res://data/scripts/CharacterServer.gd")
 const TWO_THIRDS = 2.0/3.0
 
+export(String) var Username = ""
+export(bool) var SaveUsername = false
+
 signal login_successful(servers)
 
 
@@ -21,6 +24,7 @@ func _ready():
 	result = $ConfirmationDialog.get_cancel().connect("button_down", self, "_on_ConfirmationDialog_cancelled")
 	if result != OK:
 		print("Failed to connect confirmation cancel button down event")
+	_on_LoginDialog_tree_entered()
 
 
 func _on_viewport_size_changed():
@@ -54,3 +58,17 @@ func _on_LoginButton_pressed():
 	server1.ip_address = 3282
 	servers.append(server1)
 	emit_signal("login_successful", servers)
+
+
+func _on_LoginDialog_about_to_show():
+	$Username.text = Username
+	$CheckButton.pressed = SaveUsername
+	_on_LoginDialog_tree_entered()
+
+
+func _on_LoginDialog_tree_entered():
+	if Username == "":
+		$Username.grab_focus()
+	else:
+		$Password.grab_focus()
+		$Password.grab_click_focus()

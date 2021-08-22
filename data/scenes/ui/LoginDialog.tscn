@@ -67,5 +67,7 @@ margin_bottom = 206.0
 popup_exclusive = true
 dialog_text = "Are you sure you want to exit the game?"
 
+[connection signal="about_to_show" from="." to="." method="_on_LoginDialog_about_to_show"]
+[connection signal="tree_entered" from="." to="." method="_on_LoginDialog_tree_entered"]
 [connection signal="pressed" from="LoginButton" to="." method="_on_LoginButton_pressed"]
 [connection signal="confirmed" from="ConfirmationDialog" to="." method="_on_ConfirmationDialog_confirmed"]

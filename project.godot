@@ -23,6 +23,10 @@ _global_script_class_icons={
 config/name="RokLegend"
 config/icon="res://icon.png"
 
+[autoload]
+
+Data="*res://data/scripts/cs/Data.cs"
+
 [display]
 
 window/dpi/allow_hidpi=true
